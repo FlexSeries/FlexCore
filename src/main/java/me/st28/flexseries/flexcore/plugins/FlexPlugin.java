@@ -217,8 +217,10 @@ public abstract class FlexPlugin extends JavaPlugin {
     public final void reloadAll() {
         reloadConfig();
 
-        for (FlexModule manager : modules.values()) {
-            manager.reloadAll();
+        for (FlexModule module : modules.values()) {
+            if (getModuleStatus(module.getClass()) == ModuleStatus.ENABLED) {
+                module.reloadAll();
+            }
         }
 
         handlePluginReload();
@@ -234,7 +236,9 @@ public abstract class FlexPlugin extends JavaPlugin {
         saveConfig();
 
         for (FlexModule<?> module : modules.values()) {
-            module.saveAll(async);
+            if (getModuleStatus(module.getClass()) == ModuleStatus.ENABLED) {
+                module.saveAll(async);
+            }
         }
 
         handlePluginSave(async);
