@@ -34,6 +34,7 @@
     <orderEntry type="library" name="Maven: net.milkbowl.vault:Vault:1.4.1" level="project" />
     <orderEntry type="library" name="Maven: com.vexsoftware:votifier:1.9" level="project" />
     <orderEntry type="library" name="Maven: com.palmergames:towny:0.89.2.0" level="project" />
+    <orderEntry type="library" name="Maven: com.gamingmesh:jobs:2.12.0" level="project" />
     <orderEntry type="library" name="Maven: com.jolbox:bonecp:0.8.0.RELEASE" level="project" />
     <orderEntry type="library" name="Maven: org.slf4j:slf4j-api:1.7.2" level="project" />
     <orderEntry type="library" name="Maven: net.jodah:expiringmap:0.3.1" level="project" />
