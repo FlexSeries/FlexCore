@@ -23,6 +23,7 @@ public final class HookManager extends FlexModule<FlexCore> {
 
     @Override
     protected void handleLoad() throws Exception {
+        registerHook(new JobsHook());
         registerHook(new ProtocolLibHook());
         registerHook(new TownyHook());
         registerHook(new VaultHook());
@@ -84,6 +85,13 @@ public final class HookManager extends FlexModule<FlexCore> {
             throw new HookDisabledException(hook);
         }
         return (T) hook;
+    }
+
+    public void checkHookStatus(Class<? extends Hook> clazz) {
+        Hook hook = hooks.get(clazz);
+        if (hookStatuses.get(clazz) != HookStatus.ENABLED) {
+            throw new HookDisabledException(hook);
+        }
     }
 
 }
