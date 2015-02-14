@@ -27,6 +27,21 @@ public final class StringUtils {
         return sb.toString();
     }
 
+    public static <T> List<String> collectionToStringList(Collection<T> collection, StringConverter<T> converter) {
+        List<String> returnList = new ArrayList<>();
+        for (T item : collection) {
+            returnList.add(converter.toString(item));
+        }
+        return returnList;
+    }
+
+    public static <T, F extends Collection<String>>  F collectionToStringCollection(Collection<T> collection, StringConverter<T> converter, F returnCollection) {
+        for (T item : collection) {
+            returnCollection.add(converter.toString(item));
+        }
+        return returnCollection;
+    }
+
     public static String stringCollectionToString(Collection<String> collection) {
         return stringCollectionToString(collection, " ");
     }
