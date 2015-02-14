@@ -42,6 +42,7 @@ public final class PlayerManager extends FlexModule<FlexCore> implements Listene
     private PlayerStorageHandler storageHandler;
 
     private File playerDir;
+    final Set<UUID> handledPlayers = new HashSet<>();
     final Map<UUID, PlayerData> loadedPlayers = new HashMap<>();
     private final Map<UUID, PlayerLoadCycle> cachedCycles = new HashMap<>();
 
@@ -207,6 +208,14 @@ public final class PlayerManager extends FlexModule<FlexCore> implements Listene
         Player p = e.getPlayer();
         UUID uuid = p.getUniqueId();
 
+        if (!handledPlayers.contains(uuid)) {
+            p.kickPlayer(
+                    "The server is not loaded yet.\n" +
+                    "Please try again."
+            );
+            return;
+        }
+
         handleOfficialLogin(p, cachedCycles.remove(uuid), getPlayerData(uuid));
     }
 
@@ -221,6 +230,12 @@ public final class PlayerManager extends FlexModule<FlexCore> implements Listene
     }
 
     private void handlePlayerLeave(Player p) {
+        if (!handledPlayers.contains(p.getUniqueId())) {
+            return;
+        }
+
+        handledPlayers.remove(p.getUniqueId());
+
         Bukkit.getPluginManager().callEvent(new PlayerLeaveEvent(p));
 
         PlayerData data = getPlayerData(p.getUniqueId());
@@ -235,6 +250,7 @@ public final class PlayerManager extends FlexModule<FlexCore> implements Listene
 
         final UUID uuid = e.getUniqueId();
         if (uuid == null) return;
+        handledPlayers.add(uuid);
 
         // Begin loading
         PlayerLoadCycle cycle = new PlayerLoadCycle(uuid, e.getName(), loadTimeout);

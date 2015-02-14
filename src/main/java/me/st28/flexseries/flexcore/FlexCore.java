@@ -31,11 +31,12 @@ import me.st28.flexseries.flexcore.plugins.FlexPlugin;
 import me.st28.flexseries.flexcore.plugins.exceptions.ModuleDisabledException;
 import me.st28.flexseries.flexcore.storage.mysql.MySQLManager;
 import me.st28.flexseries.flexcore.terms.TermsManager;
+import org.bukkit.event.Listener;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class FlexCore extends FlexPlugin {
+public final class FlexCore extends FlexPlugin implements Listener {
 
     public final static Pattern CHARACTER_REGEX = Pattern.compile("\\\\(\\\\u[A-F0-9]{4})");
 
