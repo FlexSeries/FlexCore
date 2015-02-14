@@ -1,0 +1,120 @@
+name: ${project.name}
+version: ${project.version}
+description: '${project.description}'
+depend: []
+softdepend: [ProtocolLib, Towny, Vault, WorldEdit, WorldGuard]
+authors: [${project.authors}]
+website: ${project.url}
+main: ${project.mainClass}
+commands:
+  ###########################
+  # Plugin Library Commands #
+  ###########################
+  flexhooks:
+    description: 'Command for viewing all registered hooks and their statuses'
+    aliases: [hooks]
+  flexmodules:
+    description: 'Command for viewing an FlexPlugin implementation''s registered modules and their statuses'
+    aliases: [modules]
+  flexreload:
+    description: 'Universal reload command for FlexPlugin implementations'
+    aliases: []
+  flexsave:
+    description: 'Universal save command for FlexPlugin implementations'
+    aliases: []
+
+  #--------------------------------------------------------------------------------------------------------------------#
+
+  ###########################
+  #  Help Library Commands  #
+  ###########################
+  flexhelp:
+    description: 'Universal help command for FlexPlugin implementations'
+    aliases: [help]
+
+  #--------------------------------------------------------------------------------------------------------------------#
+
+  ###########################
+  #      Misc Commands      #
+  ###########################
+
+  flexdebug:
+    description: 'Command for running registered debug tests'
+    aliases: [debug]
+  flexmotd:
+    description: ''
+  flexping:
+    description: 'Command for viewing loaded server list messages and setting current message'
+    aliases: [ping]
+  flexterms:
+    description: 'Command for viewing and accepting/declining various TOS for the server'
+    aliases: [terms, tos]
+
+permissions:
+  ##########
+  # Groups #
+  ##########
+
+  flexcore.admin:
+    default: op
+    children:
+      flexcore.debug: true
+      flexcore.modules: true
+      flexcore.motd.list: true
+      flexcore.motd.set: true
+      flexcore.ping.list: true
+      flexcore.ping.set: true
+      flexcore.reload: true
+      flexcore.save: true
+
+  flexcore.user:
+    default: true
+    children:
+      flexcore.help: true
+      flexcore.terms: true
+      flexcore.terms.list: true
+
+  #########
+  # Nodes #
+  #########
+
+  flexcore.debug:
+    description: 'Access to the debugging command.'
+    default: false
+
+  flexcore.help:
+    description: 'Access to universal help command.'
+    default: false
+
+  flexcore.hooks:
+    description: 'Access to hooks command.'
+    default: false
+  flexcore.modules:
+    description: 'View FlexPlugin modules'
+    default: false
+  flexcore.motd.list:
+    description: 'List loaded MOTDs'
+    default: false
+  flexcore.motd.set:
+    description: 'Set current MOTD'
+    default: false
+  flexcore.ping.list:
+    description: 'List loaded server list messages'
+    default: false
+  flexcore.ping.set:
+    description: 'Set current server list message'
+    default: false
+
+  flexcore.terms:
+    description: 'Base TOS command'
+    default: false
+  flexcore.terms.list:
+    description: 'Ability to view ability TOS'
+    default: false
+
+  flexcore.reload:
+    description: 'Access to universal reload command.'
+    default: false
+  flexcore.save:
+    description: 'Access to universal save command.'
+    default: false

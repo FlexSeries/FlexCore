@@ -1,0 +1,9 @@
+Terms:
+  '1':
+    name: 'Notifications'
+    description: 'Terms required to enable email and SMS notifications.'
+    content:
+    - 'In order to use the email and SMS notification features offered by Urban Astorea, you must agree to the following terms.'
+    - '&e1) &cStandard data fees and text messaging rates may occur.'
+    - '&e2) &cEmail addresses and phone numbers will not be viewed by staff members and will not be shared.'
+    - '&4&lUrban Astorea may not be held responsible for failure to abide by these terms.'

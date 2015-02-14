@@ -1,0 +1,10 @@
+Database:
+  host: localhost
+  port: 3306
+  db: ''
+  user: user
+  pass: password
+  bonecp:
+    minConnections: 5
+    maxConnections: 10
+    partitions: 1

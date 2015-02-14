@@ -1,0 +1,76 @@
+general:
+  errors:
+    item_must_be_boolean: '&c{ITEM} must be a boolean value.'
+    item_must_be_int: '&c{ITEM} must be an integer.'
+    must_be_player: '&cYou must be a player to do this.'
+    must_hold_item: '&cYou must be holding an item.'
+    no_permission: '&cYou do not have permission to do this.'
+    number_invalid_range: '&c{ITEM} must be between {MIN} and {MAX}.'
+    number_invalid_minimum: '&c{ITEM} must be {MIN} or more.'
+    number_invalid_maximum: '&c{ITEM} must be {MAX} or less.'
+    number_not_negative: '&c{ITEM} must not be a negative number.'
+    page_must_be_int: '&cPage number must be an integer.'
+    players_cannot_be_self: '&cYou cannot be the target of this command.'
+    players_matched_multiple: '&cName &6{NAME} &cmatches multiple online players, please be more specific.'
+    players_matched_none: '&cUnknown player: &6{NAME}&c.'
+    players_matched_none_offline: '&cUnable to find offline player: &6{NAME}&c.'
+    players_matched_offline: '&cPlayer &6{NAME} &cis offline.'
+    plugin_not_found: '&cUnable to find plugin ''&6{NAME}&c''.'
+
+lib_command:
+  errors:
+    tag: '&4USAGE: &c'
+    invalid_usage: '{TAG}{USAGE}'
+    invalid_usage_generic: 'Invalid command usage.'
+
+lib_plugin:
+  errors:
+    module_disabled: '&cThe module ''&6{IDENTIFIER}&c'' is required for this command, but is disabled.'
+    plugin_not_flexplugin: '&cPlugin ''&6{NAME}&c'' is not a FlexPlugin and therefore cannot be the target of this command.'
+  notices:
+    plugin_reloaded: '{TAG}&9Plugin configuration &creloaded &9from the disk.'
+    plugin_saved: '{TAG}&9Plugin data &asaved &9to the database/disk.'
+
+debug:
+  tag: '&8[&c?&4!&8] '
+  errors:
+    test_exception: '{TAG}&cThe debug test encountered an exception: &f{OUTPUT}'
+    test_failed: '{TAG}&cThe debug test FAILED.'
+    test_failed_output: '{TAG}&cThe debug test FAILED: &f{OUTPUT}'
+    unknown_test: '{TAG}&cUnable to find debug test: &6{PLUGIN} &8 / &6{TEST}'
+  notices:
+    test_success: '{TAG}&aThe debug test SUCCEEDED.'
+    test_success_output: '{TAG}&aThe debug test SUCCEEDED: &f{OUTPUT}'
+
+motd:
+  errors:
+    message_already_set: '&cMessage ''&6{MESSAGE}&c'' is already active.'
+    message_unknown: '&cUnable to find MOTD: &6{NAME}&c.'
+  notices:
+    message_set: '&9Set MOTD to: &6{MESSAGE}&9.'
+
+ping:
+  errors:
+    message_already_set: '{TAG}&cMessage ''&6{MESSAGE}&c'' is already active.'
+    message_unknown: '{TAG}&cUnable to find message: &6{NAME}&c.'
+  notices:
+    message_set: '{TAG}&9Set serverlist message to message: &6{MESSAGE}&9.'
+
+players:
+  notices:
+    first_join: '&a&l+ &e{DISPNAME} &a&ojoined for the first time, welcome!'
+    join: '&a&l+ &e{DISPNAME}'
+    join_silent: '&7&l+ &8{DISPNAME} &7&ojoined the server vanished and silently.'
+    quit: '&c&l- &e{DISPNAME}'
+
+terms:
+  tag: '&8[&c\u270D&8] '
+  errors:
+    already_accepted: '{TAG}&cYou have already &aaccepted &cterms: &6{TERMS}&c.'
+    already_declined: '{TAG}&cYou have already &4declined &cterms: &6{TERMS}&c.'
+    not_found: '{TAG}&cUnable to find terms: &6{TERMS}&c.'
+  notices:
+    accepted: '{TAG}&9Successfully &aaccepted &9terms: &6{TERMS}&9.'
+    declined: '{TAG}&9Successfully &4declined &9terms: &6{TERMS}&9.'
+  usages:
+    decide: '&9Type &6/{LABEL} {TERMS} <accept|decline> &9to accept or decline these terms.'
