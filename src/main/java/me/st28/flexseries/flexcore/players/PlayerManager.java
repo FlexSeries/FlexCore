@@ -94,7 +94,7 @@ public final class PlayerManager extends FlexModule<FlexCore> implements Listene
             @Override
             protected void run() {
                 for (UUID uuid : uuids) {
-                    PlayerData data = loadedPlayers.remove(uuid);
+                    PlayerData data = loadedPlayers.get(uuid);
 
                     if (data != null) {
                         storageHandler.savePlayerData(data);
