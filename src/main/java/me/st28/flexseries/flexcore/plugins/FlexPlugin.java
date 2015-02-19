@@ -227,6 +227,14 @@ public abstract class FlexPlugin extends JavaPlugin {
         Bukkit.getPluginManager().callEvent(new PluginReloadedEvent(this.getClass()));
     }
 
+    public final void reloadConfig() {
+        if (hasConfig) {
+            super.reloadConfig();
+
+            handleConfigReload(getConfig());
+        }
+    }
+
     /**
      * Saves the entirety of the plugin.
      *
@@ -296,6 +304,7 @@ public abstract class FlexPlugin extends JavaPlugin {
      * @throws java.lang.IllegalStateException Thrown if this method after the plugin has gone through the loading phase.
      */
     public final boolean registerModule(FlexModule module) {
+        Validate.notNull(module, "Module cannot be null.");
         Class<? extends FlexModule> clazz = module.getClass();
         if (REGISTERED_MODULES.containsKey(clazz)) {
             return false;
@@ -333,6 +342,11 @@ public abstract class FlexPlugin extends JavaPlugin {
      * Handles custom reload tasks.
      */
     public void handlePluginReload() { }
+
+    /**
+     * Handles custom config reload tasks.
+     */
+    public void handleConfigReload(FileConfiguration config) { }
 
     /**
      * Handles custom save tasks.

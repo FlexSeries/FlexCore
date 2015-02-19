@@ -2,10 +2,9 @@ package me.st28.flexseries.flexcore.cookies;
 
 import me.st28.flexseries.flexcore.FlexCore;
 import me.st28.flexseries.flexcore.events.PlayerLeaveEvent;
-import me.st28.flexseries.flexcore.logging.LogHelper;
+import me.st28.flexseries.flexcore.players.PlayerManager;
 import me.st28.flexseries.flexcore.players.loading.PlayerLoadCycle;
 import me.st28.flexseries.flexcore.players.loading.PlayerLoader;
-import me.st28.flexseries.flexcore.players.PlayerManager;
 import me.st28.flexseries.flexcore.plugins.FlexModule;
 import me.st28.flexseries.flexcore.plugins.FlexPlugin;
 import me.st28.flexseries.flexcore.storage.flatfile.YamlFileManager;
@@ -46,7 +45,7 @@ public final class CookieManager extends FlexModule<FlexCore> implements Listene
     protected final void handleReload() {
         cookieDir.mkdir();
 
-        loadedCookies.clear();
+        /*loadedCookies.clear();
 
         for (File file : cookieDir.listFiles()) {
             if (YamlFileManager.YAML_FILE_PATTERN.matcher(file.getName()).matches()) {
@@ -71,7 +70,7 @@ public final class CookieManager extends FlexModule<FlexCore> implements Listene
 
                 loadedCookies.put(uuid, values);
             }
-        }
+        }*/
     }
 
     @Override
@@ -79,6 +78,19 @@ public final class CookieManager extends FlexModule<FlexCore> implements Listene
         for (UUID entry : loadedCookies.keySet()) {
             saveEntry(entry);
         }
+    }
+
+    private void loadEntry(UUID entry) {
+        FileConfiguration config = new YamlFileManager(cookieDir + File.separator + (identifier == null ? "console" : entry.toString()) + ".yml").getConfig();
+
+        //TODO: Wipe file is there's an error with the YAML syntax.
+
+        Map<String, String> values = new HashMap<>();
+        for (String key : config.getKeys(false)) {
+            values.put(key, config.getString(key));
+        }
+
+        loadedCookies.put(entry, values);
     }
 
     private void saveEntry(UUID entry) {
@@ -154,6 +166,7 @@ public final class CookieManager extends FlexModule<FlexCore> implements Listene
 
     @Override
     public boolean loadPlayer(UUID uuid, String name, PlayerLoadCycle cycle) {
+        loadEntry(uuid);
         PlayerLoadCycle.completedCycle(cycle, this);
         return true;
     }
