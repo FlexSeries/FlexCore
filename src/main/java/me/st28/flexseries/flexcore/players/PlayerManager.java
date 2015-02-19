@@ -4,12 +4,15 @@ import me.st28.flexseries.flexcore.FlexCore;
 import me.st28.flexseries.flexcore.events.NewPlayerJoinEvent;
 import me.st28.flexseries.flexcore.events.PlayerJoinLoadedEvent;
 import me.st28.flexseries.flexcore.events.PlayerLeaveEvent;
+import me.st28.flexseries.flexcore.hooks.HookManager;
+import me.st28.flexseries.flexcore.hooks.VanishNoPacketHook;
 import me.st28.flexseries.flexcore.logging.LogHelper;
 import me.st28.flexseries.flexcore.messages.MessageReference;
 import me.st28.flexseries.flexcore.messages.ReplacementMap;
 import me.st28.flexseries.flexcore.players.loading.PlayerLoadCycle;
 import me.st28.flexseries.flexcore.players.loading.PlayerLoader;
 import me.st28.flexseries.flexcore.plugins.FlexModule;
+import me.st28.flexseries.flexcore.plugins.FlexPlugin;
 import me.st28.flexseries.flexcore.storage.StorageType;
 import me.st28.flexseries.flexcore.utils.ArgumentCallback;
 import me.st28.flexseries.flexcore.utils.ScreenTitle;
@@ -38,6 +41,8 @@ public final class PlayerManager extends FlexModule<FlexCore> implements Listene
 
     private long loadTimeout;
     private final List<String> loginMessageOrder = new ArrayList<>();
+
+    private boolean enableLoginTitle;
 
     private PlayerStorageHandler storageHandler;
 
@@ -75,6 +80,8 @@ public final class PlayerManager extends FlexModule<FlexCore> implements Listene
         }
 
         loadTimeout = config.getLong("Load Timeout", 100L);
+
+        enableLoginTitle = config.getBoolean("Login Title", true);
 
         loginMessageOrder.clear();
         loginMessageOrder.addAll(config.getStringList("Player Join.Message Order"));
@@ -143,6 +150,7 @@ public final class PlayerManager extends FlexModule<FlexCore> implements Listene
         final long curTime = System.currentTimeMillis();
         data.lastLogin = new Timestamp(curTime);
 
+        boolean isVanished = p.hasMetadata("vanished") && p.getMetadata("vanished").get(0).asBoolean();
         boolean firstJoin = (boolean) cycle.getCustomData().get("firstJoin");
 
         PlayerJoinLoadedEvent newJoinEvent = new PlayerJoinLoadedEvent(p, cycle.getCustomData());
@@ -161,12 +169,17 @@ public final class PlayerManager extends FlexModule<FlexCore> implements Listene
             secondLine = ChatColor.GOLD + "Welcome back, " + p.getDisplayName() + "!";
         }
 
-        //TODO: Use configuration option for server name
-        ScreenTitle title = new ScreenTitle("" + ChatColor.GREEN + ChatColor.BOLD + "Urban Astorea", secondLine);
-        title.setFadeInTime(1);
-        title.setStayTime(3);
-        title.setFadeOutTime(1);
-        title.send(p);
+        if (enableLoginTitle) {
+            ScreenTitle title = new ScreenTitle("" + ChatColor.GREEN + ChatColor.BOLD + plugin.getServerName(), secondLine);
+            title.setFadeInTime(1);
+            title.setStayTime(3);
+            title.setFadeOutTime(1);
+            title.send(p);
+        }
+
+        if (isVanished) {
+            newJoinEvent.setJoinMessage(null);
+        }
 
         Bukkit.getPluginManager().callEvent(newJoinEvent);
 

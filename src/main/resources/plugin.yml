@@ -42,7 +42,8 @@ commands:
     description: 'Command for running registered debug tests'
     aliases: [debug]
   flexmotd:
-    description: ''
+    description: 'Command for viewing loaded MOTDs and setting current MOTD'
+    aliases: [motd]
   flexping:
     description: 'Command for viewing loaded server list messages and setting current message'
     aliases: [ping]

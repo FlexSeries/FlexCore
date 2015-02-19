@@ -31,6 +31,7 @@ import me.st28.flexseries.flexcore.plugins.FlexPlugin;
 import me.st28.flexseries.flexcore.plugins.exceptions.ModuleDisabledException;
 import me.st28.flexseries.flexcore.storage.mysql.MySQLManager;
 import me.st28.flexseries.flexcore.terms.TermsManager;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.event.Listener;
 
 import java.util.regex.Matcher;
@@ -45,6 +46,8 @@ public final class FlexCore extends FlexPlugin implements Listener {
     public static FlexCore getInstance() {
         return instance;
     }
+
+    private String serverName;
 
     @Override
     public void handlePluginLoad() {
@@ -115,8 +118,17 @@ public final class FlexCore extends FlexPlugin implements Listener {
     }
 
     @Override
+    public void handleConfigReload(FileConfiguration config) {
+        serverName = config.getString("Server Name", "Minecraft Server");
+    }
+
+    @Override
     public void handlePluginDisable() {
         instance = null;
+    }
+
+    public String getServerName() {
+        return serverName;
     }
 
 }
