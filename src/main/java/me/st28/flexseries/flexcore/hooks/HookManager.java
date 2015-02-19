@@ -26,6 +26,7 @@ public final class HookManager extends FlexModule<FlexCore> {
         registerHook(new JobsHook());
         registerHook(new ProtocolLibHook());
         registerHook(new TownyHook());
+        registerHook(new VanishNoPacketHook());
         registerHook(new VaultHook());
         registerHook(new WorldEditHook());
         registerHook(new WorldGuardHook());

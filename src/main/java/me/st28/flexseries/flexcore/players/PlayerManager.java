@@ -209,6 +209,7 @@ public final class PlayerManager extends FlexModule<FlexCore> implements Listene
         UUID uuid = p.getUniqueId();
 
         if (!handledPlayers.contains(uuid)) {
+            //TODO: Make this message configurable.
             p.kickPlayer(
                     "The server is not loaded yet.\n" +
                     "Please try again."
@@ -219,24 +220,48 @@ public final class PlayerManager extends FlexModule<FlexCore> implements Listene
         handleOfficialLogin(p, cachedCycles.remove(uuid), getPlayerData(uuid));
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerQuit(PlayerQuitEvent e) {
-        handlePlayerLeave(e.getPlayer());
+        e.setQuitMessage(null);
+        handlePlayerLeave(e.getPlayer(), null);
     }
 
     @EventHandler
     public void onPlayerKick(PlayerKickEvent e) {
-        handlePlayerLeave(e.getPlayer());
+        handlePlayerLeave(e.getPlayer(), e.getLeaveMessage());
     }
 
-    private void handlePlayerLeave(Player p) {
-        if (!handledPlayers.contains(p.getUniqueId())) {
+    private void handlePlayerLeave(Player p, String message) {
+        if (!handledPlayers.remove(p.getUniqueId())) {
             return;
         }
 
-        handledPlayers.remove(p.getUniqueId());
+        boolean isVanished;
+        try {
+            isVanished = FlexPlugin.getRegisteredModule(HookManager.class).getHook(VanishNoPacketHook.class).isPlayerVanished(p);
+        } catch (Exception ex) {
+            isVanished = false;
+        }
 
-        Bukkit.getPluginManager().callEvent(new PlayerLeaveEvent(p));
+        PlayerLeaveEvent newLeaveEvent = new PlayerLeaveEvent(p);
+
+        if (message == null) {
+            if (!isVanished) {
+                newLeaveEvent.setLeaveMessage(MessageReference.create(FlexCore.class, "players.notices.quit", new ReplacementMap("{DISPNAME}", p.getDisplayName()).getMap()));
+            }
+        } else {
+            newLeaveEvent.setLeaveMessage(MessageReference.createPlain(message));
+        }
+
+        Bukkit.getPluginManager().callEvent(newLeaveEvent);
+
+        for (Player op : Bukkit.getOnlinePlayers()) {
+            MessageReference plMessage = newLeaveEvent.getLeaveMessage(op.getUniqueId());
+
+            if (plMessage != null) {
+                plMessage.sendTo(op);
+            }
+        }
 
         PlayerData data = getPlayerData(p.getUniqueId());
         if (data != null) {
