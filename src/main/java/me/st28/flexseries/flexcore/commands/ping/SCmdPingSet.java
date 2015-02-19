@@ -42,9 +42,9 @@ public final class SCmdPingSet extends FlexCommand<FlexCore> {
         }
 
         if (pingManager.setCurrentMessage(newName)) {
-            MessageReference.create(FlexCore.class, "ping.notices.message_set", new QuickMap<>("{MESSAGE}", currentMessage).getMap()).sendTo(sender);
+            MessageReference.create(FlexCore.class, "ping.notices.message_set", new QuickMap<>("{MESSAGE}", newName).getMap()).sendTo(sender);
         } else {
-            MessageReference.create(FlexCore.class, "ping.notices.message_already_set", new QuickMap<>("{MESSAGE}", currentMessage).getMap()).sendTo(sender);
+            MessageReference.create(FlexCore.class, "ping.errors.message_already_set", new QuickMap<>("{MESSAGE}", currentMessage).getMap()).sendTo(sender);
         }
     }
 
