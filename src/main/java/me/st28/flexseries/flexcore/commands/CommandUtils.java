@@ -26,7 +26,7 @@ public final class CommandUtils {
         for (int i = 0; i < args.length; i++) {
             String curSegment = args[i];
 
-            if (curSegment.startsWith("\"")) {
+            if (curSegment.contains("\"")) {
                 StringBuilder sb = new StringBuilder();
                 for (int i2 = i; i2 < args.length; i2++) {
                     String newSegment = args[i2];

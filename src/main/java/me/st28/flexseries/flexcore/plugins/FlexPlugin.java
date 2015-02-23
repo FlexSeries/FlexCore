@@ -8,6 +8,7 @@ import me.st28.flexseries.flexcore.messages.MessageManager;
 import me.st28.flexseries.flexcore.plugins.exceptions.ModuleDisabledException;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 
