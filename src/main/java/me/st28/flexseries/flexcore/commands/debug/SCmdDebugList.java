@@ -29,7 +29,7 @@ public final class SCmdDebugList extends FlexCommand<FlexCore> {
     }
 
     @Override
-    public void runCommand(CommandSender sender, String command, String label, String[] args) {
+    public void runCommand(CommandSender sender, String command, String label, String[] args, Map<String, String> parameters) {
         boolean pageArgFirst = true;
 
         int page = CommandUtils.getPage(args, 0, true);

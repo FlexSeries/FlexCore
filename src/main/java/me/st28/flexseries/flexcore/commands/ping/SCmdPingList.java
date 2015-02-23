@@ -12,6 +12,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 
 import java.util.Collection;
+import java.util.Map;
 
 public final class SCmdPingList extends FlexCommand<FlexCore> {
 
@@ -27,7 +28,7 @@ public final class SCmdPingList extends FlexCommand<FlexCore> {
     }
 
     @Override
-    public void runCommand(CommandSender sender, String command, String label, String[] args) {
+    public void runCommand(CommandSender sender, String command, String label, String[] args, Map<String, String> parameters) {
         PingManager pingManager = FlexPlugin.getRegisteredModule(PingManager.class);
 
         String currentMessage = pingManager.getCurrentMessageName();

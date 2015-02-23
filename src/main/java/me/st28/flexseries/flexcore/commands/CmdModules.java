@@ -14,10 +14,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.Plugin;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 public final class CmdModules extends FlexCommand<FlexCore> {
 
@@ -26,7 +23,7 @@ public final class CmdModules extends FlexCommand<FlexCore> {
     }
 
     @Override
-    public void runCommand(CommandSender sender, String command, String label, String[] args) {
+    public void runCommand(CommandSender sender, String command, String label, String[] args, Map<String, String> parameters) {
         int page = CommandUtils.getPage(args, 1);
 
         String name = PluginUtils.getProperPluginName(args[0]);

@@ -25,7 +25,7 @@ public final class FlexHelpCommand<T extends FlexPlugin> extends FlexCommand<T> 
     }
 
     @Override
-    public void runCommand(CommandSender sender, String command, String label, String[] args) {
+    public void runCommand(CommandSender sender, String command, String label, String[] args, Map<String, String> parameters) {
         HelpManager helpManager = FlexPlugin.getRegisteredModule(HelpManager.class);
 
         boolean pageSpecified = false;

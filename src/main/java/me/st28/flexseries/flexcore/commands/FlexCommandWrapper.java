@@ -18,13 +18,16 @@ import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public final class FlexCommandWrapper implements CommandExecutor {
 
-    public final static Pattern PARAMETER_PATTERN = Pattern.compile();
-    public final static Pattern PARAMETER_VALUE_PATTERN = Pattern.compile();
+    public final static Pattern PARAMETER_PATTERN = Pattern.compile("-([^=]+)");
+    public final static Pattern PARAMETER_VALUE_PATTERN = Pattern.compile("-(.+)=(.+)");
 
     /**
      * Registers a command that uses FlexCore's command library.
@@ -89,8 +92,22 @@ public final class FlexCommandWrapper implements CommandExecutor {
                 fullNewArgs = CommandUtils.fixArguments(ArrayUtils.stringArraySublist(args, curIndex, args.length));
             }
 
+            Map<String, String> parameters = new HashMap<>();
+
             List<String> newArgs = new ArrayList<>();
             for (String newArg : fullNewArgs) {
+                Matcher matcher = PARAMETER_PATTERN.matcher(newArg);
+                if (matcher.matches()) {
+                    parameters.put(matcher.group(1), null);
+                    continue;
+                } else {
+                    matcher = PARAMETER_VALUE_PATTERN.matcher(newArg);
+                    if (matcher.matches()) {
+                        parameters.put(matcher.group(1), matcher.group(2));
+                        continue;
+                    }
+                }
+
                 newArgs.add(newArg);
             }
 
@@ -112,10 +129,10 @@ public final class FlexCommandWrapper implements CommandExecutor {
 
                 CommandUtils.performPlayerTest(sender, currentCommand.settings.isPlayerOnly);
                 CommandUtils.performPermissionTest(sender, currentCommand.getPermissionNode());
-                CommandUtils.performArgsTest(newArgs.length, currentCommand.getRequiredArgs(), MessageReference.createPlain(currentCommand.buildUsage(sender)));
+                CommandUtils.performArgsTest(newArgs.size(), currentCommand.getRequiredArgs(), MessageReference.createPlain(currentCommand.buildUsage(sender)));
             }
 
-            currentCommand.runCommand(sender, "/" + label + " " + ArrayUtils.stringArrayToString(args, " "), label, newArgs);
+            currentCommand.runCommand(sender, "/" + label + " " + ArrayUtils.stringArrayToString(args, " "), label, newArgs.toArray(new String[newArgs.size()]), parameters);
         } catch (CommandInterruptedException ex) {
             if (ex.getMessage() != null) {
                 sender.sendMessage(ex.getMessage());

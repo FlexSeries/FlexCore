@@ -5,6 +5,8 @@ import me.st28.flexseries.flexcore.commands.FlexCommand;
 import me.st28.flexseries.flexcore.commands.FlexCommandSettings;
 import org.bukkit.command.CommandSender;
 
+import java.util.Map;
+
 public final class CmdMotd extends FlexCommand<FlexCore> {
 
     public CmdMotd(FlexCore plugin) {
@@ -23,6 +25,6 @@ public final class CmdMotd extends FlexCommand<FlexCore> {
     }
 
     @Override
-    public void runCommand(CommandSender sender, String command, String label, String[] args) { }
+    public void runCommand(CommandSender sender, String command, String label, String[] args, Map<String, String> parameters) { }
 
 }

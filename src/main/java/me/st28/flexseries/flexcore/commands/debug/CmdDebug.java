@@ -19,6 +19,8 @@ import me.st28.flexseries.flexcore.utils.QuickMap;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.util.Map;
+
 public final class CmdDebug extends FlexCommand<FlexCore> {
 
     public CmdDebug(FlexCore plugin) {
@@ -28,7 +30,7 @@ public final class CmdDebug extends FlexCommand<FlexCore> {
     }
 
     @Override
-    public void runCommand(CommandSender sender, String command, String label, String[] args) {
+    public void runCommand(CommandSender sender, String command, String label, String[] args, Map<String, String> parameters) {
         JavaPlugin plugin = (JavaPlugin) PluginUtils.getPlugin(args[0]);
         if (plugin == null) {
             throw new CommandInterruptedException(MessageReference.createGeneral(FlexCore.class, "errors.plugin_not_found", new QuickMap<>("{NAME}", args[0]).getMap()));

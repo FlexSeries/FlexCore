@@ -5,6 +5,8 @@ import me.st28.flexseries.flexcore.commands.FlexCommand;
 import me.st28.flexseries.flexcore.commands.FlexCommandSettings;
 import org.bukkit.command.CommandSender;
 
+import java.util.Map;
+
 public final class CmdPing extends FlexCommand<FlexCore> {
 
     public CmdPing(FlexCore plugin) {
@@ -23,5 +25,6 @@ public final class CmdPing extends FlexCommand<FlexCore> {
     }
 
     @Override
-    public void runCommand(CommandSender sender, String command, String label, String[] args) {}
+    public void runCommand(CommandSender sender, String command, String label, String[] args, Map<String, String> parameters) {}
+
 }

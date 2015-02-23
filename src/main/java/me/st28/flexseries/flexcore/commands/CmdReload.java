@@ -11,6 +11,8 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.util.Map;
+
 public final class CmdReload extends FlexCommand<FlexCore> {
 
     public CmdReload(FlexCore plugin) {
@@ -18,7 +20,7 @@ public final class CmdReload extends FlexCommand<FlexCore> {
     }
 
     @Override
-    public void runCommand(CommandSender sender, String command, String label, String[] args) {
+    public void runCommand(CommandSender sender, String command, String label, String[] args, Map<String, String> parameters) {
         String properName = PluginUtils.getProperPluginName(args[0]);
         if (properName == null) {
             MessageReference.create(FlexCore.class, "general.errors.plugin_not_found", new ReplacementMap("{NAME}", args[0]).getMap()).sendTo(sender);

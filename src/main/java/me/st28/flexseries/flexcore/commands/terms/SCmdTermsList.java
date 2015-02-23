@@ -29,7 +29,7 @@ public final class SCmdTermsList extends FlexCommand<FlexCore> {
     }
 
     @Override
-    public void runCommand(CommandSender sender, String command, String label, String[] args) {
+    public void runCommand(CommandSender sender, String command, String label, String[] args, Map<String, String> parameters) {
         int page = CommandUtils.getPage(args, 0);
 
         TermsManager termsManager = plugin.getModule(TermsManager.class);

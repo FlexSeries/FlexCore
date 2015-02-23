@@ -12,6 +12,7 @@ import me.st28.flexseries.flexcore.utils.QuickMap;
 import org.bukkit.command.CommandSender;
 
 import java.util.Collection;
+import java.util.Map;
 
 public final class SCmdMotdSet extends FlexCommand<FlexCore> {
 
@@ -28,7 +29,7 @@ public final class SCmdMotdSet extends FlexCommand<FlexCore> {
     }
 
     @Override
-    public void runCommand(CommandSender sender, String command, String label, String[] args) {
+    public void runCommand(CommandSender sender, String command, String label, String[] args, Map<String, String> parameters) {
         String newName = args[0];
 
         MotdManager messageManager = FlexPlugin.getRegisteredModule(MotdManager.class);

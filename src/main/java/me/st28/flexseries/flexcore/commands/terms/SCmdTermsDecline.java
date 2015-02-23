@@ -11,6 +11,8 @@ import me.st28.flexseries.flexcore.terms.Terms;
 import me.st28.flexseries.flexcore.terms.TermsManager;
 import org.bukkit.command.CommandSender;
 
+import java.util.Map;
+
 public final class SCmdTermsDecline extends FlexCommand<FlexCore> {
 
     public SCmdTermsDecline(FlexCore plugin, FlexCommand<FlexCore> parent) {
@@ -26,7 +28,7 @@ public final class SCmdTermsDecline extends FlexCommand<FlexCore> {
     }
 
     @Override
-    public void runCommand(CommandSender sender, String command, String label, String[] args) {
+    public void runCommand(CommandSender sender, String command, String label, String[] args, Map<String, String> parameters) {
         Terms terms = plugin.getModule(TermsManager.class).getTerms(args[0]);
         if (terms == null) {
             MessageReference.create(FlexCore.class, "terms.errors.not_found", new ReplacementMap("{TERMS}", args[0]).getMap()).sendTo(sender);
