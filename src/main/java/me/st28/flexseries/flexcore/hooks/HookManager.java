@@ -12,6 +12,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+//TODO: Make method of handling optional dependencies without NoClassDefFoundErrors
+// This can be accomplished by dynamically instantiating hooks only if the plugin is loaded.
 public final class HookManager extends FlexModule<FlexCore> {
 
     private final Map<Class<? extends Hook>, Hook> hooks = new HashMap<>();
@@ -78,6 +80,17 @@ public final class HookManager extends FlexModule<FlexCore> {
     public HookStatus getHookStatus(Class<? extends Hook> hookClass) {
         Validate.notNull(hookClass, "Hook class cannot be null.");
         return hookStatuses.get(hookClass);
+    }
+
+    /**
+     * @return returns a hook without warning if it's disabled.
+     */
+    public <T extends Hook> T getUnsafeHook(Class<T> clazz) {
+        Hook hook = hooks.get(clazz);
+        if (hook == null) {
+            throw new IllegalArgumentException("No hook with the class '" + clazz.getCanonicalName() + "' is registered.");
+        }
+        return (T) hook;
     }
 
     public <T extends Hook> T getHook(Class<T> clazz) {

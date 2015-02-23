@@ -3,15 +3,22 @@ package me.st28.flexseries.flexcore.plugins;
 import me.st28.flexseries.flexcore.events.PluginReloadedEvent;
 import me.st28.flexseries.flexcore.help.HelpManager;
 import me.st28.flexseries.flexcore.help.HelpTopic;
+import me.st28.flexseries.flexcore.hooks.Hook;
+import me.st28.flexseries.flexcore.hooks.HookManager;
+import me.st28.flexseries.flexcore.hooks.HookStatus;
+import me.st28.flexseries.flexcore.hooks.OptionalHookManager;
 import me.st28.flexseries.flexcore.logging.LogHelper;
 import me.st28.flexseries.flexcore.messages.MessageManager;
 import me.st28.flexseries.flexcore.plugins.exceptions.ModuleDisabledException;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.lang.reflect.Constructor;
 import java.util.*;
+import java.util.Map.Entry;
 
 public abstract class FlexPlugin extends JavaPlugin {
 
@@ -60,6 +67,9 @@ public abstract class FlexPlugin extends JavaPlugin {
      * The current load statuses of each registered {@link me.st28.flexseries.flexcore.plugins.FlexModule}.
      */
     private final Map<Class<? extends FlexModule>, ModuleStatus> moduleStatuses = new HashMap<>();
+
+    private final Map<Class<? extends OptionalHookManager>, Class<? extends Hook>> optionalHookManagers = new HashMap<>();
+    private final Set<OptionalHookManager> loadedOptionalHookManagers = new HashSet<>();
 
     @Override
     public final void onLoad() {
@@ -169,6 +179,37 @@ public abstract class FlexPlugin extends JavaPlugin {
 
         if (getResource("messages.yml") != null) {
             MessageManager.registerMessageProvider(this);
+        }
+
+        HookManager hookManager;
+        try {
+            hookManager = FlexPlugin.getRegisteredModule(HookManager.class);
+
+            for (Entry<Class<? extends OptionalHookManager>, Class<? extends Hook>> entry : optionalHookManagers.entrySet()) {
+                Hook hook = hookManager.getUnsafeHook(entry.getValue());
+                if (hookManager.getHookStatus(hook) != HookStatus.ENABLED) {
+                    LogHelper.warning(this, "Unable to load some features because optional hook '" + hook.getPluginName() + "' is not enabled.");
+                    continue;
+                }
+
+                try {
+                    Constructor<? extends OptionalHookManager> constructor = entry.getKey().getConstructor(JavaPlugin.class, Class.class);
+
+                    OptionalHookManager manager = constructor.newInstance(this, entry.getValue());
+                    loadedOptionalHookManagers.add(manager);
+
+                    try {
+                        manager.enable();
+                    } catch (Exception ex) {
+                        LogHelper.warning(this, "An error occurred while loading optional hook manager for plugin '" + hook.getPluginName() + "'");
+                        ex.printStackTrace();
+                    }
+                } catch (ReflectiveOperationException ex) {
+                    LogHelper.severe(this, "Unable to load some features because optional hook manager is not defined correctly: " + ex.getMessage());
+                }
+            }
+        } catch (ModuleDisabledException ex) {
+            LogHelper.warning(this, "Unable to load optional hook managers because the hook manager is disabled.");
         }
 
         try {
@@ -317,6 +358,21 @@ public abstract class FlexPlugin extends JavaPlugin {
         REGISTERED_MODULES.put(clazz, this);
         modules.put(clazz, module);
         moduleStatuses.put(clazz, null);
+        return true;
+    }
+
+    public final boolean registerOptionalHookManager(Class<? extends OptionalHookManager> managerClass, Class<? extends Hook> hookClass) {
+        Validate.notNull(managerClass, "Manager class cannot be null.");
+        Validate.notNull(hookClass, "Hook class cannot be null.");
+        if (optionalHookManagers.containsKey(managerClass)) {
+            return false;
+        }
+
+        if (status != PluginStatus.LOADING) {
+            throw new IllegalStateException("Currently not accepting new module registrations.");
+        }
+
+        optionalHookManagers.put(managerClass, hookClass);
         return true;
     }
 
