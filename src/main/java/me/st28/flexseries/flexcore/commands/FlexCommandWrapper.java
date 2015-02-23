@@ -17,7 +17,14 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.Player;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Pattern;
+
 public final class FlexCommandWrapper implements CommandExecutor {
+
+    public final static Pattern PARAMETER_PATTERN = Pattern.compile();
+    public final static Pattern PARAMETER_VALUE_PATTERN = Pattern.compile();
 
     /**
      * Registers a command that uses FlexCore's command library.
@@ -75,23 +82,28 @@ public final class FlexCommandWrapper implements CommandExecutor {
             CommandUtils.performPlayerTest(sender, currentCommand.settings.isPlayerOnly);
             CommandUtils.performPermissionTest(sender, currentCommand.getPermissionNode());
 
-            String[] newArgs;
+            String[] fullNewArgs;
             if (args.length < curIndex) {
-                newArgs = args;
+                fullNewArgs = args;
             } else {
-                newArgs = CommandUtils.fixArguments(ArrayUtils.stringArraySublist(args, curIndex, args.length));
+                fullNewArgs = CommandUtils.fixArguments(ArrayUtils.stringArraySublist(args, curIndex, args.length));
             }
 
-            if (currentCommand.settings.isDummyCommand || newArgs.length < currentCommand.getRequiredArgs()) {
+            List<String> newArgs = new ArrayList<>();
+            for (String newArg : fullNewArgs) {
+                newArgs.add(newArg);
+            }
+
+            if (currentCommand.settings.isDummyCommand || newArgs.size() < currentCommand.getRequiredArgs()) {
                 String defCommand = currentCommand.settings.defaultSubcommand;
                 if (defCommand == null) {
                     if (currentCommand.settings.isDummyCommand) {
                         HelpTopic topic = currentCommand.plugin.getHelpTopic();
                         if (topic != null) {
-                            FlexPlugin.getRegisteredModule(HelpManager.class).buildMessages(topic.getIdentifier(), sender, newArgs.length == 0 ? label : newArgs[0], null).sendTo(sender, 1);
+                            FlexPlugin.getRegisteredModule(HelpManager.class).buildMessages(topic.getIdentifier(), sender, newArgs.size() == 0 ? label : newArgs.get(0), null).sendTo(sender, 1);
                         }
                     } else {
-                        CommandUtils.performArgsTest(newArgs.length, currentCommand.getRequiredArgs(), MessageReference.createPlain(currentCommand.buildUsage(sender)));
+                        CommandUtils.performArgsTest(newArgs.size(), currentCommand.getRequiredArgs(), MessageReference.createPlain(currentCommand.buildUsage(sender)));
                     }
                     return true;
                 }

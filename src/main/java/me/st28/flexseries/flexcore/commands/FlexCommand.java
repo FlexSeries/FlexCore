@@ -244,11 +244,12 @@ public abstract class FlexCommand<T extends FlexPlugin> {
     /**
      * Handles the execution of the command.
      *  @param sender The sender of the command.
-     * @param command
+     * @param command The full text that was entered by the sender.
      * @param label The label that was used by the sender.
      * @param args The {@link CommandArgument}s that were detected for the command.<br />
- *             Arguments entered in quotes will appear as a single entry in the array.<br />
+     *             Arguments entered in quotes will appear as a single entry in the array.<br />
+     * @param flags Optional flags that can be entered by the sender to change the command behavior, where supported.
      */
-    public abstract void runCommand(CommandSender sender, String command, String label, String[] args);
+    public abstract void runCommand(CommandSender sender, String command, String label, String[] args, Map<String, String> flags);
 
 }
