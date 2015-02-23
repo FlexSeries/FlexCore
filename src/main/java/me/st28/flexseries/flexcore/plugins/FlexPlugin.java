@@ -6,16 +6,19 @@ import me.st28.flexseries.flexcore.help.HelpTopic;
 import me.st28.flexseries.flexcore.logging.LogHelper;
 import me.st28.flexseries.flexcore.messages.MessageManager;
 import me.st28.flexseries.flexcore.plugins.exceptions.ModuleDisabledException;
+import me.st28.flexseries.flexcore.utils.TimeUtils;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.*;
 
 public abstract class FlexPlugin extends JavaPlugin {
 
+    private static final Map<Class<? extends FlexPlugin>, BukkitRunnable> AUTOSAVE_RUNNABLES = new HashMap<>();
     private static final Map<Class<? extends FlexModule>, FlexPlugin> REGISTERED_MODULES = new HashMap<>();
 
     /**
@@ -98,7 +101,6 @@ public abstract class FlexPlugin extends JavaPlugin {
             addToLoadOrder(loadOrder, module);
         }
 
-
         // Attempted easy way out, doesn't work consistently.
         /*
         List<Class<? extends FlexModule>> loadOrder = new ArrayList<>(modules.keySet());
@@ -174,6 +176,7 @@ public abstract class FlexPlugin extends JavaPlugin {
 
         try {
             handlePluginEnable();
+            reloadAll();
         } catch (Exception ex) {
             LogHelper.severe(this, "An error occurred while enabling: " + ex.getMessage());
             ex.printStackTrace();
@@ -232,6 +235,26 @@ public abstract class FlexPlugin extends JavaPlugin {
         if (hasConfig) {
             super.reloadConfig();
 
+            int autosaveInterval = getConfig().getInt("Autosave Interval", 0);
+            if (autosaveInterval == 0) {
+                LogHelper.warning(this, "Autosaving disabled. It is recommended to enable it to help prevent data loss!");
+            } else {
+                if (AUTOSAVE_RUNNABLES.containsKey(getClass())) {
+                    AUTOSAVE_RUNNABLES.remove(getClass()).cancel();
+                }
+
+                BukkitRunnable runnable = new BukkitRunnable() {
+                    @Override
+                    public void run() {
+                        saveAll(true);
+                    }
+                };
+
+                runnable.runTaskTimer(this, autosaveInterval * 1200L, autosaveInterval * 1200L);
+                AUTOSAVE_RUNNABLES.put(getClass(), runnable);
+                LogHelper.info(this, "Autosaving enabled. Saving every " + TimeUtils.translateSeconds(autosaveInterval * 60) + ".");
+            }
+
             handleConfigReload(getConfig());
         }
     }
@@ -239,7 +262,7 @@ public abstract class FlexPlugin extends JavaPlugin {
     /**
      * Saves the entirety of the plugin.
      *
-     * @param async If true, should save asynchronously (where applicable{).}
+     * @param async If true, should save asynchronously (where applicable).
      */
     public final void saveAll(boolean async) {
         saveConfig();
