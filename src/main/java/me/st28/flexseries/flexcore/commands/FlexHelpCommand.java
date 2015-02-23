@@ -12,6 +12,10 @@ import java.util.*;
 
 public final class FlexHelpCommand<T extends FlexPlugin> extends FlexCommand<T> {
 
+    public FlexHelpCommand(T plugin, FlexCommand<T> parent) {
+        this(plugin, new String[]{"help"}, parent);
+    }
+
     public FlexHelpCommand(T plugin, String[] labels, FlexCommand<T> parent) {
         super(
                 plugin,

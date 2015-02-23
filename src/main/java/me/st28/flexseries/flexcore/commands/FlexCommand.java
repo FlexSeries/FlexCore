@@ -1,7 +1,7 @@
 package me.st28.flexseries.flexcore.commands;
 
 import me.st28.flexseries.flexcore.cookies.CookieManager;
-import me.st28.flexseries.flexcore.help.CommandHelpEntry;
+import me.st28.flexseries.flexcore.help.CookieCommandHelpEntry;
 import me.st28.flexseries.flexcore.help.HelpManager;
 import me.st28.flexseries.flexcore.help.HelpTopic;
 import me.st28.flexseries.flexcore.permissions.PermissionNode;
@@ -17,6 +17,7 @@ import java.util.*;
  *
  * @param <T> The plugin that owns the command.
  */
+//TODO: If the base command, should read label aliases from the plugin.yml
 public abstract class FlexCommand<T extends FlexPlugin> {
 
     /**
@@ -88,6 +89,14 @@ public abstract class FlexCommand<T extends FlexPlugin> {
                 helpManager.addHelpTopic(helpTopic);
             }
         }
+    }
+
+    public final FlexCommandSettings<T> getSettings() {
+        return settings;
+    }
+
+    public final String[] getLabels() {
+        return labels;
     }
 
     String getLabelCookieIdentifier() {
@@ -235,7 +244,8 @@ public abstract class FlexCommand<T extends FlexPlugin> {
             if (description == null) {
                 description = "&c&oNo description set.";
             }
-            helpTopic.addEntry(new CommandHelpEntry(subcommand.buildUsage(null).replace("/", ""), description, permission == null ? null : permission.getNode()));
+            //helpTopic.addEntry(new CommandHelpEntry(subcommand.buildUsage(null).replace("/", ""), description, permission == null ? null : permission.getNode()));
+            helpTopic.addEntry(new CookieCommandHelpEntry(subcommand));
         }
 
         return registeredLabels != 0;

@@ -81,6 +81,10 @@ public final class FlexCommandSettings<T extends FlexPlugin> {
         return this;
     }
 
+    public final String getDescription() {
+        return description;
+    }
+
     /**
      * Makes this command only usable by players.
      *
