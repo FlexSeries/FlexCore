@@ -6,7 +6,7 @@
 
     <groupId>me.st28.flexseries</groupId>
     <artifactId>flexcore</artifactId>
-    <version>dev</version>
+    <version>2.1.0</version>
     <name>FlexCore</name>
     <description>Powerful library for Bukkit plugins</description>
     <url>http://stealthyone.com/</url>
