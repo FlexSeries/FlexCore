@@ -1,10 +1,7 @@
 package me.st28.flexseries.flexcore.commands.debug;
 
 import me.st28.flexseries.flexcore.FlexCore;
-import me.st28.flexseries.flexcore.commands.CommandArgument;
-import me.st28.flexseries.flexcore.commands.CommandUtils;
-import me.st28.flexseries.flexcore.commands.FlexCommand;
-import me.st28.flexseries.flexcore.commands.FlexCommandSettings;
+import me.st28.flexseries.flexcore.commands.*;
 import me.st28.flexseries.flexcore.commands.exceptions.CommandInterruptedException;
 import me.st28.flexseries.flexcore.debug.DebugManager;
 import me.st28.flexseries.flexcore.debug.DebugTest;
@@ -24,9 +21,20 @@ import java.util.Map;
 public final class CmdDebug extends FlexCommand<FlexCore> {
 
     public CmdDebug(FlexCore plugin) {
-        super(plugin, new String[]{"flexdebug", "debug"}, null, new FlexCommandSettings<FlexCore>().permission(PermissionNodes.DEBUG), new CommandArgument("plugin", true), new CommandArgument("test", true));
+        super(
+                plugin,
+                new String[]{"flexdebug", "debug"},
+                null,
+                new FlexCommandSettings<FlexCore>()
+                        .permission(PermissionNodes.DEBUG)
+                        .helpPath("Debug")
+                        .helpDescription("Debug tests for various plugin features"),
+                new CommandArgument("plugin", true),
+                new CommandArgument("test", true)
+        );
 
         registerSubcommand(new SCmdDebugList(plugin, this));
+        registerSubcommand(new FlexHelpCommand<>(plugin, this));
     }
 
     @Override

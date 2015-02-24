@@ -25,7 +25,7 @@ import java.util.UUID;
  *     <li>Most frequently used command labels</li>
  * </ul>
  */
-//TODO: Unload on player leave, load on player join
+//TODO: Make plugin function without the cookie manager being enabled.
 public final class CookieManager extends FlexModule<FlexCore> implements Listener, PlayerLoader {
 
     private File cookieDir;

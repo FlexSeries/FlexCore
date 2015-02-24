@@ -58,7 +58,7 @@ Formats:
       center: '&aHelp: &6{KEY} &c(pg.{PAGE}/{MAXPAGES})'
   Elements:
     chat_channel: '&a{ACTIVE}{COLOR}{CHANNEL} &8({STATUS}&8) &8- &6{CHATTERS} chatter{S}'
-    command: '&c/{LABEL}(txt:{ALIASES}){COMMAND} &8- &e{DESCRIPTION}'
+    command: '&c/&4{LABEL}(txt:&6Aliases: &e{ALIASES})&c{COMMAND} &8- &e{DESCRIPTION}'
     element: '&6{KEY}'
     friends_friend: '{PLAYER} &8- &7{TIME}'
     friends_friend_request: '&e&oRequest from &6&o{PLAYER}'
