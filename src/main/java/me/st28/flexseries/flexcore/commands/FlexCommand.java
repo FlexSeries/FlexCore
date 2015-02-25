@@ -8,6 +8,7 @@ import me.st28.flexseries.flexcore.permissions.PermissionNode;
 import me.st28.flexseries.flexcore.plugins.FlexPlugin;
 import org.apache.commons.lang.Validate;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.Player;
 
 import java.util.*;
@@ -33,7 +34,7 @@ public abstract class FlexCommand<T extends FlexPlugin> {
     /**
      * The parent command to this subcommand.
      */
-    private FlexCommand<T> parent;
+    private final FlexCommand<T> parent;
 
     /**
      * Subcommands for this particular command.
@@ -43,6 +44,52 @@ public abstract class FlexCommand<T extends FlexPlugin> {
     private final List<CommandArgument> arguments = new ArrayList<>();
 
     protected final FlexCommandSettings<T> settings;
+
+    public FlexCommand(T plugin, String label, FlexCommandSettings<T> settings, CommandArgument... arguments) {
+        Validate.notNull(plugin, "Plugin cannot be null.");
+        Validate.notNull(label, "Label cannot be null.");
+
+        this.plugin = plugin;
+
+        PluginCommand pluginCommand = plugin.getCommand(label);
+        if (pluginCommand == null) {
+            throw new IllegalArgumentException("Command '" + label + "' is not a registered command for plugin '" + plugin.getName() + "'");
+        }
+
+        List<String> rawLabels = new ArrayList<>();
+        rawLabels.add(label.toLowerCase());
+        rawLabels.addAll(pluginCommand.getAliases());
+        this.labels = rawLabels.toArray(new String[rawLabels.size()]);
+
+        if (settings == null) {
+            this.settings = new FlexCommandSettings<>();
+        } else {
+            this.settings = settings;
+        }
+        this.settings.isLocked = true;
+
+        String plDescription = pluginCommand.getDescription();
+        if (plDescription != null) {
+            this.settings.description(plDescription);
+        }
+
+        Collections.addAll(this.arguments, arguments);
+
+        this.parent = null;
+
+        String helpPath = getHelpPath();
+        if (helpPath != null) {
+            HelpManager helpManager = FlexPlugin.getRegisteredModule(HelpManager.class);
+
+            if (getHelpTopic() == null) {
+                HelpTopic helpTopic;
+
+                helpTopic = new HelpTopic(helpPath, this.settings.helpDescription, null);
+
+                helpManager.addHelpTopic(helpTopic);
+            }
+        }
+    }
 
     /**
      * Creates a new FlexCommand.
