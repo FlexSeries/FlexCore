@@ -8,6 +8,7 @@ import com.comphenix.protocol.wrappers.WrappedChatComponent;
 import com.google.gson.JsonParser;
 import me.st28.flexseries.flexcore.commands.*;
 import me.st28.flexseries.flexcore.commands.debug.CmdDebug;
+import me.st28.flexseries.flexcore.commands.items.CmdItemInfo;
 import me.st28.flexseries.flexcore.commands.motd.CmdMotd;
 import me.st28.flexseries.flexcore.commands.ping.CmdPing;
 import me.st28.flexseries.flexcore.commands.terms.CmdTerms;
@@ -21,6 +22,7 @@ import me.st28.flexseries.flexcore.hooks.ProtocolLibHook;
 import me.st28.flexseries.flexcore.hooks.exceptions.HookDisabledException;
 import me.st28.flexseries.flexcore.items.CustomItemDebugTest;
 import me.st28.flexseries.flexcore.items.CustomItemManager;
+import me.st28.flexseries.flexcore.items.ItemNameIndex;
 import me.st28.flexseries.flexcore.lists.ListManager;
 import me.st28.flexseries.flexcore.logging.LogHelper;
 import me.st28.flexseries.flexcore.messages.MessageManager;
@@ -59,6 +61,7 @@ public final class FlexCore extends FlexPlugin implements Listener {
         registerModule(new DebugManager(this));
         registerModule(new HelpManager(this));
         registerModule(new HookManager(this));
+        registerModule(new ItemNameIndex(this));
         registerModule(new ListManager(this));
         registerModule(new MessageManager(this));
         registerModule(new MotdManager(this));
@@ -75,6 +78,7 @@ public final class FlexCore extends FlexPlugin implements Listener {
 
         FlexCommandWrapper.registerCommand(this, "flexdebug", new CmdDebug(this));
         FlexCommandWrapper.registerCommand(this, "flexhooks", new CmdHooks(this));
+        FlexCommandWrapper.registerCommand(this, "flexiteminfo", new CmdItemInfo(this));
         FlexCommandWrapper.registerCommand(this, "flexmodules", new CmdModules(this));
         FlexCommandWrapper.registerCommand(this, "flexmotd", new CmdMotd(this));
         FlexCommandWrapper.registerCommand(this, "flexping", new CmdPing(this));
