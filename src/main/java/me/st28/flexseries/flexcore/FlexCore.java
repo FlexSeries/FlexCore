@@ -77,6 +77,7 @@ public final class FlexCore extends FlexPlugin implements Listener {
         //TODO: Register commands automatically.
 
         FlexCommandWrapper.registerCommand(this, "flexdebug", new CmdDebug(this));
+        FlexCommandWrapper.registerCommand(this, "flexhelp", new FlexHelpCommand<>(this, new String[]{"flexhelp", "help"}, null));
         FlexCommandWrapper.registerCommand(this, "flexhooks", new CmdHooks(this));
         FlexCommandWrapper.registerCommand(this, "flexiteminfo", new CmdItemInfo(this));
         FlexCommandWrapper.registerCommand(this, "flexmodules", new CmdModules(this));

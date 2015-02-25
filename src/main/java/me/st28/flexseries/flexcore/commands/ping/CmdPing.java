@@ -19,7 +19,7 @@ public final class CmdPing extends FlexCommand<FlexCore> {
                     .description("Server list message modification command")
                     .defaultSubcommand("list")
                     .helpPath("FlexCore.Ping")
-                    .helpDescription("Live server list changing")
+                    .description("Live server list changing")
                     .setDummyCommand()
         );
 
