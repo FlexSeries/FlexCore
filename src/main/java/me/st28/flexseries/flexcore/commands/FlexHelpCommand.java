@@ -29,6 +29,11 @@ public final class FlexHelpCommand<T extends FlexPlugin> extends FlexCommand<T> 
     }
 
     @Override
+    String getLabelCookieIdentifier() {
+        return getParent() != null ? getParent().getLabelCookieIdentifier() + "-help" : super.getLabelCookieIdentifier();
+    }
+
+    @Override
     public void runCommand(CommandSender sender, String command, String label, String[] args, Map<String, String> parameters) {
         HelpManager helpManager = FlexPlugin.getRegisteredModule(HelpManager.class);
 
@@ -63,7 +68,11 @@ public final class FlexHelpCommand<T extends FlexPlugin> extends FlexCommand<T> 
             }
         }
 
-        identifier = getHelpPath() + (identifier == null ? "" : ("." + identifier));
+        String helpPath = getHelpPath();
+        identifier = (helpPath == null ? "" : helpPath) + (identifier == null ? "" : ((helpPath == null ? "" : ".") + identifier));
+        if (identifier.isEmpty()) {
+            identifier = null;
+        }
 
         List<HelpTopic> topics = new ArrayList<>(helpManager.getHelpTopics(identifier));
 
