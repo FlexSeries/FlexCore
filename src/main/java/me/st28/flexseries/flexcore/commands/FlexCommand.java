@@ -66,12 +66,12 @@ public abstract class FlexCommand<T extends FlexPlugin> {
         } else {
             this.settings = settings;
         }
-        this.settings.isLocked = true;
 
         String plDescription = pluginCommand.getDescription();
         if (plDescription != null) {
             this.settings.description(plDescription);
         }
+        this.settings.isLocked = true;
 
         Collections.addAll(this.arguments, arguments);
 
@@ -84,7 +84,7 @@ public abstract class FlexCommand<T extends FlexPlugin> {
             if (getHelpTopic() == null) {
                 HelpTopic helpTopic;
 
-                helpTopic = new HelpTopic(helpPath, this.settings.helpDescription, null);
+                helpTopic = new HelpTopic(helpPath, this.settings.description, null);
 
                 helpManager.addHelpTopic(helpTopic);
             }
@@ -126,11 +126,11 @@ public abstract class FlexCommand<T extends FlexPlugin> {
                 if (this.settings.shouldInheritHelpPath && parent != null) {
                     helpTopic = new HelpTopic(
                             helpPath,
-                            this.settings.helpDescription == null ? parent.settings.helpDescription : this.settings.helpDescription,
+                            this.settings.description,
                             helpManager.getHelpTopic(parent.getHelpPath())
                     );
                 } else {
-                    helpTopic = new HelpTopic(helpPath, this.settings.helpDescription, null);
+                    helpTopic = new HelpTopic(helpPath, this.settings.description, null);
                 }
 
                 helpManager.addHelpTopic(helpTopic);

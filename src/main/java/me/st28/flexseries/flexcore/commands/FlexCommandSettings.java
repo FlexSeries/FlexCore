@@ -57,11 +57,6 @@ public final class FlexCommandSettings<T extends FlexPlugin> {
      */
     String helpPath = null;
 
-    /**
-     * The description to use for the help topic for this command.
-     */
-    String helpDescription = null;
-
     private void checkState() {
         if (isLocked) {
             throw new IllegalStateException("This command settings instance is locked.");
@@ -170,23 +165,6 @@ public final class FlexCommandSettings<T extends FlexPlugin> {
 
         this.helpPath = helpPath;
         return this;
-    }
-
-    /**
-     * Sets the description of the help topic for this command.
-     *
-     * @return The settings instance, for chaining.
-     */
-    public final FlexCommandSettings<T> helpDescription(String helpDescription) {
-        Validate.notNull(helpDescription, "Help description must not be null.");
-        checkState();
-
-        this.helpDescription = helpDescription;
-        return this;
-    }
-
-    public final String getHelpDescription() {
-        return helpDescription;
     }
 
 }
