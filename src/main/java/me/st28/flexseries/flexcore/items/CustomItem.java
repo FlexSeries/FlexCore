@@ -15,9 +15,9 @@ import java.util.Map;
 public final class CustomItem {
 
     /**
-     * The unique ID for the item.
+     * The IID for this custom item.
      */
-    final String id;
+    final String iid;
 
     /**
      * The type of custom item.
@@ -25,23 +25,46 @@ public final class CustomItem {
     final CustomItemType type;
 
     /**
-     * Additional custom data the item may have.
+     * Custom data for this item that only exists in memory.
      */
-    final Map<String, Object> customData = new HashMap<>();
+    final Map<String, Object> temporaryCustomData = new HashMap<>();
 
-    public CustomItem(final String id, final CustomItemType type) {
-        this.id = id;
+    /**
+     * Custom data for this item that is saved and loaded to the disk.<br />
+     * Values should be ConfigurationSerializable if they are not supported by default.
+     */
+    final Map<String, Object> persistentCustomData = new HashMap<>();
+
+    CustomItem(final String iid, final CustomItemType type) {
+        this.iid = iid;
         this.type = type;
     }
 
-    public ItemStack getItemStack(int amount) {
-        ItemStack item = type.getItemStack().clone();
+    /**
+     * @return the temporary custom data for this item.
+     */
+    public final Map<String, Object> getTemporaryCustomData() {
+        return temporaryCustomData;
+    }
+
+    /**
+     * @return the persistent custom data for this item.
+     */
+    public final Map<String, Object> getPersistentCustomData() {
+        return persistentCustomData;
+    }
+
+    /**
+     * @return Builds an ItemStack that represents this custom item.
+     */
+    public final ItemStack getItemStack(int amount) {
+        ItemStack item = type.getItemStack(this).clone();
         if (!item.hasItemMeta()) {
             item.setItemMeta(Bukkit.getItemFactory().getItemMeta(item.getType()));
         }
 
         StringBuilder prefix = new StringBuilder();
-        for (char ch : id.toCharArray()) {
+        for (char ch : iid.toCharArray()) {
             prefix.append(ChatColor.COLOR_CHAR + ch);
         }
 
