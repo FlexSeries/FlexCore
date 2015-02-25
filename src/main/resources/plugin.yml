@@ -30,7 +30,7 @@ commands:
   ###########################
   flexhelp:
     description: 'Universal help command for FlexPlugin implementations'
-    aliases: [help]
+    aliases: []
 
   #--------------------------------------------------------------------------------------------------------------------#
 
@@ -69,7 +69,7 @@ permissions:
     default: op
     children:
       flexcore.debug: true
-      flexcore.iteminfo
+      flexcore.iteminfo: true
       flexcore.modules: true
       flexcore.motd.list: true
       flexcore.motd.set: true
