@@ -176,7 +176,8 @@ public abstract class FlexPlugin extends JavaPlugin {
 
         try {
             handlePluginEnable();
-            reloadAll();
+            reloadConfig();
+            handlePluginReload();
         } catch (Exception ex) {
             LogHelper.severe(this, "An error occurred while enabling: " + ex.getMessage());
             ex.printStackTrace();
