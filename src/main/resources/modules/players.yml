@@ -1,12 +1,23 @@
-Storage: 'YAML'
-Database: 'flexseries' # Only for MySQL
-Load Timeout: 100 # In ticks
-Login Title:
+storage: 'YAML' # YAML is currently the only supported storage type
+database: 'flexseries' # Only for MySQL
+load timeout: 100 # In ticks
+login title:
   enabled: true
-  server name: 'Flex Server'
-Player Join:
-  Message Order:
-  - me.st28.mcast.astmotd.ASTMotd$motd
-  - me.st28.mcast.astmail.ASTMail$mail
-  - me.st28.mcast.astchat.ASTChat$channel
-  - me.st28.mcast.astfriends.ASTFriends$friends
+  message:
+    first line: '&a&o{SERVER}'
+    second line:
+      first join: '&6Welcome to the server, {DISPNAME}&6!'
+      join: '&6Welcome back, {DISPNAME}&6!'
+join message:
+  enabled: true # If false, will not modify the login message at all
+  compatibility: true # If false, will override the login message even if it was already changed.
+quit message:
+  enabled: true # If false, will not modify the quit message at all
+  compatibility: true # If false, will override the quit message even if it was already changed.
+player join:
+  unloaded message: 'The server is not loaded yet.\nPlease try again.'
+  message order:
+    - me.st28.mcast.astmotd.ASTMotd$motd
+    - me.st28.mcast.astmail.ASTMail$mail
+    - me.st28.mcast.astchat.ASTChat$channel
+    - me.st28.mcast.astfriends.ASTFriends$friends
