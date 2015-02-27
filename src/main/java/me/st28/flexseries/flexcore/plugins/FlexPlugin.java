@@ -168,6 +168,10 @@ public abstract class FlexPlugin extends JavaPlugin {
                 LogHelper.severe(this, "An error occurred while loading module '" + module.getIdentifier() + "': " + ex.getMessage());
                 ex.printStackTrace();
             }
+
+            if (moduleStatuses.get(clazz) != ModuleStatus.ENABLED) {
+                modules.remove(clazz);
+            }
         }
 
         if (getResource("messages.yml") != null) {
