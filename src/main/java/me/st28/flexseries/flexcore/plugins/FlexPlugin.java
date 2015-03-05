@@ -89,6 +89,7 @@ public abstract class FlexPlugin extends JavaPlugin {
             saveDefaultConfig();
             getConfig().options().copyDefaults(true);
             saveConfig();
+            reloadConfig();
         }
 
         List<String> disabledDependencies = hasConfig ? getConfig().getStringList("Disabled Modules") : null;
@@ -133,7 +134,7 @@ public abstract class FlexPlugin extends JavaPlugin {
         LogHelper.debug(this, loadOrderDebug.toString());
         // !!DEBUG!! //
 
-        _moduleLoop:
+        _moduleLoop: // EWWWWWWWWWW. Yeah, I know.
         for (Class<? extends FlexModule> clazz : loadOrder) {
             FlexModule<?> module = modules.get(clazz);
             LogHelper.info(this, "Loading module: " + module.getIdentifier());
@@ -236,6 +237,7 @@ public abstract class FlexPlugin extends JavaPlugin {
         Bukkit.getPluginManager().callEvent(new PluginReloadedEvent(this.getClass()));
     }
 
+    @Override
     public final void reloadConfig() {
         if (hasConfig) {
             super.reloadConfig();
