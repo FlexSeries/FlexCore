@@ -27,6 +27,7 @@ import me.st28.flexseries.flexcore.lists.ListManager;
 import me.st28.flexseries.flexcore.logging.LogHelper;
 import me.st28.flexseries.flexcore.messages.MessageManager;
 import me.st28.flexseries.flexcore.motd.MotdManager;
+import me.st28.flexseries.flexcore.notifications.NotificationManager;
 import me.st28.flexseries.flexcore.ping.PingManager;
 import me.st28.flexseries.flexcore.players.PlayerManager;
 import me.st28.flexseries.flexcore.players.PlayerUUIDTracker;
@@ -66,6 +67,7 @@ public final class FlexCore extends FlexPlugin implements Listener {
         registerModule(new MessageManager(this));
         registerModule(new MotdManager(this));
         registerModule(new MySQLManager(this));
+        registerModule(new NotificationManager(this));
         registerModule(new PingManager(this));
         registerModule(new PlayerManager(this));
         registerModule(new PlayerUUIDTracker(this));
