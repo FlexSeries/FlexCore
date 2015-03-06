@@ -93,7 +93,7 @@ public abstract class FlexPlugin extends JavaPlugin {
             reloadConfig();
         }
 
-        List<String> disabledDependencies = hasConfig ? getConfig().getStringList("Disabled Modules") : null;
+        List<String> disabledDependencies = hasConfig ? getConfig().getStringList("disabled modules") : null;
 
         // Load modules
         //TODO: Detect circular dependencies
@@ -241,7 +241,7 @@ public abstract class FlexPlugin extends JavaPlugin {
     public final void reloadConfig() {
         super.reloadConfig();
         if (hasConfig) {
-            int autosaveInterval = getConfig().getInt("Autosave Interval", 0);
+            int autosaveInterval = getConfig().getInt("autosave interval", 0);
             if (autosaveInterval == 0) {
                 LogHelper.warning(this, "Autosaving disabled. It is recommended to enable it to help prevent data loss!");
             } else {

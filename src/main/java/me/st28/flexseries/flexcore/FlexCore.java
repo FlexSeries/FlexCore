@@ -98,7 +98,7 @@ public final class FlexCore extends FlexPlugin implements Listener {
         }
 
         try {
-            if (getConfig().getBoolean("Enable Character Fix", true)) {
+            if (getConfig().getBoolean("enable character fix", true)) {
                 FlexPlugin.getRegisteredModule(HookManager.class).getHook(ProtocolLibHook.class).getProtocolManager().addPacketListener(new PacketAdapter(this, Play.Server.CHAT) {
                     @Override
                     public void onPacketSending(PacketEvent event) {
@@ -126,7 +126,7 @@ public final class FlexCore extends FlexPlugin implements Listener {
 
     @Override
     public void handleConfigReload(FileConfiguration config) {
-        serverName = config.getString("Server Name", "Minecraft Server");
+        serverName = config.getString("server name", "Minecraft Server");
     }
 
     @Override

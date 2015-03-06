@@ -23,13 +23,13 @@ public final class LogHelper {
     }
 
     public static void debug(JavaPlugin plugin, String message) {
-        if (plugin.getConfig().getBoolean("Debug")) {
+        if (plugin.getConfig().getBoolean("debug")) {
             Bukkit.getLogger().log(Level.INFO, String.format("[%s DEBUG] %s", plugin.getName(), message));
         }
     }
 
     public static void debug(FlexModule module, String message) {
-        if (module.getPlugin().getConfig().getBoolean("Debug")) {
+        if (module.getPlugin().getConfig().getBoolean("debug")) {
             Bukkit.getLogger().log(Level.INFO, String.format("[%s/%s DEBUG] %s", module.getPlugin().getName(), module.getIdentifier(), message));
         }
     }
