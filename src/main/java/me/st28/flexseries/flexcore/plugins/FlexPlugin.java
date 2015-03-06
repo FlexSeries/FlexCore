@@ -85,10 +85,11 @@ public abstract class FlexPlugin extends JavaPlugin {
 
         // Determine if the plugin has a configuration file or not, and save it if there is one.
         if (getResource("config.yml") != null) {
-            hasConfig = true;
             saveDefaultConfig();
             getConfig().options().copyDefaults(true);
             saveConfig();
+
+            hasConfig = true;
             reloadConfig();
         }
 
@@ -181,7 +182,6 @@ public abstract class FlexPlugin extends JavaPlugin {
 
         try {
             handlePluginEnable();
-            reloadConfig();
             handlePluginReload();
         } catch (Exception ex) {
             LogHelper.severe(this, "An error occurred while enabling: " + ex.getMessage());
@@ -239,9 +239,8 @@ public abstract class FlexPlugin extends JavaPlugin {
 
     @Override
     public final void reloadConfig() {
+        super.reloadConfig();
         if (hasConfig) {
-            super.reloadConfig();
-
             int autosaveInterval = getConfig().getInt("Autosave Interval", 0);
             if (autosaveInterval == 0) {
                 LogHelper.warning(this, "Autosaving disabled. It is recommended to enable it to help prevent data loss!");
