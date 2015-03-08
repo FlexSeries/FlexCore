@@ -1,11 +1,5 @@
 package me.st28.flexseries.flexcore;
 
-import com.comphenix.packetwrapper.WrapperPlayServerChat;
-import com.comphenix.protocol.PacketType.Play;
-import com.comphenix.protocol.events.PacketAdapter;
-import com.comphenix.protocol.events.PacketEvent;
-import com.comphenix.protocol.wrappers.WrappedChatComponent;
-import com.google.gson.JsonParser;
 import me.st28.flexseries.flexcore.commands.*;
 import me.st28.flexseries.flexcore.commands.debug.CmdDebug;
 import me.st28.flexseries.flexcore.commands.items.CmdItemInfo;
@@ -18,8 +12,6 @@ import me.st28.flexseries.flexcore.debug.DebugManager;
 import me.st28.flexseries.flexcore.debug.MCMLDebugTest;
 import me.st28.flexseries.flexcore.help.HelpManager;
 import me.st28.flexseries.flexcore.hooks.HookManager;
-import me.st28.flexseries.flexcore.hooks.ProtocolLibHook;
-import me.st28.flexseries.flexcore.hooks.exceptions.HookDisabledException;
 import me.st28.flexseries.flexcore.items.CustomItemDebugTest;
 import me.st28.flexseries.flexcore.items.CustomItemManager;
 import me.st28.flexseries.flexcore.items.ItemNameIndex;
@@ -37,7 +29,6 @@ import me.st28.flexseries.flexcore.terms.TermsManager;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.event.Listener;
 
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public final class FlexCore extends FlexPlugin implements Listener {
@@ -95,32 +86,6 @@ public final class FlexCore extends FlexPlugin implements Listener {
             debugManager.registerDebugTest(new MCMLDebugTest(this));
         } catch (ModuleDisabledException ex) {
             LogHelper.warning(this, "Unable to register default debug tests because the debug manager is not enabled.");
-        }
-
-        try {
-            if (getConfig().getBoolean("enable character fix", true)) {
-                FlexPlugin.getRegisteredModule(HookManager.class).getHook(ProtocolLibHook.class).getProtocolManager().addPacketListener(new PacketAdapter(this, Play.Server.CHAT) {
-                    @Override
-                    public void onPacketSending(PacketEvent event) {
-                        WrapperPlayServerChat wrapper = new WrapperPlayServerChat(event.getPacket());
-
-                        String fixedJson = new JsonParser().parse(wrapper.getMessage().getJson()).getAsJsonObject().toString();
-                        Matcher matcher = CHARACTER_REGEX.matcher(fixedJson);
-                        while (matcher.find()) {
-                            fixedJson = fixedJson.replace(matcher.group(), matcher.group(1));
-                        }
-
-                        wrapper.setMessage(WrappedChatComponent.fromJson(fixedJson));
-                    }
-                });
-                LogHelper.info(this, "Character fix enabled.");
-            } else {
-                LogHelper.info(this, "Character fix disabled.");
-            }
-        } catch (ModuleDisabledException ex) {
-            LogHelper.warning(this, "Character fix is enabled in the configuration but the hook manager is not enabled.");
-        } catch (HookDisabledException ex) {
-            LogHelper.warning(this, "Character fix is enabled in the configuration but ProtocolLib is not installed on the server.");
         }
     }
 

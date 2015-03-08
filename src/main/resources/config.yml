@@ -1,5 +1,4 @@
 debug: false
-enable character fix: false
 server name: 'Minecraft Server'
 autosave interval: 10
 disabled modules: []

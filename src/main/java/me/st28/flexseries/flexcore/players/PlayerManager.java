@@ -18,6 +18,7 @@ import me.st28.flexseries.flexcore.utils.ScreenTitle;
 import me.st28.flexseries.flexcore.utils.TaskChain;
 import me.st28.flexseries.flexcore.utils.TaskChain.AsyncGenericTask;
 import me.st28.flexseries.flexcore.utils.TaskChain.VariableGenericTask;
+import org.apache.commons.lang.StringEscapeUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -99,7 +100,7 @@ public final class PlayerManager extends FlexModule<FlexCore> implements Listene
         loginMessageOrder.clear();
         loginMessageOrder.addAll(config.getStringList("player join.message order"));
 
-        unloadedMessage = config.getString("player join.unloaded message", "The server is not loaded yet.\nPlease try again.");
+        unloadedMessage = StringEscapeUtils.unescapeJava(config.getString("player join.unloaded message", "The server is not loaded yet.\nPlease try again."));
 
         titleFirstLine = config.getString("login title.message.first line", "");
         titleSecondLineFirstJoin = config.getString("login title.message.second line.first join", "");
@@ -212,6 +213,14 @@ public final class PlayerManager extends FlexModule<FlexCore> implements Listene
 
         Bukkit.getPluginManager().callEvent(newJoinEvent);
 
+        for (Player op : Bukkit.getOnlinePlayers()) {
+            MessageReference message = newJoinEvent.getJoinMessage(op.getUniqueId());
+
+            if (message != null) {
+                message.sendTo(op);
+            }
+        }
+
         Map<String, MessageReference> loginMessages = newJoinEvent.getLoginMessages();
         List<String> sent = new ArrayList<>();
 
@@ -228,14 +237,6 @@ public final class PlayerManager extends FlexModule<FlexCore> implements Listene
                 if (!sent.contains(entry.getKey())) {
                     entry.getValue().sendTo(p);
                 }
-            }
-        }
-
-        for (Player op : Bukkit.getOnlinePlayers()) {
-            MessageReference message = newJoinEvent.getJoinMessage(op.getUniqueId());
-
-            if (message != null) {
-                message.sendTo(op);
             }
         }
     }

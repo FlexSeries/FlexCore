@@ -1,20 +1,13 @@
 package me.st28.flexseries.flexcore.ping;
 
-import com.comphenix.packetwrapper.WrapperStatusServerOutServerInfo;
-import com.comphenix.protocol.PacketType.Status.Server;
-import com.comphenix.protocol.events.PacketAdapter;
-import com.comphenix.protocol.events.PacketEvent;
-import com.comphenix.protocol.wrappers.WrappedServerPing;
-import com.google.gson.JsonParser;
 import me.st28.flexseries.flexcore.FlexCore;
 import me.st28.flexseries.flexcore.hooks.HookManager;
-import me.st28.flexseries.flexcore.hooks.ProtocolLibHook;
-import me.st28.flexseries.flexcore.hooks.exceptions.HookDisabledException;
 import me.st28.flexseries.flexcore.logging.LogHelper;
 import me.st28.flexseries.flexcore.plugins.FlexModule;
-import me.st28.flexseries.flexcore.plugins.FlexPlugin;
-import me.st28.flexseries.flexcore.plugins.exceptions.ModuleDisabledException;
 import me.st28.flexseries.flexcore.utils.InternalUtils;
+import me.st28.flexseries.flexcore.utils.StringConverter;
+import me.st28.flexseries.flexcore.utils.StringUtils;
+import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -64,22 +57,6 @@ public final class PingManager extends FlexModule<FlexCore> implements Listener 
             objectMinecraftServer = null;
             fieldMotd = null;
         }
-
-        // ProtocolLib character fix
-        try {
-            FlexPlugin.getRegisteredModule(HookManager.class).getHook(ProtocolLibHook.class).getProtocolManager().addPacketListener(new PacketAdapter(plugin, Server.OUT_SERVER_INFO) {
-                @Override
-                public void onPacketSending(PacketEvent event) {
-                    WrapperStatusServerOutServerInfo wrapper = new WrapperStatusServerOutServerInfo(event.getPacket());
-
-                    wrapper.setServerPing(WrappedServerPing.fromJson(new JsonParser().parse(wrapper.getServerPing().toJson()).getAsJsonObject().toString().replace("\\\\", "\\")));
-                }
-            });
-        } catch (ModuleDisabledException ex) {
-            LogHelper.warning(this, "Unable to enable server list character fix: " + ex.getMessage());
-        } catch (HookDisabledException ex) {
-            LogHelper.warning(this, "Unable to enable server list character fix because ProtocolLib is not installed on the server.");
-        }
     }
 
     @Override
@@ -92,7 +69,12 @@ public final class PingManager extends FlexModule<FlexCore> implements Listener 
         messages.clear();
         if (msgSec != null) {
             for (String key : msgSec.getKeys(false)) {
-                messages.put(key.toLowerCase(), msgSec.getStringList(key).toArray(new String[2]));
+                messages.put(key.toLowerCase(), StringUtils.collectionToStringList(msgSec.getStringList(key), new StringConverter<String>() {
+                    @Override
+                    public String toString(String object) {
+                        return StringEscapeUtils.unescapeJava(object);
+                    }
+                }).toArray(new String[2]));
             }
         }
 

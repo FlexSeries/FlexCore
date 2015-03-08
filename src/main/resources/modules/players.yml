@@ -17,7 +17,5 @@ quit message:
 player join:
   unloaded message: 'The server is not loaded yet.\nPlease try again.'
   message order:
-    - me.st28.mcast.astmotd.ASTMotd$motd
-    - me.st28.mcast.astmail.ASTMail$mail
-    - me.st28.mcast.astchat.ASTChat$channel
-    - me.st28.mcast.astfriends.ASTFriends$friends
+    - me.st28.flexseries.flexcore.FlexCore$motd
+    - me.st28.flexseries.flexchat.FlexChat$channel
