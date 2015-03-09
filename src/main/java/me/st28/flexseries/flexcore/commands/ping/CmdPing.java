@@ -23,6 +23,7 @@ public final class CmdPing extends FlexCommand<FlexCore> {
                     .setDummyCommand()
         );
 
+        //TODO: Command to view ping command
         registerSubcommand(new SCmdPingList(plugin, this));
         registerSubcommand(new SCmdPingSet(plugin, this));
         registerSubcommand(new FlexHelpCommand<>(plugin, this));

@@ -17,7 +17,7 @@ public final class DebugManager extends FlexModule<FlexCore> {
     private final Map<Class<? extends JavaPlugin>, Map<String, DebugTest>> debugTests = new HashMap<>();
 
     public DebugManager(FlexCore plugin) {
-        super(plugin, "debug", "Manages debug tests");
+        super(plugin, "debug", "Manages debug tests", false);
     }
 
     /**

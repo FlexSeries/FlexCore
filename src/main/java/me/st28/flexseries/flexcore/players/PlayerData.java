@@ -1,21 +1,26 @@
 package me.st28.flexseries.flexcore.players;
 
 import java.sql.Timestamp;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Represents a loaded player's data.
  */
+//TODO: Add player info command
 public final class PlayerData {
 
     private final UUID uuid;
-    private final Map<String, Object> customData = new HashMap<>();
+    final Map<String, Object> customData = new HashMap<>();
 
     Timestamp firstJoin;
     Timestamp lastLogin;
     Timestamp lastLogout;
+
+    String lastIp;
+    final List<String> ips = new ArrayList<>();
+
+    String lastName;
+    final List<String> names = new ArrayList<>();
 
     public PlayerData(UUID uuid) {
         this.uuid = uuid;
@@ -47,6 +52,22 @@ public final class PlayerData {
      */
     public Timestamp getLastLogout() {
         return lastLogout;
+    }
+
+    public String getLastIp() {
+        return lastIp;
+    }
+
+    public List<String> getIps() {
+        return ips;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public List<String> getNames() {
+        return names;
     }
 
     /**

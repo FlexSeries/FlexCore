@@ -5,7 +5,7 @@ import me.st28.flexseries.flexcore.commands.FlexCommand;
 import me.st28.flexseries.flexcore.commands.FlexCommandSettings;
 import me.st28.flexseries.flexcore.commands.FlexHelpCommand;
 import me.st28.flexseries.flexcore.commands.exceptions.CommandInterruptedException;
-import me.st28.flexseries.flexcore.items.ItemNameIndex;
+import me.st28.flexseries.flexcore.items.ItemNameManager;
 import me.st28.flexseries.flexcore.lists.ListBuilder;
 import me.st28.flexseries.flexcore.messages.MessageReference;
 import me.st28.flexseries.flexcore.permissions.PermissionNodes;
@@ -47,7 +47,7 @@ public final class CmdItemInfo extends FlexCommand<FlexCore> {
         MaterialRef type = new MaterialRef(item);
         List<String> aliases = new ArrayList<>();
         try {
-            aliases.addAll(FlexPlugin.getRegisteredModule(ItemNameIndex.class).getAliases(type));
+            aliases.addAll(FlexPlugin.getRegisteredModule(ItemNameManager.class).getAliases(type));
         } catch (ModuleDisabledException ex) { }
 
         ListBuilder builder = new ListBuilder("title", "Item Info", null, label);

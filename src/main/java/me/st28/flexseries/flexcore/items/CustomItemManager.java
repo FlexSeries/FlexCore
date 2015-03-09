@@ -89,16 +89,16 @@ public final class CustomItemManager extends FlexModule<FlexCore> implements Lis
     private final Map<String, CustomItem> activeItems = new HashMap<>();
 
     public CustomItemManager(FlexCore plugin) {
-        super(plugin, "custom_items", "Tracks and handles custom items");
+        super(plugin, "custom_items", "Tracks and handles custom items", true);
     }
 
     @Override
     public void handleLoad() throws Exception {
-        customItemDir = new File(plugin.getDataFolder() + File.separator + "custom_items");
+        customItemDir = new File(getDataFolder() + File.separator + "items");
         customItemDir.mkdir();
 
         // Load the singleton IIDs.
-        singletonTypeIdFile = new YamlFileManager(customItemDir + File.separator + "singletonTypeIIDs.yml");
+        singletonTypeIdFile = new YamlFileManager(getDataFolder() + File.separator + "singletonTypeIIDs.yml");
         FileConfiguration singletonConfig = singletonTypeIdFile.getConfig();
         for (String identifier : singletonConfig.getKeys(false)) {
             singletonTypeIIDs.put(identifier, singletonConfig.getString(identifier));

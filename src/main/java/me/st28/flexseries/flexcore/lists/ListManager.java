@@ -36,7 +36,7 @@ public final class ListManager extends FlexModule<FlexCore> {
     private Map<String, ListHeader> formatsHeader = new HashMap<>();
 
     public ListManager(FlexCore plugin) {
-        super(plugin, "lists", "Handles the creation and formatting of lists that are displayed as output for commands");
+        super(plugin, "lists", "Handles the creation and formatting of lists that are displayed as output for commands", false);
     }
 
     @Override

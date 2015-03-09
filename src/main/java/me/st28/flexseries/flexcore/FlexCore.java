@@ -14,7 +14,7 @@ import me.st28.flexseries.flexcore.help.HelpManager;
 import me.st28.flexseries.flexcore.hooks.HookManager;
 import me.st28.flexseries.flexcore.items.CustomItemDebugTest;
 import me.st28.flexseries.flexcore.items.CustomItemManager;
-import me.st28.flexseries.flexcore.items.ItemNameIndex;
+import me.st28.flexseries.flexcore.items.ItemNameManager;
 import me.st28.flexseries.flexcore.lists.ListManager;
 import me.st28.flexseries.flexcore.logging.LogHelper;
 import me.st28.flexseries.flexcore.messages.MessageManager;
@@ -52,7 +52,7 @@ public final class FlexCore extends FlexPlugin implements Listener {
         registerModule(new DebugManager(this));
         registerModule(new HelpManager(this));
         registerModule(new HookManager(this));
-        registerModule(new ItemNameIndex(this));
+        registerModule(new ItemNameManager(this));
         registerModule(new ListManager(this));
         registerModule(new MessageManager(this));
         registerModule(new MotdManager(this));

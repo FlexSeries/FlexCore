@@ -58,7 +58,7 @@ public final class MessageManager extends FlexModule<FlexCore> {
     private Map<Class<? extends JavaPlugin>, MessageProvider> messageProviders = new HashMap<>();
 
     public MessageManager(FlexCore plugin) {
-        super(plugin, "messages", "Handles customizable messages for plugins.");
+        super(plugin, "messages", "Handles customizable messages for plugins.", false);
 
         isDisableable = false;
 

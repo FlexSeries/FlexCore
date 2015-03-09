@@ -62,12 +62,12 @@ public final class PlayerManager extends FlexModule<FlexCore> implements Listene
     private final Map<UUID, PlayerLoadCycle> cachedCycles = new HashMap<>();
 
     public PlayerManager(FlexCore plugin) {
-        super(plugin, "players", "Manages players");
+        super(plugin, "players", "Manages players", true);
     }
 
     @Override
     protected void handleLoad() throws Exception {
-        playerDir = new File(plugin.getDataFolder() + File.separator + "players");
+        playerDir = new File(getDataFolder() + File.separator + "data");
     }
 
     @Override

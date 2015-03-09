@@ -12,12 +12,12 @@ import org.bukkit.configuration.file.FileConfiguration;
 import java.util.*;
 import java.util.Map.Entry;
 
-public final class ItemNameIndex extends FlexModule<FlexCore> {
+public final class ItemNameManager extends FlexModule<FlexCore> {
 
     private final Map<String, MaterialRef> nameIndex = new HashMap<>();
 
-    public ItemNameIndex(FlexCore plugin) {
-        super(plugin, "item_names", "Allows for easier item lookup based on name");
+    public ItemNameManager(FlexCore plugin) {
+        super(plugin, "item_names", "Allows for easier item lookup based on name", false);
     }
 
     @Override

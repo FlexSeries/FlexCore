@@ -34,7 +34,7 @@ public final class PingManager extends FlexModule<FlexCore> implements Listener 
     private Map<String, String[]> messages = new LinkedHashMap<>();
 
     public PingManager(FlexCore plugin) {
-        super(plugin, "ping", "Dynamic server list message", HookManager.class);
+        super(plugin, "ping", "Dynamic server list message", false, HookManager.class);
     }
 
     @Override

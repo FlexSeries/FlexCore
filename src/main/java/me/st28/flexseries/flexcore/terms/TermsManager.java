@@ -19,12 +19,12 @@ public final class TermsManager extends FlexModule<FlexCore> {
     private YamlFileManager agreedTermsFile;
 
     public TermsManager(FlexCore plugin) {
-        super(plugin, "termsofservice", "Allows players to accept/decline various TOS required for different server features");
+        super(plugin, "terms_of_service", "Allows players to accept/decline various TOS required for different server features", true);
     }
 
     @Override
     public void handleLoad() throws Exception {
-        agreedTermsFile = new YamlFileManager(plugin.getDataFolder() + File.separator + "agreedTerms.yml");
+        agreedTermsFile = new YamlFileManager(getDataFolder() + File.separator + "agreedTerms.yml");
         FileConfiguration config = agreedTermsFile.getConfig();
         for (String rawUuid : config.getKeys(false)) {
             UUID uuid;
