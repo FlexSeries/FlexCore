@@ -28,7 +28,7 @@ public final class CmdDebug extends FlexCommand<FlexCore> {
                 new FlexCommandSettings<FlexCore>()
                         .permission(PermissionNodes.DEBUG)
                         .helpPath("Debug")
-                        .helpDescription("Debug tests for various plugin features"),
+                        .description("Debug tests for various plugin features"),
                 new CommandArgument("plugin", true),
                 new CommandArgument("test", true)
         );

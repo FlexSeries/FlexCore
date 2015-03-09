@@ -20,7 +20,7 @@ public final class MotdManager extends FlexModule<FlexCore> implements Listener 
     private Map<String, String[]> messages = new LinkedHashMap<>();
 
     public MotdManager(FlexCore plugin) {
-        super(plugin, "motd", "Manages available MOTDs", PlayerManager.class);
+        super(plugin, "motd", "Manages available MOTDs", false, PlayerManager.class);
     }
 
     @Override

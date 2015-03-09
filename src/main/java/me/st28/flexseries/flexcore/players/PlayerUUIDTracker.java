@@ -3,6 +3,7 @@ package me.st28.flexseries.flexcore.players;
 import me.st28.flexseries.flexcore.FlexCore;
 import me.st28.flexseries.flexcore.logging.LogHelper;
 import me.st28.flexseries.flexcore.plugins.FlexModule;
+import me.st28.flexseries.flexcore.plugins.FlexPlugin;
 import me.st28.flexseries.flexcore.storage.flatfile.YamlFileManager;
 import org.apache.commons.lang.Validate;
 import org.bukkit.ChatColor;
@@ -32,12 +33,12 @@ public final class PlayerUUIDTracker extends FlexModule<FlexCore> implements Lis
     private final Map<String, UUID> displayNamesToUuids = new HashMap<>();
 
     public PlayerUUIDTracker(FlexCore plugin) {
-        super(plugin, "uuid_tracker", "Tracks the UUIDs, names, and display names of joined players", PlayerManager.class);
+        super(plugin, "uuid_tracker", "Tracks the UUIDs, names, and display names of joined players", false, PlayerManager.class);
     }
 
     @Override
     public void handleLoad() throws Exception {
-        uuidFile = new YamlFileManager(plugin.getDataFolder() + File.separator + "playerUuids.yml");
+        uuidFile = new YamlFileManager(FlexPlugin.getRegisteredModule(PlayerManager.class).getDataFolder() + File.separator + "uuidIndex.yml");
 
         FileConfiguration config = uuidFile.getConfig();
         for (String rawUuid : config.getKeys(false)) {
@@ -45,7 +46,7 @@ public final class PlayerUUIDTracker extends FlexModule<FlexCore> implements Lis
             try {
                 uuid = UUID.fromString(rawUuid);
             } catch (Exception ex) {
-                plugin.getLogger().severe("Unable to load UUID '" + rawUuid + "' from playerUuids.yml for plugin: '" + plugin.getName() + "'");
+                plugin.getLogger().severe("Unable to load UUID '" + rawUuid + "' from uuidIndex.yml for plugin: '" + plugin.getName() + "'");
                 continue;
             }
 

@@ -2,7 +2,7 @@ name: ${project.name}
 version: ${project.version}
 description: '${project.description}'
 depend: []
-softdepend: [Jobs, ProtocolLib, Towny, VanishNoPacket, Vault, WorldEdit, WorldGuard]
+softdepend: [Essentials, Jobs, ProtocolLib, Towny, VanishNoPacket, Vault, WorldEdit, WorldGuard]
 authors: [${project.authors}]
 website: ${project.url}
 main: ${project.mainClass}
@@ -30,7 +30,16 @@ commands:
   ###########################
   flexhelp:
     description: 'Universal help command for FlexPlugin implementations'
-    aliases: [help]
+    aliases: []
+
+  #--------------------------------------------------------------------------------------------------------------------#
+
+  ###########################
+  #  Item-related Commands  #
+  ###########################
+  flexiteminfo:
+    description: 'Shows information about an item.'
+    aliases: [iteminfo, itemdb]
 
   #--------------------------------------------------------------------------------------------------------------------#
 
@@ -60,6 +69,7 @@ permissions:
     default: op
     children:
       flexcore.debug: true
+      flexcore.iteminfo: true
       flexcore.modules: true
       flexcore.motd.list: true
       flexcore.motd.set: true
@@ -89,6 +99,9 @@ permissions:
 
   flexcore.hooks:
     description: 'Access to hooks command.'
+    default: false
+  flexcore.iteminfo:
+    description: 'View information on an item.'
     default: false
   flexcore.modules:
     description: 'View FlexPlugin modules'

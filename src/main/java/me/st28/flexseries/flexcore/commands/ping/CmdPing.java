@@ -19,10 +19,11 @@ public final class CmdPing extends FlexCommand<FlexCore> {
                     .description("Server list message modification command")
                     .defaultSubcommand("list")
                     .helpPath("FlexCore.Ping")
-                    .helpDescription("Live server list changing")
+                    .description("Live server list changing")
                     .setDummyCommand()
         );
 
+        //TODO: Command to view ping command
         registerSubcommand(new SCmdPingList(plugin, this));
         registerSubcommand(new SCmdPingSet(plugin, this));
         registerSubcommand(new FlexHelpCommand<>(plugin, this));

@@ -6,7 +6,6 @@ import me.st28.flexseries.flexcore.events.PlayerJoinLoadedEvent;
 import me.st28.flexseries.flexcore.events.PlayerLeaveEvent;
 import me.st28.flexseries.flexcore.hooks.HookManager;
 import me.st28.flexseries.flexcore.hooks.VanishNoPacketHook;
-import me.st28.flexseries.flexcore.logging.LogHelper;
 import me.st28.flexseries.flexcore.messages.MessageReference;
 import me.st28.flexseries.flexcore.messages.ReplacementMap;
 import me.st28.flexseries.flexcore.players.loading.PlayerLoadCycle;
@@ -19,6 +18,7 @@ import me.st28.flexseries.flexcore.utils.ScreenTitle;
 import me.st28.flexseries.flexcore.utils.TaskChain;
 import me.st28.flexseries.flexcore.utils.TaskChain.AsyncGenericTask;
 import me.st28.flexseries.flexcore.utils.TaskChain.VariableGenericTask;
+import org.apache.commons.lang.StringEscapeUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -39,10 +39,20 @@ import java.util.Map.Entry;
 
 public final class PlayerManager extends FlexModule<FlexCore> implements Listener, PlayerLoader {
 
-    private long loadTimeout;
+    private String unloadedMessage;
+    private String titleFirstLine;
+    private String titleSecondLineFirstJoin;
+    private String titleSecondLineJoin;
+
     private final List<String> loginMessageOrder = new ArrayList<>();
 
+    /* Configuration Options */
+    private long loadTimeout;
     private boolean enableLoginTitle;
+    private boolean enableJoinMessageChange;
+    private boolean enableJoinMessageCompatibility;
+    private boolean enableQuitMessageChange;
+    private boolean enableQuitMessageCompatibility;
 
     private PlayerStorageHandler storageHandler;
 
@@ -52,12 +62,12 @@ public final class PlayerManager extends FlexModule<FlexCore> implements Listene
     private final Map<UUID, PlayerLoadCycle> cachedCycles = new HashMap<>();
 
     public PlayerManager(FlexCore plugin) {
-        super(plugin, "players", "Manages players");
+        super(plugin, "players", "Manages players", true);
     }
 
     @Override
     protected void handleLoad() throws Exception {
-        playerDir = new File(plugin.getDataFolder() + File.separator + "players");
+        playerDir = new File(getDataFolder() + File.separator + "data");
     }
 
     @Override
@@ -66,7 +76,7 @@ public final class PlayerManager extends FlexModule<FlexCore> implements Listene
 
         FileConfiguration config = getConfig();
 
-        StorageType storageType = StorageType.valueOf(config.getString("Storage", "").toUpperCase());
+        StorageType storageType = StorageType.valueOf(config.getString("storage", "").toUpperCase());
 
         switch (storageType) {
             /*case MYSQL:*/
@@ -79,12 +89,22 @@ public final class PlayerManager extends FlexModule<FlexCore> implements Listene
                 throw new IllegalArgumentException("Unsupported storage type: '" + storageType + "'");
         }
 
-        loadTimeout = config.getLong("Load Timeout", 100L);
+        loadTimeout = config.getLong("load timeout", 100L);
 
-        enableLoginTitle = config.getBoolean("Login Title", true);
+        enableLoginTitle = config.getBoolean("login title", true);
+        enableJoinMessageChange = config.getBoolean("join message.enabled", true);
+        enableJoinMessageCompatibility = config.getBoolean("join message.compatibility", true);
+        enableQuitMessageChange = config.getBoolean("quit message.enabled", true);
+        enableQuitMessageCompatibility = config.getBoolean("quit message.compatibility", true);
 
         loginMessageOrder.clear();
-        loginMessageOrder.addAll(config.getStringList("Player Join.Message Order"));
+        loginMessageOrder.addAll(config.getStringList("player join.message order"));
+
+        unloadedMessage = StringEscapeUtils.unescapeJava(config.getString("player join.unloaded message", "The server is not loaded yet.\nPlease try again."));
+
+        titleFirstLine = config.getString("login title.message.first line", "");
+        titleSecondLineFirstJoin = config.getString("login title.message.second line.first join", "");
+        titleSecondLineJoin = config.getString("login title.message.second line.join", "");
     }
 
     @Override
@@ -146,7 +166,7 @@ public final class PlayerManager extends FlexModule<FlexCore> implements Listene
         }
     }
 
-    private void handleOfficialLogin(final Player p, final PlayerLoadCycle cycle, final PlayerData data) {
+    private void handleOfficialLogin(final Player p, final PlayerLoadCycle cycle, final PlayerData data, final String defaultJoinMessage) {
         final long curTime = System.currentTimeMillis();
         data.lastLogin = new Timestamp(curTime);
 
@@ -155,6 +175,10 @@ public final class PlayerManager extends FlexModule<FlexCore> implements Listene
 
         PlayerJoinLoadedEvent newJoinEvent = new PlayerJoinLoadedEvent(p, cycle.getCustomData());
 
+        if (defaultJoinMessage != null) {
+            newJoinEvent.setJoinMessage(MessageReference.createPlain(defaultJoinMessage));
+        }
+
         String secondLine;
         if (firstJoin) {
             data.firstJoin = new Timestamp(curTime);
@@ -162,15 +186,21 @@ public final class PlayerManager extends FlexModule<FlexCore> implements Listene
             NewPlayerJoinEvent newPlayerJoinEvent = new NewPlayerJoinEvent(p);
             Bukkit.getPluginManager().callEvent(newPlayerJoinEvent);
 
-            newJoinEvent.setJoinMessage(MessageReference.create(FlexCore.class, "players.notices.first_join", new ReplacementMap("{DISPNAME}", p.getDisplayName()).getMap()));
-            secondLine = ChatColor.GOLD + "Welcome to the server, " + p.getDisplayName() + "!";
+            secondLine = ChatColor.translateAlternateColorCodes('&', titleSecondLineFirstJoin.replace("{DISPNAME}", p.getDisplayName()));
+
+            if (defaultJoinMessage == null) {
+                newJoinEvent.setJoinMessage(MessageReference.create(FlexCore.class, "players.notices.first_join", new ReplacementMap("{DISPNAME}", p.getDisplayName()).getMap()));
+            }
         } else {
-            newJoinEvent.setJoinMessage(MessageReference.create(FlexCore.class, "players.notices.join", new ReplacementMap("{DISPNAME}", p.getDisplayName()).getMap()));
-            secondLine = ChatColor.GOLD + "Welcome back, " + p.getDisplayName() + "!";
+            secondLine = ChatColor.translateAlternateColorCodes('&', titleSecondLineJoin.replace("{DISPNAME}", p.getDisplayName()));
+
+            if (defaultJoinMessage == null) {
+                newJoinEvent.setJoinMessage(MessageReference.create(FlexCore.class, "players.notices.join", new ReplacementMap("{DISPNAME}", p.getDisplayName()).getMap()));
+            }
         }
 
         if (enableLoginTitle) {
-            ScreenTitle title = new ScreenTitle("" + ChatColor.GREEN + ChatColor.BOLD + plugin.getServerName(), secondLine);
+            ScreenTitle title = new ScreenTitle(ChatColor.translateAlternateColorCodes('&', titleFirstLine.replace("{SERVER}", plugin.getServerName())), secondLine);
             title.setFadeInTime(1);
             title.setStayTime(3);
             title.setFadeOutTime(1);
@@ -183,13 +213,18 @@ public final class PlayerManager extends FlexModule<FlexCore> implements Listene
 
         Bukkit.getPluginManager().callEvent(newJoinEvent);
 
+        for (Player op : Bukkit.getOnlinePlayers()) {
+            MessageReference message = newJoinEvent.getJoinMessage(op.getUniqueId());
+
+            if (message != null) {
+                message.sendTo(op);
+            }
+        }
+
         Map<String, MessageReference> loginMessages = newJoinEvent.getLoginMessages();
-        LogHelper.debug(FlexCore.class, "Identifiers: " + loginMessages.keySet().toString());
         List<String> sent = new ArrayList<>();
 
         for (String identifier : loginMessageOrder) {
-            LogHelper.debug(FlexCore.class, "Identifier: " + identifier);
-
             MessageReference message = loginMessages.get(identifier);
             if (message != null) {
                 message.sendTo(p);
@@ -204,42 +239,49 @@ public final class PlayerManager extends FlexModule<FlexCore> implements Listene
                 }
             }
         }
+    }
 
-        for (Player op : Bukkit.getOnlinePlayers()) {
-            MessageReference message = newJoinEvent.getJoinMessage(op.getUniqueId());
-
-            if (message != null) {
-                message.sendTo(op);
-            }
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onPlayerJoinLowest(PlayerJoinEvent e) {
+        if (enableJoinMessageChange) {
+            e.setJoinMessage(null);
         }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
-    public void onPlayerJoin(PlayerJoinEvent e) {
-        e.setJoinMessage(null);
-
+    public void onPlayerJoinHighest(PlayerJoinEvent e) {
         Player p = e.getPlayer();
         UUID uuid = p.getUniqueId();
 
         if (!handledPlayers.contains(uuid)) {
-            //TODO: Make this message configurable.
-            p.kickPlayer(
-                    "The server is not loaded yet.\n" +
-                    "Please try again."
-            );
+            p.kickPlayer(unloadedMessage);
             return;
         }
 
-        handleOfficialLogin(p, cachedCycles.remove(uuid), getPlayerData(uuid));
+        if (enableJoinMessageChange && !enableJoinMessageCompatibility) {
+            e.setJoinMessage(null);
+        }
+
+        handleOfficialLogin(p, cachedCycles.remove(uuid), getPlayerData(uuid), e.getJoinMessage());
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
-    public void onPlayerQuit(PlayerQuitEvent e) {
-        e.setQuitMessage(null);
-        handlePlayerLeave(e.getPlayer(), null);
+    public void onPlayerQuitLowest(PlayerQuitEvent e) {
+        if (enableQuitMessageChange) {
+            e.setQuitMessage(null);
+        }
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onPlayerQuitHighest(PlayerQuitEvent e) {
+        if (enableQuitMessageChange && !enableQuitMessageCompatibility) {
+            e.setQuitMessage(null);
+        }
+
+        handlePlayerLeave(e.getPlayer(), e.getQuitMessage());
+    }
+
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
     public void onPlayerKick(PlayerKickEvent e) {
         handlePlayerLeave(e.getPlayer(), e.getLeaveMessage());
     }

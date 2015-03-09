@@ -1,0 +1,158 @@
+Items:
+  LOG:0:
+    - oaklog
+  LOG:1:
+    - sprucelog
+    - pinelog
+  LOG:2:
+    - birchlog
+  LOG:3:
+    - junglelog
+  LOG_2:0:
+    - acacialog
+  LOG_2:1:
+    - darkoaklog
+  STAINED_CLAY:0:
+    - whiteclay
+  STAINED_CLAY:1:
+    - orangeclay
+  STAINED_CLAY:2:
+    - magentaclay
+    - lpurpleclay
+    - lightpurpleclay
+  STAINED_CLAY:3:
+    - lblueclay
+    - lightblueclay
+  STAINED_CLAY:4:
+    - yellowclay
+  STAINED_CLAY:5:
+    - limeclay
+  STAINED_CLAY:6:
+    - pinkclay
+  STAINED_CLAY:7:
+    - grayclay
+    - greyclay
+  STAINED_CLAY:8:
+    - lgrayclay
+    - lightgrayclay
+    - lgreyclay
+    - lightgreyclay
+  STAINED_CLAY:9:
+    - cyanclay
+  STAINED_CLAY:10:
+    - purpleclay
+  STAINED_CLAY:11:
+    - blueclay
+  STAINED_CLAY:12:
+    - brownclay
+  STAINED_CLAY:13:
+    - greenclay
+  STAINED_CLAY:14:
+    - redclay
+  STAINED_CLAY:15:
+    - blackclay
+  STEP:0:
+    - stoneslab
+    - stonestep
+  STEP:1:
+    - sandstoneslab
+    - sandstonestep
+  STEP:3:
+    - cobblestoneslab
+    - cobblestonestep
+    - cobbleslab
+    - cobblestep
+  STEP:4:
+    - brickslab
+    - brickstep
+  STEP:5:
+    - stonebrickslab
+    - stonebrickstep
+  STEP:6:
+    - netherbrickslab
+    - netherbrickstep
+  STEP:7:
+    - quartzslab
+    - quartzstep
+  STONE_SLAB2:0:
+    - redsandstoneslab
+    - redsandstonestep
+  WOOD:0:
+    - oakplank
+    - oakplanks
+  WOOD:1:
+    - spruceplank
+    - spruceplanks
+    - pineplank
+    - pineplanks
+  WOOD:2:
+    - birchplank
+    - birchplanks
+  WOOD:3:
+    - jungleplank
+    - jungleplanks
+  WOOD:4:
+    - acaciaplank
+    - acaciaplanks
+  WOOD:5:
+    - darkoakplank
+    - darkoakplanks
+  WOOD_STEP:0:
+    - oakslab
+    - oakstep
+  WOOD_STEP:1:
+    - spruceslab
+    - sprucestep
+    - pineslab
+    - pinestep
+  WOOD_STEP:2:
+    - birchslab
+    - birchstep
+  WOOD_STEP:3:
+    - jungleslab
+    - junglestep
+  WOOD_STEP:4:
+    - acaciaslab
+    - acaciastep
+  WOOD_STEP:5:
+    - darkoakslab
+    - darkoakstep
+  WOOL:0:
+    - whitewool
+  WOOL:1:
+    - orangewool
+  WOOL:2:
+    - magentawool
+    - lpurplewool
+    - lightpurplewool
+  WOOL:3:
+    - lbluewool
+    - lightbluewool
+  WOOL:4:
+    - yellowwool
+  WOOL:5:
+    - limewool
+  WOOL:6:
+    - pinkwool
+  WOOL:7:
+    - graywool
+    - greywool
+  WOOL:8:
+    - lgraywool
+    - lightgraywool
+    - lgreywool
+    - lightgreywool
+  WOOL:9:
+    - cyanwool
+  WOOL:10:
+    - purplewool
+  WOOL:11:
+    - bluewool
+  WOOL:12:
+    - brownwool
+  WOOL:13:
+    - greenwool
+  WOOL:14:
+    - redwool
+  WOOL:15:
+    - blackwool

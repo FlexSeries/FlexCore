@@ -1,5 +1,4 @@
-Debug: false
-Enable Character Fix: false
-Server Name: 'Minecraft Server'
-Autosave Interval: 10
-Disabled Modules: []
+debug: false
+server name: 'Minecraft Server'
+autosave interval: 10
+disabled modules: []

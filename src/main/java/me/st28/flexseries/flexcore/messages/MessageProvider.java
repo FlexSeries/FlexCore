@@ -2,6 +2,7 @@ package me.st28.flexseries.flexcore.messages;
 
 import me.st28.flexseries.flexcore.storage.flatfile.YamlFileManager;
 import me.st28.flexseries.flexcore.utils.ArrayUtils;
+import org.apache.commons.lang.StringEscapeUtils;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -73,9 +74,9 @@ public class MessageProvider {
             String objString = (String) obj;
 
             if (key.equalsIgnoreCase("tag")) {
-                tags.put(section.getCurrentPath(), objString);
+                tags.put(section.getCurrentPath(), StringEscapeUtils.unescapeJava(objString));
             } else {
-                messages.put(section.getCurrentPath() + "." + key, objString);
+                messages.put(section.getCurrentPath() + "." + key, StringEscapeUtils.unescapeJava(objString));
             }
         }
     }

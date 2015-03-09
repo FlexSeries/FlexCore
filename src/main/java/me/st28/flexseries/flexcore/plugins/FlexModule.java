@@ -49,14 +49,26 @@ public abstract class FlexModule<T extends FlexPlugin> {
     protected boolean isDisableable = true;
 
     /**
+     * Whether or not to use a data folder.<br />
+     * If false, the config file will be located in <code>(plugin base dir)\config-(module name).yml</code>
+     */
+    private boolean useModuleFolder;
+
+    /**
+     * The directory for this module's data.
+     */
+    private File dataFolder;
+
+    /**
      * The config file for the module.
      */
     private YamlFileManager configFile;
 
-    public FlexModule(T plugin, String identifier, String description, Class<? extends FlexModule>... dependencies) {
+    public FlexModule(T plugin, String identifier, String description, boolean useModuleFolder, Class<? extends FlexModule>... dependencies) {
         this.plugin = plugin;
         this.identifier = identifier;
         this.description = description;
+        this.useModuleFolder = useModuleFolder;
         Collections.addAll(this.dependencies, dependencies);
     }
 
@@ -108,7 +120,7 @@ public abstract class FlexModule<T extends FlexPlugin> {
             configFile.reload();
             FileConfiguration config = configFile.getConfig();
 
-            config.addDefaults(YamlConfiguration.loadConfiguration(new InputStreamReader(plugin.getResource("modules/" + identifier + ".yml"))));
+            config.addDefaults(YamlConfiguration.loadConfiguration(new InputStreamReader(plugin.getResource("modules/" + identifier + "/config.yml"))));
             config.options().copyDefaults(true);
             configFile.save();
             configFile.reload();
@@ -124,13 +136,33 @@ public abstract class FlexModule<T extends FlexPlugin> {
         }
     }
 
+    public File getDataFolder() {
+        if (!useModuleFolder) {
+            return null;
+        }
+
+        if (!dataFolder.exists()) {
+            dataFolder.mkdirs();
+        }
+        return dataFolder;
+    }
+
     public final FileConfiguration getConfig() {
         return configFile == null ? null : configFile.getConfig();
     }
 
     public final void loadAll() throws Exception {
-        if (plugin.getResource("modules/" + identifier + ".yml") != null) {
-            configFile = new YamlFileManager(plugin.getDataFolder() + File.separator + "modules" + File.separator + identifier + ".yml");
+        if (useModuleFolder) {
+            dataFolder = new File(plugin.getDataFolder() + File.separator + identifier);
+            dataFolder.mkdirs();
+        }
+
+        if (plugin.getResource("modules/" + identifier + "/config.yml") != null) {
+            if (useModuleFolder) {
+                configFile = new YamlFileManager(dataFolder + File.separator + "config.yml");
+            } else {
+                configFile = new YamlFileManager(plugin.getDataFolder() + File.separator + "config-" + getIdentifier() + ".yml");
+            }
         } else {
             configFile = null;
         }

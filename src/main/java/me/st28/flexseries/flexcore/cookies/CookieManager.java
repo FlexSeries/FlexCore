@@ -33,12 +33,12 @@ public final class CookieManager extends FlexModule<FlexCore> implements Listene
     private final Map<UUID, Map<String, String>> loadedCookies = new HashMap<>();
 
     public CookieManager(FlexCore plugin) {
-        super(plugin, "cookies", "Manages small per-user preferences", PlayerManager.class);
+        super(plugin, "cookies", "Manages small per-user preferences", true, PlayerManager.class);
     }
 
     @Override
     protected final void handleLoad() throws Exception {
-        cookieDir = new File(plugin.getDataFolder() + File.separator + "cookies");
+        cookieDir = new File(getDataFolder() + File.separator + "data");
     }
 
     @Override

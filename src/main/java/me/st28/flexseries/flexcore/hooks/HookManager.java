@@ -18,7 +18,7 @@ public final class HookManager extends FlexModule<FlexCore> {
     private final Map<Class<? extends Hook>, HookStatus> hookStatuses = new HashMap<>();
 
     public HookManager(FlexCore plugin) {
-        super(plugin, "hooks", "Manages external plugin hooks");
+        super(plugin, "hooks", "Manages external plugin hooks", false);
     }
 
     @Override

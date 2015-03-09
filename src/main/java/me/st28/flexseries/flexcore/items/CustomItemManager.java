@@ -1,10 +1,22 @@
 package me.st28.flexseries.flexcore.items;
 
 import me.st28.flexseries.flexcore.FlexCore;
+import me.st28.flexseries.flexcore.items.events.*;
 import me.st28.flexseries.flexcore.plugins.FlexModule;
 import me.st28.flexseries.flexcore.storage.flatfile.YamlFileManager;
+import org.apache.commons.lang.Validate;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.Item;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityCombustEvent;
+import org.bukkit.event.entity.ItemDespawnEvent;
+import org.bukkit.event.player.PlayerItemHeldEvent;
 import org.bukkit.inventory.ItemStack;
 
 import java.io.File;
@@ -13,89 +25,145 @@ import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public final class CustomItemManager extends FlexModule<FlexCore> {
+/**
+ * Tracks and handles custom items.<br />
+ * Custom items are tracked via a unique identifier in the display name of the item.
+ *
+ * <h1>Terms</h1>
+ * <ul>
+ *     <li><b>IID</b> - Item ID.  The unique identifier for a custom item.</li>
+ * </ul>
+ */
+public final class CustomItemManager extends FlexModule<FlexCore> implements Listener {
 
     /**
-     * Valid characters that can be used in the name of an item (color codes).
+     * Valid characters that can be used for an IID. (color codes)
      */
-    private final static char[] VALID_CHARACTERS = "abcdef0123456789".toCharArray();
+    private final static char[] IID_CHARACTERS = "abcdef0123456789".toCharArray();
 
     /**
-     * The pattern to capture an item ID from the display name of an item.
+     * The pattern to capture an IID from the display name of a custom item.
      */
     private final static Pattern IID_PATTERN = Pattern.compile("^((?:&[a-f0-9]){5,10})&r.+");
 
     /**
-     * The length of an <b>I</b>tem <b>ID</b>.
+     * The pattern to capture an IID from the save file for a custom item.
+     */
+    private final static Pattern IID_FILE_PATTERN = Pattern.compile("^([a-f0-9]{10}).yml");
+
+    /**
+     * The length to use for an IID.
      */
     private final static int IID_LENGTH = 10;
 
     /**
-     * Registered custom item types.
+     * Registered custom item types.<br />
+     * <b>Structure:</b> <code>IID, CustomItemType</code>
      */
     private final Map<String, CustomItemType> itemTypes = new HashMap<>();
 
     /**
-     * Stores the single IDs used for CustomItemTypes with single instances.
+     * Stores the IIDs that are used for singleton CustomItemTypes.
      */
     private YamlFileManager singletonTypeIdFile;
-    private final Map<String, String> singletonTypeIds = new HashMap<>();
 
-    private YamlFileManager activeItemFile;
+    /**
+     * <b>Structure:</b> <code>type identifier, IID</code>
+     */
+    private final Map<String, String> singletonTypeIIDs = new HashMap<>();
+
+    /**
+     * The storage location for custom item data.
+     */
+    private File customItemDir;
+
+    /**
+     * Custom items that are awaiting the corresponding {@link me.st28.flexseries.flexcore.items.CustomItemType} to be registered.
+     */
+    private final Map<String, ConfigurationSection> pendingActiveItems = new HashMap<>();
+
+    /**
+     * Loaded custom items.<br />
+     * <b>Structure:</b> <code>IID, CustomItem</code>
+     */
     private final Map<String, CustomItem> activeItems = new HashMap<>();
-    private final Map<String, String> pendingActiveItems = new HashMap<>();
 
     public CustomItemManager(FlexCore plugin) {
-        super(plugin, "custom_items", "Tracks and handles custom items");
+        super(plugin, "custom_items", "Tracks and handles custom items", true);
     }
 
     @Override
     public void handleLoad() throws Exception {
-        File customItemDir = new File(plugin.getDataFolder() + File.separator + "custom_items");
+        customItemDir = new File(getDataFolder() + File.separator + "items");
         customItemDir.mkdir();
 
-        singletonTypeIdFile = new YamlFileManager(customItemDir + File.separator + "singletonTypeIds.yml");
+        // Load the singleton IIDs.
+        singletonTypeIdFile = new YamlFileManager(getDataFolder() + File.separator + "singletonTypeIIDs.yml");
         FileConfiguration singletonConfig = singletonTypeIdFile.getConfig();
         for (String identifier : singletonConfig.getKeys(false)) {
-            singletonTypeIds.put(identifier, singletonConfig.getString(identifier));
+            singletonTypeIIDs.put(identifier, singletonConfig.getString(identifier));
         }
 
-        activeItemFile = new YamlFileManager(customItemDir + File.separator + "activeItems.yml");
-        FileConfiguration config = activeItemFile.getConfig();
-        for (String id : config.getKeys(false)) {
-            pendingActiveItems.put(id, config.getString(id));
+        // Load the custom items.
+        for (File file : customItemDir.listFiles()) {
+            final Matcher matcher = IID_FILE_PATTERN.matcher(file.getName());
+            if (matcher.matches()) {
+                pendingActiveItems.put(matcher.group(1), new YamlFileManager(file).getConfig());
+            }
         }
     }
 
     @Override
+    protected void handleReload() {
+        customItemDir.mkdir();
+    }
+
+    @Override
     public void handleSave(boolean async) {
-        FileConfiguration config = activeItemFile.getConfig();
+        // Save the singleton item IIDs.
+        FileConfiguration singletonConfig = singletonTypeIdFile.getConfig();
+        for (Entry<String, String> entry : singletonTypeIIDs.entrySet()) {
+            singletonConfig.set(entry.getKey(), entry.getValue());
+        }
+        singletonTypeIdFile.save();
+
+        // Save custom item data.
         for (Entry<String, CustomItem> entry : activeItems.entrySet()) {
-            config.set(entry.getKey(), entry.getValue().type.getIdentifier());
-        }
+            final CustomItem entryItem = entry.getValue();
+            final YamlFileManager entryFile = new YamlFileManager(customItemDir + File.separator + entry.getKey() + ".yml");
+            final FileConfiguration entryConfig = entryFile.getConfig();
 
-        for (Entry<String, String> entry : pendingActiveItems.entrySet()) {
-            config.set(entry.getKey(), entry.getValue());
-        }
+            entryConfig.set("type", entryItem.type.getIdentifier());
 
-        activeItemFile.save();
+            ConfigurationSection dataSection = entryConfig.getConfigurationSection("data");
+            if (dataSection == null) {
+                dataSection = entryConfig.createSection("data");
+            }
+
+            for (Entry<String, Object> dataEntry : entryItem.persistentCustomData.entrySet()) {
+                dataSection.set(dataEntry.getKey(), dataEntry.getValue());
+            }
+
+            entryFile.save();
+        }
     }
 
     /**
-     * Registers a custom item type with the manager.
+     * Registers a {@link me.st28.flexseries.flexcore.items.CustomItemType} with the manager.
      *
-     * @param type The type to register.
      * @return True if successfully registered.<br />
      *         False if an item type with the same identifier is already registered.
      */
     public boolean registerItemType(CustomItemType type) {
+        Validate.notNull(type, "Type cannot be null.");
+
         String identifier = type.getIdentifier();
         if (itemTypes.containsKey(identifier)) {
             return false;
         }
 
-        if (!type.allowsMultipleInstances && !singletonTypeIds.containsKey(type.getIdentifier())) {
-            singletonTypeIds.put(type.getIdentifier(), generateId());
+        if (type.isSingleton && !singletonTypeIIDs.containsKey(type.getIdentifier())) {
+            singletonTypeIIDs.put(type.getIdentifier(), generateId());
         }
 
         itemTypes.put(identifier, type);
@@ -104,19 +172,28 @@ public final class CustomItemManager extends FlexModule<FlexCore> {
     }
 
     private void loadPendingItems(CustomItemType type) {
-        String identifier = type.getIdentifier();
+        final String identifier = type.getIdentifier();
 
-        List<String> loadedIds = new ArrayList<>();
-        for (Entry<String, String> entry : pendingActiveItems.entrySet()) {
-            String curIdentifier = entry.getValue();
+        final List<String> loadedIIDs = new ArrayList<>();
+        for (Entry<String, ConfigurationSection> entry : pendingActiveItems.entrySet()) {
+            final ConfigurationSection config = entry.getValue();
+            final String curIID = entry.getKey();
+            final String curIdentifier = config.getString("type", null);
 
             if (curIdentifier.equals(identifier)) {
-                activeItems.put(entry.getKey(), new CustomItem(entry.getKey(), type));
-                loadedIds.add(entry.getKey());
+                CustomItem customItem = new CustomItem(curIID, type);
+
+                final ConfigurationSection dataSec = config.getConfigurationSection("data");
+                if (dataSec != null) {
+                    customItem.persistentCustomData.putAll(dataSec.getValues(false));
+                }
+
+                activeItems.put(curIdentifier, customItem);
+                loadedIIDs.add(curIID);
             }
         }
 
-        for (String id : loadedIds) {
+        for (String id : loadedIIDs) {
             pendingActiveItems.remove(id);
         }
     }
@@ -131,7 +208,7 @@ public final class CustomItemManager extends FlexModule<FlexCore> {
         while (id == null || activeItems.containsKey(id) || pendingActiveItems.containsKey(id)) {
             char[] text = new char[length];
             for (int i = 0; i < length; i++) {
-                text[i] = VALID_CHARACTERS[random.nextInt(VALID_CHARACTERS.length)];
+                text[i] = IID_CHARACTERS[random.nextInt(IID_CHARACTERS.length)];
             }
             id = String.valueOf(text);
         }
@@ -146,6 +223,7 @@ public final class CustomItemManager extends FlexModule<FlexCore> {
      *         Null if the item is not a custom item.
      */
     public String readId(ItemStack item) {
+        Validate.notNull(item, "Item cannot be null.");
         if (!item.hasItemMeta() || !item.getItemMeta().hasDisplayName()) return null;
 
         String id = null;
@@ -164,6 +242,8 @@ public final class CustomItemManager extends FlexModule<FlexCore> {
      *         Null if the item does not represent a custom item.
      */
     public CustomItem getCustomItem(ItemStack item) {
+        Validate.notNull(item, "Item cannot be null.");
+
         String id = readId(item);
         return id == null ? null : activeItems.get(id);
     }
@@ -172,20 +252,112 @@ public final class CustomItemManager extends FlexModule<FlexCore> {
      * Creates a new instance of an item type.
      *
      * @param type The item type to create.
-     * @param extraData Extra data to include in the item.
+     * @param persistentData Custom data for the item that should be saved and loaded to the disk.
+     * @param temporaryData Custom data for the item that is only temporary.
      * @return The newly created custom item.
      */
-    public CustomItem createCustomItem(CustomItemType type, Map<String, Object> extraData) {
-        String id = !type.allowsMultipleInstances ? singletonTypeIds.get(type.getIdentifier()) : generateId();
-        CustomItem item = new CustomItem(id, type);
-        if (extraData != null && !extraData.isEmpty()) {
-            item.customData.putAll(extraData);
+    public CustomItem createCustomItem(CustomItemType type, Map<String, Object> persistentData, Map<String, Object> temporaryData) {
+        Validate.notNull(type, "Type cannot be null.");
+
+        if (type.isSingleton) {
+            return activeItems.get(singletonTypeIIDs.get(type.getIdentifier()));
         }
 
-        if (!activeItems.containsKey(id)) {
-            activeItems.put(id, item);
+        final String id = generateId();
+        final CustomItem item = new CustomItem(id, type);
+
+        if (persistentData != null) {
+            item.persistentCustomData.putAll(persistentData);
         }
+
+        if (temporaryData != null) {
+            item.temporaryCustomData.putAll(temporaryData);
+        }
+
+        activeItems.put(id, item);
         return item;
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onPlayerItemHeld(PlayerItemHeldEvent e) {
+        if (e.isCancelled()) return;
+
+        final Player p = e.getPlayer();
+
+        final ItemStack prevItem = p.getInventory().getItem(e.getPreviousSlot());
+
+        if (prevItem != null) {
+            CustomItem prevCustomItem = getCustomItem(prevItem);
+            if (prevCustomItem != null) {
+                CustomItemUnholdEvent newEvent = new CustomItemUnholdEvent(p, prevCustomItem);
+                Bukkit.getPluginManager().callEvent(newEvent);
+
+                if (newEvent.isCancelled()) {
+                    e.setCancelled(true);
+                    return;
+                }
+            }
+        }
+
+        final ItemStack newItem = p.getInventory().getItem(e.getNewSlot());
+
+        if (newItem != null) {
+            CustomItem newCustomItem = getCustomItem(newItem);
+            if (newCustomItem != null) {
+                CustomItemHoldEvent newEvent = new CustomItemHoldEvent(p, newCustomItem);
+                Bukkit.getPluginManager().callEvent(newEvent);
+
+                if (newEvent.isCancelled()) {
+                    e.setCancelled(true);
+                }
+            }
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onItemDespawn(final ItemDespawnEvent e) {
+        if (e.isCancelled()) return;
+
+        CustomItem customItem = getCustomItem(e.getEntity().getItemStack());
+        if (customItem != null) {
+            final CustomItemDestroyEvent destroyEvent = new CustomItemDestroyEvent(customItem);
+            Bukkit.getPluginManager().callEvent(destroyEvent);
+
+            if (destroyEvent.isCancelled()) {
+                e.setCancelled(true);
+                return;
+            }
+
+            final CustomItemDespawnEvent despawnEvent = new CustomItemDespawnEvent(customItem);
+            Bukkit.getPluginManager().callEvent(despawnEvent);
+
+            if (despawnEvent.isCancelled()) {
+                e.setCancelled(true);
+            }
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onEntityCombust(final EntityCombustEvent e) {
+        if (e.isCancelled() || !(e.getEntity() instanceof Item)) return;
+
+        CustomItem customItem = getCustomItem(((Item) e.getEntity()).getItemStack());
+        if (customItem != null) {
+            final CustomItemDestroyEvent destroyEvent = new CustomItemDestroyEvent(customItem);
+            Bukkit.getPluginManager().callEvent(destroyEvent);
+
+            if (destroyEvent.isCancelled()) {
+                e.setCancelled(true);
+                return;
+            }
+
+            final CustomItemCombustEvent combustEvent = new CustomItemCombustEvent(customItem);
+            Bukkit.getPluginManager().callEvent(combustEvent);
+
+            if (combustEvent.isCancelled()) {
+                e.setCancelled(true);
+            }
+        }
     }
 
 }

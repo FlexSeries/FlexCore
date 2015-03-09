@@ -85,13 +85,15 @@ public abstract class FlexPlugin extends JavaPlugin {
 
         // Determine if the plugin has a configuration file or not, and save it if there is one.
         if (getResource("config.yml") != null) {
-            hasConfig = true;
             saveDefaultConfig();
             getConfig().options().copyDefaults(true);
             saveConfig();
+
+            hasConfig = true;
+            reloadConfig();
         }
 
-        List<String> disabledDependencies = hasConfig ? getConfig().getStringList("Disabled Modules") : null;
+        List<String> disabledDependencies = hasConfig ? getConfig().getStringList("disabled modules") : null;
 
         // Load modules
         //TODO: Detect circular dependencies
@@ -133,7 +135,7 @@ public abstract class FlexPlugin extends JavaPlugin {
         LogHelper.debug(this, loadOrderDebug.toString());
         // !!DEBUG!! //
 
-        _moduleLoop:
+        _moduleLoop: // EWWWWWWWWWW. Yeah, I know.
         for (Class<? extends FlexModule> clazz : loadOrder) {
             FlexModule<?> module = modules.get(clazz);
             LogHelper.info(this, "Loading module: " + module.getIdentifier());
@@ -168,6 +170,10 @@ public abstract class FlexPlugin extends JavaPlugin {
                 LogHelper.severe(this, "An error occurred while loading module '" + module.getIdentifier() + "': " + ex.getMessage());
                 ex.printStackTrace();
             }
+
+            if (moduleStatuses.get(clazz) != ModuleStatus.ENABLED) {
+                modules.remove(clazz);
+            }
         }
 
         if (getResource("messages.yml") != null) {
@@ -176,7 +182,7 @@ public abstract class FlexPlugin extends JavaPlugin {
 
         try {
             handlePluginEnable();
-            reloadAll();
+            handlePluginReload();
         } catch (Exception ex) {
             LogHelper.severe(this, "An error occurred while enabling: " + ex.getMessage());
             ex.printStackTrace();
@@ -231,11 +237,11 @@ public abstract class FlexPlugin extends JavaPlugin {
         Bukkit.getPluginManager().callEvent(new PluginReloadedEvent(this.getClass()));
     }
 
+    @Override
     public final void reloadConfig() {
+        super.reloadConfig();
         if (hasConfig) {
-            super.reloadConfig();
-
-            int autosaveInterval = getConfig().getInt("Autosave Interval", 0);
+            int autosaveInterval = getConfig().getInt("autosave interval", 0);
             if (autosaveInterval == 0) {
                 LogHelper.warning(this, "Autosaving disabled. It is recommended to enable it to help prevent data loss!");
             } else {

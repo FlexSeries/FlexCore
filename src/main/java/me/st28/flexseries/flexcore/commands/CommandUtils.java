@@ -5,6 +5,7 @@ import me.st28.flexseries.flexcore.commands.exceptions.CommandInterruptedExcepti
 import me.st28.flexseries.flexcore.messages.MessageReference;
 import me.st28.flexseries.flexcore.messages.ReplacementMap;
 import me.st28.flexseries.flexcore.permissions.PermissionNode;
+import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -120,6 +121,27 @@ public final class CommandUtils {
         } else {
             throw new CommandInterruptedException(MessageReference.create(FlexCore.class, "general.errors.must_be_player"));
         }
+    }
+
+    public static Player getTargetPlayer(CommandSender sender, String name, boolean isNotSender) {
+        List<Player> matched = Bukkit.matchPlayer(name);
+
+        if (matched.isEmpty()) {
+            throw new CommandInterruptedException(MessageReference.create(FlexCore.class, "general.errors.players_matched_none", new ReplacementMap("{NAME}", name).getMap()));
+        }
+
+        Player player;
+        if (matched.size() == 1) {
+            player = matched.get(0);
+        } else {
+            throw new CommandInterruptedException(MessageReference.create(FlexCore.class, "general.errors.players_matched_multiple", new ReplacementMap("{NAME}", name).getMap()));
+        }
+
+        if (isNotSender && sender instanceof Player && getSenderPlayer(sender) == player) {
+            throw new CommandInterruptedException(MessageReference.create(FlexCore.class, "general.errors.players_cannot_be_self"));
+        }
+
+        return player;
     }
 
 }

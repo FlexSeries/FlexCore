@@ -13,12 +13,12 @@ import java.util.Map.Entry;
 
 public final class HelpManager extends FlexModule<FlexCore> {
 
-    Map<String, HelpTopic> helpTopics = new HashMap<>();
+    final Map<String, HelpTopic> helpTopics = new HashMap<>();
 
     private final String unknownMessage = "" + ChatColor.RED + ChatColor.ITALIC + "Unknown help topic: " + ChatColor.DARK_RED + "{PATH}";
 
     public HelpManager(FlexCore plugin) {
-        super(plugin, "help", "Manages help page generation", ListManager.class);
+        super(plugin, "help", "Manages help page generation", false, ListManager.class);
 
         isDisableable = false;
     }

@@ -18,7 +18,7 @@ public final class MySQLManager extends FlexModule<FlexCore> {
     private boolean dbSpecified;
 
     public MySQLManager(FlexCore plugin) {
-        super(plugin, "storage-mysql", "Manages a MySQL connection pool");
+        super(plugin, "storage-mysql", "Manages a MySQL connection pool", false);
     }
 
     @Override

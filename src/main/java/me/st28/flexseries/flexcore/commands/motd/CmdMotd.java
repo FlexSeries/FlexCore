@@ -19,7 +19,7 @@ public final class CmdMotd extends FlexCommand<FlexCore> {
                     .description("MOTD modification command")
                     .defaultSubcommand("list")
                     .helpPath("FlexCore.Motd")
-                    .helpDescription("Live in-game MOTD changing")
+                    .description("Live in-game MOTD changing")
                     .setDummyCommand()
         );
 
