@@ -1,6 +1,7 @@
 package me.st28.flexseries.flexcore.players;
 
 import me.st28.flexseries.flexcore.FlexCore;
+import me.st28.flexseries.flexcore.events.PlayerJoinLoadedEvent;
 import me.st28.flexseries.flexcore.logging.LogHelper;
 import me.st28.flexseries.flexcore.plugins.FlexModule;
 import me.st28.flexseries.flexcore.plugins.FlexPlugin;
@@ -10,8 +11,8 @@ import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerJoinEvent;
 
 import java.io.File;
 import java.util.Collections;
@@ -83,8 +84,8 @@ public final class PlayerUUIDTracker extends FlexModule<FlexCore> implements Lis
         uuidFile.save();
     }
 
-    @EventHandler
-    public void onPlayerJoin(PlayerJoinEvent e) {
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onPlayerJoinLoaded(PlayerJoinLoadedEvent e) {
         String curDispName = uuidsToDisplayNames.get(e.getPlayer().getUniqueId());
         if (curDispName != null) {
             e.getPlayer().setDisplayName(curDispName);

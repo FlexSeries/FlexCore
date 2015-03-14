@@ -159,9 +159,15 @@ public final class PlayerLoadCycle {
      * @param playerLoader The loader to start.
      */
     private void startLoader(PlayerLoader playerLoader) {
-        if (playerLoader.loadPlayer(playerUuid, playerName, this)) {
-            startedLoaders.add(playerLoader.getClass().getCanonicalName());
-            LogHelper.debug(FlexCore.class, playerLoader.getClass().getCanonicalName() + " BEGAN cycle.");
+        try {
+            if (playerLoader.loadPlayer(playerUuid, playerName, this)) {
+                startedLoaders.add(playerLoader.getClass().getCanonicalName());
+                LogHelper.debug(FlexCore.class, playerLoader.getClass().getCanonicalName() + " BEGAN cycle.");
+            }
+        } catch (Exception ex) {
+            PlayerLoadCycle.failedCycle(this, playerLoader);
+            LogHelper.severe(FlexCore.class, "An exception occurred while loading player '" + playerName + "' (" + playerUuid.toString() + ")");
+            ex.printStackTrace();
         }
     }
 
@@ -204,7 +210,7 @@ public final class PlayerLoadCycle {
                     return;
                 }
 
-                p.kickPlayer("An error occurred while trying to load your data.\nPlease contact an administrator and notify them.");
+                setLoadResult(new LoadResult(false, "An error occurred while trying to load your data.\nPlease contact an administrator and notify them."));
             }
         });
         cancelTask();
