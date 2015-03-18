@@ -1,5 +1,8 @@
 package me.st28.flexseries.flexcore.plugins;
 
+/**
+ * Represents the status of a {@link me.st28.flexseries.flexcore.plugins.FlexPlugin}.
+ */
 public enum PluginStatus {
 
     /**
@@ -13,6 +16,11 @@ public enum PluginStatus {
     ENABLING,
 
     /**
+     * The plugin has loaded
+     */
+    LOADED_ERROR,
+
+    /**
      * The plugin is enabled.
      */
     ENABLED,
@@ -20,6 +28,6 @@ public enum PluginStatus {
     /**
      * The plugin has begun the disabling process.
      */
-    DISABLING,
+    DISABLING
 
 }

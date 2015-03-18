@@ -1,8 +1,6 @@
 package me.st28.flexseries.flexcore.plugins;
 
 import me.st28.flexseries.flexcore.events.PluginReloadedEvent;
-import me.st28.flexseries.flexcore.help.HelpManager;
-import me.st28.flexseries.flexcore.help.HelpTopic;
 import me.st28.flexseries.flexcore.logging.LogHelper;
 import me.st28.flexseries.flexcore.messages.MessageManager;
 import me.st28.flexseries.flexcore.plugins.exceptions.ModuleDisabledException;
@@ -16,17 +14,27 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.*;
 
+/**
+ * Represents a Bukkit plugin that uses FlexCore's plugin framework.
+ */
 public abstract class FlexPlugin extends JavaPlugin {
 
+    /**
+     * References to each FlexPlugin's autosaving runnable (where applicable).
+     */
     private static final Map<Class<? extends FlexPlugin>, BukkitRunnable> AUTOSAVE_RUNNABLES = new HashMap<>();
+
+    /**
+     * An index of each FlexPlugin's registered modules, for easy reference via {@link me.st28.flexseries.flexcore.plugins.FlexPlugin#getRegisteredModule(Class)}.
+     */
     private static final Map<Class<? extends FlexModule>, FlexPlugin> REGISTERED_MODULES = new HashMap<>();
 
     /**
-     * Retrieves a registered module instance.
+     * Retrieves a registered {@link me.st28.flexseries.flexcore.plugins.FlexModule} from any loaded {@link me.st28.flexseries.flexcore.plugins.FlexPlugin}.
      *
      * @param clazz The class of the module.
      * @return The module matching the class.
-     * @throws java.lang.IllegalArgumentException Thrown if the input module isn't registered.
+     * @throws java.lang.IllegalArgumentException Thrown if there is no registered module matching the given class.
      */
     public static <T extends FlexModule> T getRegisteredModule(Class<T> clazz) {
         Validate.notNull(clazz, "Module class cannot be null.");
@@ -43,6 +51,9 @@ public abstract class FlexPlugin extends JavaPlugin {
         return plugin.getModule(clazz);
     }
 
+    /**
+     * The current status of the plugin.
+     */
     private PluginStatus status;
 
     /**
@@ -67,13 +78,22 @@ public abstract class FlexPlugin extends JavaPlugin {
 
     @Override
     public final void onLoad() {
+        // Mark plugin as loading and start loading data.
         status = PluginStatus.LOADING;
 
-        handlePluginLoad();
+        try {
+            handlePluginLoad();
+        } catch (Exception ex) {
+            LogHelper.severe(this, "An error occurred while loading: " + ex.getMessage());
+            LogHelper.severe(this, "The plugin will be disabled to help prevent any damage from occurring.");
+            ex.printStackTrace();
+            Bukkit.getPluginManager().disablePlugin(this);
+        }
     }
 
     @Override
     public final void onEnable() {
+        // Mark plugin as enabling and start enabling registered modules.
         status = PluginStatus.ENABLING;
 
         long loadStartTime = System.currentTimeMillis();
@@ -93,34 +113,14 @@ public abstract class FlexPlugin extends JavaPlugin {
             reloadConfig();
         }
 
-        List<String> disabledDependencies = hasConfig ? getConfig().getStringList("disabled modules") : null;
-
         // Load modules
         //TODO: Detect circular dependencies
+        List<String> disabledDependencies = hasConfig ? getConfig().getStringList("disabled modules") : null;
         List<Class<? extends FlexModule>> loadOrder = new ArrayList<>();
 
         for (FlexModule module : modules.values()) {
             addToLoadOrder(loadOrder, module);
         }
-
-        // Attempted easy way out, doesn't work consistently.
-        /*
-        List<Class<? extends FlexModule>> loadOrder = new ArrayList<>(modules.keySet());
-        Collections.sort(loadOrder, new Comparator<Class<? extends FlexModule>>() {
-            @Override
-            public int compare(Class<? extends FlexModule> o1, Class<? extends FlexModule> o2) {
-                if (o1.equals(o2)) {
-                    return 0;
-                }
-
-                Collection dependencies = modules.get(o1).getDependencies();
-                if (dependencies.isEmpty() || dependencies.contains(o2)) {
-                    return -1;
-                }
-
-                return 1;
-            }
-        });*/
 
         // !!DEBUG!! //
         StringBuilder loadOrderDebug = new StringBuilder("\n--MODULE LOAD ORDER--\n");
@@ -135,24 +135,29 @@ public abstract class FlexPlugin extends JavaPlugin {
         LogHelper.debug(this, loadOrderDebug.toString());
         // !!DEBUG!! //
 
+        // This monstrosity of a loop determines the order in which modules should be loaded and loads them in the appropriate order.
         _moduleLoop: // EWWWWWWWWWW. Yeah, I know.
         for (Class<? extends FlexModule> clazz : loadOrder) {
             FlexModule<?> module = modules.get(clazz);
             LogHelper.info(this, "Loading module: " + module.getIdentifier());
 
+            // Check if the module is disabled via the configuration file.
             if (disabledDependencies != null && disabledDependencies.contains(module.getIdentifier())) {
                 moduleStatuses.put(clazz, ModuleStatus.DISABLED_CONFIG);
                 LogHelper.info(this, "Module '" + module.getIdentifier() + "' disabled via the config.");
                 continue;
             }
 
+            // Locate dependencies to make sure all are present.
             for (Class<? extends FlexModule> dep : module.getDependencies()) {
+                // Checks if the dependency is present on the server.
                 if (!REGISTERED_MODULES.containsKey(dep)) {
                     moduleStatuses.put(clazz, ModuleStatus.DISABLED_DEPENDENCY);
                     LogHelper.severe(this, "Unable to load module '" + module.getIdentifier() + "': dependency '" + dep.getCanonicalName() + "' is not a valid module on the server.");
                     continue _moduleLoop;
                 }
 
+                // Checks if the dependency is enabled.
                 if (REGISTERED_MODULES.get(dep).getModuleStatus(dep) != ModuleStatus.ENABLED) {
                     moduleStatuses.put(clazz, ModuleStatus.DISABLED_DEPENDENCY);
                     LogHelper.severe(this, "Unable to load module '" + module.getIdentifier() + "': dependency '" + dep.getCanonicalName() + "' is disabled.");
@@ -160,6 +165,7 @@ public abstract class FlexPlugin extends JavaPlugin {
                 }
             }
 
+            // Attempts to load the module.
             try {
                 module.loadAll();
 
@@ -176,16 +182,20 @@ public abstract class FlexPlugin extends JavaPlugin {
             }
         }
 
+        // If the plugin has a messages.yml file, a MessageProvider will be created for it.
         if (getResource("messages.yml") != null) {
             MessageManager.registerMessageProvider(this);
         }
 
+        // Attempts to enable the plugin.
         try {
             handlePluginEnable();
             handlePluginReload();
         } catch (Exception ex) {
             LogHelper.severe(this, "An error occurred while enabling: " + ex.getMessage());
+            status = PluginStatus.LOADED_ERROR;
             ex.printStackTrace();
+            return;
         }
 
         status = PluginStatus.ENABLED;
@@ -211,9 +221,19 @@ public abstract class FlexPlugin extends JavaPlugin {
     public final void onDisable() {
         status = PluginStatus.DISABLING;
 
-        saveAll(false);
+        try {
+            saveAll(false);
+        } catch (Exception ex) {
+            LogHelper.warning(this, "An error occurred while saving: " + ex.getMessage());
+            ex.printStackTrace();
+        }
 
-        handlePluginDisable();
+        try {
+            handlePluginDisable();
+        } catch (Exception ex) {
+            LogHelper.warning(this, "An error occurred while disabling: " + ex.getMessage());
+            ex.printStackTrace();
+        }
     }
 
     /**
@@ -356,52 +376,33 @@ public abstract class FlexPlugin extends JavaPlugin {
      *     <li>Registering modules</li>
      * </ul>
      */
-    public void handlePluginLoad() { }
+    public void handlePluginLoad() {}
 
     /**
      * Handles custom enable tasks.
      */
-    public void handlePluginEnable() { }
+    public void handlePluginEnable() {}
 
     /**
      * Handles custom disable tasks.
      */
-    public void handlePluginDisable() { }
+    public void handlePluginDisable() {}
 
     /**
      * Handles custom reload tasks.
      */
-    public void handlePluginReload() { }
+    public void handlePluginReload() {}
 
     /**
      * Handles custom config reload tasks.
      */
-    public void handleConfigReload(FileConfiguration config) { }
+    public void handleConfigReload(FileConfiguration config) {}
 
     /**
      * Handles custom save tasks.
      *
      * @param async If true, should save asynchronously (where applicable).
      */
-    public void handlePluginSave(boolean async) { }
-
-    /**
-     * @return the name of the base {@link me.st28.flexseries.flexcore.help.HelpTopic}.
-     */
-    public String getHelpTopicName() {
-        return getName().replace("AST", "");
-    }
-
-    /**
-     * @return the description of the base {@link me.st28.flexseries.flexcore.help.HelpTopic}.
-     */
-    public String getHelpTopicDescription() {
-        return "Help for " + getName();
-    }
-
-    public final HelpTopic getHelpTopic() {
-        String name = getHelpTopicName();
-        return name == null ? null : FlexPlugin.getRegisteredModule(HelpManager.class).getHelpTopic(name);
-    }
+    public void handlePluginSave(boolean async) {}
 
 }

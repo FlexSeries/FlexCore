@@ -1,7 +1,7 @@
 package me.st28.flexseries.flexcore.plugins;
 
 /**
- * Represents the status of a {@link FlexModule}.
+ * Represents the status of a {@link me.st28.flexseries.flexcore.plugins.FlexModule}.
  */
 public enum ModuleStatus {
 

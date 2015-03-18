@@ -50,7 +50,7 @@ public abstract class FlexModule<T extends FlexPlugin> {
 
     /**
      * Whether or not to use a data folder.<br />
-     * If false, the config file will be located in <code>(plugin base dir)\config-(module name).yml</code>
+     * If false, the config file will be located in <code>(plugin base dir)\config-(module identifier).yml</code>
      */
     private boolean useModuleFolder;
 
@@ -72,7 +72,10 @@ public abstract class FlexModule<T extends FlexPlugin> {
         Collections.addAll(this.dependencies, dependencies);
     }
 
-    public T getPlugin() {
+    /**
+     * @return the {@link me.st28.flexseries.flexcore.plugins.FlexPlugin} that this module is registered under.
+     */
+    public final T getPlugin() {
         return plugin;
     }
 
@@ -136,9 +139,13 @@ public abstract class FlexModule<T extends FlexPlugin> {
         }
     }
 
-    public File getDataFolder() {
+    /**
+     * @return the data folder for the module.<br />
+     *         If {@link #useModuleFolder} is <code>false</code>, then this will return the owning plugin's base data folder.
+     */
+    public final File getDataFolder() {
         if (!useModuleFolder) {
-            return null;
+            return plugin.getDataFolder();
         }
 
         if (!dataFolder.exists()) {
@@ -147,11 +154,18 @@ public abstract class FlexModule<T extends FlexPlugin> {
         return dataFolder;
     }
 
+    /**
+     * @return the configuration file for this module.<br />
+     *         Null if there is no configuration file for this module.
+     */
     public final FileConfiguration getConfig() {
         return configFile == null ? null : configFile.getConfig();
     }
 
-    public final void loadAll() throws Exception {
+    /**
+     * Loads the module.
+     */
+    public final void loadAll() {
         if (useModuleFolder) {
             dataFolder = new File(plugin.getDataFolder() + File.separator + identifier);
             dataFolder.mkdirs();
@@ -181,24 +195,12 @@ public abstract class FlexModule<T extends FlexPlugin> {
     }
 
     /**
-     * Handles module custom load tasks. This will only be called when enabling the module.
-     *
-     * @throws Exception Any exceptions that may be thrown while loading.
-     */
-    protected void handleLoad() throws Exception { }
-
-    /**
      * Reloads all of the module.
      */
     public final void reloadAll() {
         reloadConfig();
         handleReload();
     }
-
-    /**
-     * Handles module custom reload tasks.
-     */
-    protected void handleReload() { }
 
     /**
      * Saves all of the module data.
@@ -209,13 +211,6 @@ public abstract class FlexModule<T extends FlexPlugin> {
     }
 
     /**
-     * Handles module custom save tasks.
-     *
-     * @param async If true, should save asynchronously (if applicable).
-     */
-    protected void handleSave(boolean async) { }
-
-    /**
      * Disables the module.
      */
     public final void disable() {
@@ -224,8 +219,25 @@ public abstract class FlexModule<T extends FlexPlugin> {
     }
 
     /**
+     * Handles module custom load tasks. This will only be called when enabling the module.
+     */
+    protected void handleLoad() {}
+
+    /**
+     * Handles module custom reload tasks.
+     */
+    protected void handleReload() {}
+
+    /**
+     * Handles module custom save tasks.
+     *
+     * @param async If true, should save asynchronously (if applicable).
+     */
+    protected void handleSave(boolean async) {}
+
+    /**
      * Handles module custom disable tasks.
      */
-    protected void handleDisable() { }
+    protected void handleDisable() {}
 
 }
