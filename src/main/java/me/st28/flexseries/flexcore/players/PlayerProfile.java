@@ -1,5 +1,6 @@
 package me.st28.flexseries.flexcore.players;
 
+import me.st28.flexseries.flexcore.players.uuid_tracker.PlayerUuidTracker;
 import me.st28.flexseries.flexcore.plugins.FlexPlugin;
 import org.bukkit.ChatColor;
 
@@ -17,7 +18,7 @@ public final class PlayerProfile implements Comparable<PlayerProfile> {
     public PlayerProfile(UUID uuid) {
         this.uuid = uuid;
 
-        PlayerUUIDTracker uuidTracker = FlexPlugin.getRegisteredModule(PlayerUUIDTracker.class);
+        PlayerUuidTracker uuidTracker = FlexPlugin.getRegisteredModule(PlayerUuidTracker.class);
         name = uuidTracker.getName(uuid);
         displayName = uuidTracker.getDisplayName(uuid);
     }

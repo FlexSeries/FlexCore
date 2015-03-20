@@ -11,6 +11,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
+/**
+ * Manages a MySQL connection pool with the BoneCP library.
+ */
 public final class MySQLManager extends FlexModule<FlexCore> {
 
     private BoneCP pool;
@@ -22,7 +25,7 @@ public final class MySQLManager extends FlexModule<FlexCore> {
     }
 
     @Override
-    public void handleLoad() throws Exception {
+    public final void handleLoad() {
         LogHelper.info(this, "Setting up database.");
 
         ConfigurationSection dbConf = getConfig().getConfigurationSection("Database");
@@ -53,7 +56,7 @@ public final class MySQLManager extends FlexModule<FlexCore> {
             pool = new BoneCP(cpConfig);
         } catch (Exception ex) {
             LogHelper.severe(FlexCore.class, "An error occurred while trying to create the BoneCP connection pool: " + ex.getMessage());
-            throw ex;
+            throw new RuntimeException(ex);
         }
     }
 

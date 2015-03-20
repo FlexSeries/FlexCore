@@ -1,0 +1,4 @@
+storage:
+  type: 'YAML' # YAML, MYSQL
+  database: 'flexseries' # Only for MySQL
+  prefix: 'flex_' # Only for MySQL
