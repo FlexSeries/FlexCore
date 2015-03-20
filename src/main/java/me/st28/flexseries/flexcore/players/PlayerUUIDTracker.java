@@ -7,7 +7,6 @@ import me.st28.flexseries.flexcore.plugins.FlexModule;
 import me.st28.flexseries.flexcore.plugins.FlexPlugin;
 import me.st28.flexseries.flexcore.storage.flatfile.YamlFileManager;
 import org.apache.commons.lang.Validate;
-import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -22,7 +21,7 @@ import java.util.Map.Entry;
 import java.util.UUID;
 
 /**
- * Tracks the name and display name associated with the UUID of each player that has joined the server.
+ * Tracks the name associated with the UUID of each player that has joined the server.
  */
 public final class PlayerUUIDTracker extends FlexModule<FlexCore> implements Listener {
 
@@ -30,15 +29,13 @@ public final class PlayerUUIDTracker extends FlexModule<FlexCore> implements Lis
 
     private final Map<UUID, String> uuidsToNames = new HashMap<>();
     private final Map<String, UUID> namesToUuids = new HashMap<>();
-    private final Map<UUID, String> uuidsToDisplayNames = new HashMap<>();
-    private final Map<String, UUID> displayNamesToUuids = new HashMap<>();
 
     public PlayerUUIDTracker(FlexCore plugin) {
-        super(plugin, "uuid_tracker", "Tracks the UUIDs, names, and display names of joined players", false, PlayerManager.class);
+        super(plugin, "uuid_tracker", "Name to UUID and vice versa indexes for players that join the server", false, PlayerManager.class);
     }
 
     @Override
-    public void handleLoad() throws Exception {
+    public void handleLoad() {
         uuidFile = new YamlFileManager(FlexPlugin.getRegisteredModule(PlayerManager.class).getDataFolder() + File.separator + "uuidIndex.yml");
 
         FileConfiguration config = uuidFile.getConfig();
@@ -57,45 +54,28 @@ public final class PlayerUUIDTracker extends FlexModule<FlexCore> implements Lis
                 namesToUuids.put(name.toLowerCase(), uuid);
             }
 
-            String displayName = config.getString(rawUuid + ".displayName");
-            if (displayName != null) {
-                uuidsToDisplayNames.put(uuid, ChatColor.translateAlternateColorCodes('&', displayName));
-                namesToUuids.put(getFriendlyDisplayName(ChatColor.translateAlternateColorCodes('&', displayName)), uuid);
-            }
-
-            if (displayName == null) {
-                LogHelper.debug(FlexCore.class, "Loaded UUID/name: " + uuid.toString() + "/" + name);
-            } else {
-                LogHelper.debug(FlexCore.class, "Loaded UUID/name/display name: " + uuid.toString() + " / " + name + " / " + displayName);
-            }
+            LogHelper.debug(FlexCore.class, "Loaded UUID/name: " + uuid.toString() + "/" + name);
         }
     }
 
     @Override
     public void handleSave(boolean async) {
         FileConfiguration config = uuidFile.getConfig();
+
         for (Entry<UUID, String> entry : uuidsToNames.entrySet()) {
             config.set(entry.getKey().toString() + ".name", entry.getValue());
         }
 
-        for (Entry<UUID, String> entry : uuidsToDisplayNames.entrySet()) {
-            config.set(entry.getKey().toString() + ".displayName", entry.getValue().replace(ChatColor.COLOR_CHAR, '&'));
-        }
         uuidFile.save();
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerJoinLoaded(PlayerJoinLoadedEvent e) {
-        String curDispName = uuidsToDisplayNames.get(e.getPlayer().getUniqueId());
-        if (curDispName != null) {
-            e.getPlayer().setDisplayName(curDispName);
-        }
-
         updatePlayer(e.getPlayer());
     }
 
     /**
-     * Updates a player's name and display name entries.
+     * Updates a player's name entry.
      *
      * @param p The player to update.
      */
@@ -105,29 +85,14 @@ public final class PlayerUUIDTracker extends FlexModule<FlexCore> implements Lis
         String name = p.getName();
         uuidsToNames.put(uuid, name);
         namesToUuids.put(name.toLowerCase(), uuid);
-
-        try {
-            String temp = uuidsToDisplayNames.remove(uuid);
-            displayNamesToUuids.remove(getFriendlyDisplayName(temp));
-        } catch (Exception ex) { }
-
-        String displayName = p.getDisplayName();
-        if (!displayName.equals(name)) {
-            uuidsToDisplayNames.put(uuid, ChatColor.translateAlternateColorCodes('&', displayName));
-            displayNamesToUuids.put(getFriendlyDisplayName(displayName), uuid);
-        }
-    }
-
-    private String getFriendlyDisplayName(String displayName) {
-        return ChatColor.stripColor(displayName).toLowerCase();
     }
 
     /**
-     * @return The cached UUID for a given name or display name.
+     * @return The cached UUID for a given name.
      */
-    public UUID getUuid(String name, boolean isDisplayName) {
+    public UUID getUuid(String name) {
         Validate.notNull(name, "Name cannot be null.");
-        return isDisplayName ? displayNamesToUuids.get(getFriendlyDisplayName(name)) : namesToUuids.get(name.toLowerCase());
+        return namesToUuids.get(name.toLowerCase());
     }
 
     /**
@@ -136,42 +101,6 @@ public final class PlayerUUIDTracker extends FlexModule<FlexCore> implements Lis
     public String getName(UUID uuid) {
         Validate.notNull(uuid, "UUID cannot be null.");
         return uuidsToNames.get(uuid);
-    }
-
-    /**
-     * @return The cached display name for a given UUID.
-     */
-    public String getDisplayName(UUID uuid) {
-        Validate.notNull(uuid, "UUID cannot be null.");
-        return uuidsToDisplayNames.get(uuid);
-    }
-
-    /**
-     * Returns the name that should be displayed to players.<br />
-     * <b>Order:</b>  display name, name, uuid
-     *
-     * @param uuid The UUID to get the name of.
-     * @return The name that should be displayed to players.
-     */
-    public String getTopLevelName(UUID uuid) {
-        Validate.notNull(uuid, "UUID cannot be null.");
-
-        if (uuidsToDisplayNames.containsKey(uuid)) {
-            return uuidsToDisplayNames.get(uuid);
-        }
-
-        if (uuidsToNames.containsKey(uuid)) {
-            return uuidsToNames.get(uuid);
-        }
-
-        return uuid.toString();
-    }
-
-    /**
-     * @return an unmodifiable view of the display name to UUID index map.
-     */
-    public Map<String, UUID> getDisplayNamesToUuids() {
-        return Collections.unmodifiableMap(displayNamesToUuids);
     }
 
     /**
