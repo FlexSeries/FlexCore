@@ -13,7 +13,7 @@ import java.util.UUID;
 final class UuidTrackerStorageHandlerYaml extends UuidTrackerStorageHandler {
 
     UuidTrackerStorageHandlerYaml(PlayerUuidTracker uuidTracker) {
-        super(uuidTracker, true);
+        super(uuidTracker, false);
     }
 
     private YamlFileManager getFile() {

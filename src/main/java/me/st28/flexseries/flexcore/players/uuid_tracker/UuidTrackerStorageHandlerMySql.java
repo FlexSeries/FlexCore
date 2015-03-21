@@ -24,7 +24,7 @@ final class UuidTrackerStorageHandlerMySql extends UuidTrackerStorageHandler {
     String table;
 
     UuidTrackerStorageHandlerMySql(PlayerUuidTracker uuidTracker, String database, String prefix) {
-        super(uuidTracker, true);
+        super(uuidTracker, false);
         this.database = database;
         table = (prefix == null ? "" : prefix) + "uuid_index";
     }

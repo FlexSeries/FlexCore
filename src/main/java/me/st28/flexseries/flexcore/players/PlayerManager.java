@@ -66,7 +66,7 @@ public final class PlayerManager extends FlexModule<FlexCore> implements Listene
     }
 
     @Override
-    protected void handleLoad() throws Exception {
+    protected void handleLoad() {
         playerDir = new File(getDataFolder() + File.separator + "data");
     }
 
@@ -360,7 +360,7 @@ public final class PlayerManager extends FlexModule<FlexCore> implements Listene
 
     @Override
     public boolean isPlayerLoadSync() {
-        return !storageHandler.isAsync;
+        return storageHandler.isSync;
     }
 
     @Override
@@ -371,7 +371,7 @@ public final class PlayerManager extends FlexModule<FlexCore> implements Listene
             return true;
         }
 
-        new TaskChain().add(new VariableGenericTask(storageHandler.isAsync) {
+        new TaskChain().add(new VariableGenericTask(!storageHandler.isSync) {
             @Override
             protected void run() {
                 loadPlayer(uuid, cycle);

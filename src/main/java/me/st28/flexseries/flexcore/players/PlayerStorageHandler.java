@@ -8,11 +8,11 @@ import java.util.UUID;
 abstract class PlayerStorageHandler {
 
     PlayerManager playerManager;
-    boolean isAsync;
+    boolean isSync;
 
-    PlayerStorageHandler(PlayerManager playerManager, boolean isAsync) {
+    PlayerStorageHandler(PlayerManager playerManager, boolean isSync) {
         this.playerManager = playerManager;
-        this.isAsync = isAsync;
+        this.isSync = isSync;
     }
 
     private PlayerData getPlayerData(UUID uuid) {

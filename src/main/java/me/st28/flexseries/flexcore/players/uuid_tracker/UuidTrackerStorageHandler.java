@@ -6,11 +6,11 @@ import java.util.UUID;
 abstract class UuidTrackerStorageHandler {
 
     PlayerUuidTracker uuidTracker;
-    boolean isAsync;
+    boolean isSync;
 
-    UuidTrackerStorageHandler(PlayerUuidTracker uuidTracker, boolean isAsync) {
+    UuidTrackerStorageHandler(PlayerUuidTracker uuidTracker, boolean isSync) {
         this.uuidTracker = uuidTracker;
-        this.isAsync = isAsync;
+        this.isSync = isSync;
     }
 
     /**
