@@ -38,7 +38,7 @@ public final class PingManager extends FlexModule<FlexCore> implements Listener 
     }
 
     @Override
-    protected void handleLoad() throws Exception {
+    protected void handleLoad() {
         // Vanilla modification version
         try {
             org.bukkit.Server bukkit = Bukkit.getServer();

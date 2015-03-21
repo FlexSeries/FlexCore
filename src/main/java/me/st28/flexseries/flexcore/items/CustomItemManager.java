@@ -93,7 +93,7 @@ public final class CustomItemManager extends FlexModule<FlexCore> implements Lis
     }
 
     @Override
-    public void handleLoad() throws Exception {
+    public void handleLoad() {
         customItemDir = new File(getDataFolder() + File.separator + "items");
         customItemDir.mkdir();
 

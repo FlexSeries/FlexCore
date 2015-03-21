@@ -37,7 +37,7 @@ public final class CookieManager extends FlexModule<FlexCore> implements Listene
     }
 
     @Override
-    protected final void handleLoad() throws Exception {
+    protected final void handleLoad() {
         cookieDir = new File(getDataFolder() + File.separator + "data");
     }
 

@@ -22,7 +22,7 @@ public final class HookManager extends FlexModule<FlexCore> {
     }
 
     @Override
-    protected void handleLoad() throws Exception {
+    protected void handleLoad() {
         registerHook(new JobsHook());
         registerHook(new ProtocolLibHook());
         registerHook(new TownyHook());
