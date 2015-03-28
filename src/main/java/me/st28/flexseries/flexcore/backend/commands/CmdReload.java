@@ -1,6 +1,9 @@
-package me.st28.flexseries.flexcore.commands;
+package me.st28.flexseries.flexcore.backend.commands;
 
 import me.st28.flexseries.flexcore.FlexCore;
+import me.st28.flexseries.flexcore.commands.CommandArgument;
+import me.st28.flexseries.flexcore.commands.FlexCommand;
+import me.st28.flexseries.flexcore.commands.FlexCommandSettings;
 import me.st28.flexseries.flexcore.messages.MessageReference;
 import me.st28.flexseries.flexcore.messages.ReplacementMap;
 import me.st28.flexseries.flexcore.permissions.PermissionNodes;
@@ -13,10 +16,10 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.Map;
 
-public final class CmdSave extends FlexCommand<FlexCore> {
+public final class CmdReload extends FlexCommand<FlexCore> {
 
-    public CmdSave(FlexCore plugin) {
-        super(plugin, new String[]{ "flexsave" }, null, new FlexCommandSettings<FlexCore>().description("Universal save command for FlexPlugins").permission(PermissionNodes.SAVE), new CommandArgument("plugin", true));
+    public CmdReload(FlexCore plugin) {
+        super(plugin, new String[]{"flexreload"}, null, new FlexCommandSettings<FlexCore>().description("Universal reload command for FlexPlugins").permission(PermissionNodes.RELOAD), new CommandArgument("plugin", true));
     }
 
     @Override
@@ -29,12 +32,12 @@ public final class CmdSave extends FlexCommand<FlexCore> {
 
         Plugin targetPlugin = Bukkit.getPluginManager().getPlugin(properName);
         if (!(targetPlugin instanceof FlexPlugin)) {
-            MessageReference.create(FlexCore.class, "lib_plugin.errors.plugin_not_astplugin", new ReplacementMap("{NAME}", properName).getMap()).sendTo(sender);
+            MessageReference.create(FlexCore.class, "lib_astplugin.errors.plugin_not_astplugin", new ReplacementMap("{NAME}", args[0]).getMap()).sendTo(sender);
             return;
         }
 
-        ((FlexPlugin) targetPlugin).saveAll(true);
-        MessageReference.createGeneral((JavaPlugin) targetPlugin, "lib_plugin.notices.plugin_saved").sendTo(sender);
+        ((FlexPlugin) targetPlugin).reloadAll();
+        MessageReference.createGeneral((JavaPlugin) targetPlugin, "lib_plugin.notices.plugin_reloaded").sendTo(sender);
     }
 
 }

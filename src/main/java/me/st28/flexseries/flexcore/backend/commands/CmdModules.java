@@ -1,6 +1,10 @@
-package me.st28.flexseries.flexcore.commands;
+package me.st28.flexseries.flexcore.backend.commands;
 
 import me.st28.flexseries.flexcore.FlexCore;
+import me.st28.flexseries.flexcore.commands.CommandArgument;
+import me.st28.flexseries.flexcore.commands.CommandUtils;
+import me.st28.flexseries.flexcore.commands.FlexCommand;
+import me.st28.flexseries.flexcore.commands.FlexCommandSettings;
 import me.st28.flexseries.flexcore.lists.ListBuilder;
 import me.st28.flexseries.flexcore.messages.MessageReference;
 import me.st28.flexseries.flexcore.messages.ReplacementMap;

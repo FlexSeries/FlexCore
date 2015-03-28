@@ -1,4 +1,4 @@
-package me.st28.flexseries.flexcore.commands.debug;
+package me.st28.flexseries.flexcore.backend.commands.debug;
 
 import me.st28.flexseries.flexcore.FlexCore;
 import me.st28.flexseries.flexcore.commands.CommandArgument;

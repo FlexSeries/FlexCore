@@ -1,4 +1,4 @@
-package me.st28.flexseries.flexcore.commands.ping;
+package me.st28.flexseries.flexcore.backend.commands.ping;
 
 import me.st28.flexseries.flexcore.FlexCore;
 import me.st28.flexseries.flexcore.commands.FlexCommand;

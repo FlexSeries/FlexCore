@@ -1,11 +1,15 @@
 package me.st28.flexseries.flexcore;
 
+import me.st28.flexseries.flexcore.backend.commands.CmdHooks;
+import me.st28.flexseries.flexcore.backend.commands.CmdModules;
+import me.st28.flexseries.flexcore.backend.commands.CmdReload;
+import me.st28.flexseries.flexcore.backend.commands.CmdSave;
 import me.st28.flexseries.flexcore.commands.*;
-import me.st28.flexseries.flexcore.commands.debug.CmdDebug;
-import me.st28.flexseries.flexcore.commands.items.CmdItemInfo;
-import me.st28.flexseries.flexcore.commands.motd.CmdMotd;
-import me.st28.flexseries.flexcore.commands.ping.CmdPing;
-import me.st28.flexseries.flexcore.commands.terms.CmdTerms;
+import me.st28.flexseries.flexcore.backend.commands.debug.CmdDebug;
+import me.st28.flexseries.flexcore.backend.commands.items.CmdItemInfo;
+import me.st28.flexseries.flexcore.backend.commands.motd.CmdMotd;
+import me.st28.flexseries.flexcore.backend.commands.ping.CmdPing;
+import me.st28.flexseries.flexcore.backend.commands.terms.CmdTerms;
 import me.st28.flexseries.flexcore.cookies.CookieManager;
 import me.st28.flexseries.flexcore.debug.ArgumentDebugTest;
 import me.st28.flexseries.flexcore.debug.DebugManager;

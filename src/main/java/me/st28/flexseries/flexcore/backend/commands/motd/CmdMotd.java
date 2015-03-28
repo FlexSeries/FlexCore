@@ -1,4 +1,4 @@
-package me.st28.flexseries.flexcore.commands.motd;
+package me.st28.flexseries.flexcore.backend.commands.motd;
 
 import me.st28.flexseries.flexcore.FlexCore;
 import me.st28.flexseries.flexcore.commands.FlexCommand;

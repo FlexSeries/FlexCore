@@ -1,4 +1,4 @@
-package me.st28.flexseries.flexcore.commands.terms;
+package me.st28.flexseries.flexcore.backend.commands.terms;
 
 import me.st28.flexseries.flexcore.FlexCore;
 import me.st28.flexseries.flexcore.commands.CommandArgument;
