@@ -1,9 +1,0 @@
-current: default
-none set: '&c{SERVER} &8- &4&oNo message set.'
-Messages:
-  default:
-  - '&e\u00AB\u00BB &a&lMinecraft Server &6\u279F &b(website) &e\u00AB\u00BB'
-  - ''
-  construction:
-  - '&e\u00AB\u00BB &a&lMinecraft Server &6\u279F &b(website) &e\u00AB\u00BB'
-  - '&9Under construction'
