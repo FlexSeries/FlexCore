@@ -4,17 +4,16 @@ import me.st28.flexseries.flexcore.backend.commands.CmdHooks;
 import me.st28.flexseries.flexcore.backend.commands.CmdModules;
 import me.st28.flexseries.flexcore.backend.commands.CmdReload;
 import me.st28.flexseries.flexcore.backend.commands.CmdSave;
-import me.st28.flexseries.flexcore.commands.*;
 import me.st28.flexseries.flexcore.backend.commands.debug.CmdDebug;
 import me.st28.flexseries.flexcore.backend.commands.items.CmdItemInfo;
 import me.st28.flexseries.flexcore.backend.commands.motd.CmdMotd;
 import me.st28.flexseries.flexcore.backend.commands.ping.CmdPing;
 import me.st28.flexseries.flexcore.backend.commands.terms.CmdTerms;
+import me.st28.flexseries.flexcore.commands.FlexCommandWrapper;
 import me.st28.flexseries.flexcore.cookies.CookieManager;
 import me.st28.flexseries.flexcore.debug.ArgumentDebugTest;
 import me.st28.flexseries.flexcore.debug.DebugManager;
 import me.st28.flexseries.flexcore.debug.MCMLDebugTest;
-import me.st28.flexseries.flexcore.help.HelpManager;
 import me.st28.flexseries.flexcore.hooks.HookManager;
 import me.st28.flexseries.flexcore.items.CustomItemDebugTest;
 import me.st28.flexseries.flexcore.items.CustomItemManager;
@@ -33,11 +32,7 @@ import me.st28.flexseries.flexcore.terms.TermsManager;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.event.Listener;
 
-import java.util.regex.Pattern;
-
 public final class FlexCore extends FlexPlugin implements Listener {
-
-    public final static Pattern CHARACTER_REGEX = Pattern.compile("\\\\(\\\\u[A-F0-9]{4})");
 
     public static FlexCore instance;
 
@@ -54,7 +49,6 @@ public final class FlexCore extends FlexPlugin implements Listener {
         registerModule(new CookieManager(this));
         registerModule(new CustomItemManager(this));
         registerModule(new DebugManager(this));
-        registerModule(new HelpManager(this));
         registerModule(new HookManager(this));
         registerModule(new ItemNameManager(this));
         registerModule(new ListManager(this));
@@ -72,7 +66,6 @@ public final class FlexCore extends FlexPlugin implements Listener {
         //TODO: Register commands automatically.
 
         FlexCommandWrapper.registerCommand(this, "flexdebug", new CmdDebug(this));
-        FlexCommandWrapper.registerCommand(this, "flexhelp", new FlexHelpCommand<>(this, new String[]{"flexhelp", "help"}, null));
         FlexCommandWrapper.registerCommand(this, "flexhooks", new CmdHooks(this));
         FlexCommandWrapper.registerCommand(this, "flexiteminfo", new CmdItemInfo(this));
         FlexCommandWrapper.registerCommand(this, "flexmodules", new CmdModules(this));
