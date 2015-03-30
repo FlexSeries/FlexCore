@@ -3,8 +3,6 @@ package me.st28.flexseries.flexcore.commands;
 import me.st28.flexseries.flexcore.FlexCore;
 import me.st28.flexseries.flexcore.commands.exceptions.CommandInterruptedException;
 import me.st28.flexseries.flexcore.cookies.CookieManager;
-import me.st28.flexseries.flexcore.help.HelpManager;
-import me.st28.flexseries.flexcore.help.HelpTopic;
 import me.st28.flexseries.flexcore.messages.MessageReference;
 import me.st28.flexseries.flexcore.messages.ReplacementMap;
 import me.st28.flexseries.flexcore.plugins.FlexPlugin;
@@ -15,7 +13,6 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.PluginCommand;
-import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -33,12 +30,13 @@ public final class FlexCommandWrapper implements CommandExecutor {
      * Registers a command that uses FlexCore's command library.
      *
      * @param plugin The plugin that owns the command.
-     * @param name The name of the command that is being registered.
      * @param command The command to register.
      */
-    public static void registerCommand(FlexPlugin plugin, String name, FlexCommand<?> command) {
+    public static void registerCommand(FlexPlugin plugin, FlexCommand<?> command) {
         Validate.notNull(plugin, "Plugin cannot be null.");
         Validate.notNull(plugin, "Command cannot be null.");
+
+        String name = command.getLabels().get(0);
 
         PluginCommand bukkitCommand = plugin.getCommand(name);
         if (bukkitCommand == null) {
@@ -51,22 +49,32 @@ public final class FlexCommandWrapper implements CommandExecutor {
     private final FlexCommand<?> command;
 
     private FlexCommandWrapper(FlexCommand<?> command) {
+        Validate.notNull(command, "Command cannot be null.");
         this.command = command;
     }
 
     @Override
     public final boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+        if (!this.command.getSettings().isLocked()) {
+            this.command.getSettings().lock();
+        }
+
         try {
-            CookieManager cookieManager = FlexPlugin.getRegisteredModule(CookieManager.class);
-            Player cookieOwner = sender instanceof Player ? (Player) sender : null;
+            CookieManager cookieManager = FlexPlugin.getRegisteredModuleSilent(CookieManager.class);
+            String cookieUserId = null;
 
             args = CommandUtils.fixArguments(args);
+            FlexCommand<?> currentCommand = this.command.getSubcommands().get(label.toLowerCase());;
 
-            FlexCommand<?> currentCommand = this.command.settings.subcommandAliases.get(label.toLowerCase());
-            if (currentCommand == null) {
-                currentCommand = this.command;
+            // Set the cookie for this command label
+            if (cookieManager != null) {
+                cookieUserId = CookieManager.getUserIdentifier(sender);
 
-                cookieManager.setValue(cookieOwner, label, currentCommand.plugin.getClass(), currentCommand.getLabelCookieIdentifier());
+                if (currentCommand == null) {
+                    currentCommand = this.command;
+
+                    cookieManager.setValue(cookieUserId, label, currentCommand.getPlugin().getClass(), currentCommand.getLabelCookieIdentifier());
+                }
             }
 
             int curIndex = 0;
@@ -75,15 +83,20 @@ public final class FlexCommandWrapper implements CommandExecutor {
 
                 if (subcommand != null) {
                     currentCommand = subcommand;
-                    cookieManager.setValue(cookieOwner, args[curIndex].toLowerCase(), subcommand.plugin.getClass(), subcommand.getLabelCookieIdentifier());
                     curIndex++;
+
+                    if (cookieManager != null) {
+                        cookieManager.setValue(cookieUserId, args[curIndex].toLowerCase(), subcommand.getPlugin().getClass(), subcommand.getLabelCookieIdentifier());
+                    }
                 } else {
                     break;
                 }
             }
 
-            CommandUtils.performPlayerTest(sender, currentCommand.settings.isPlayerOnly);
-            CommandUtils.performPermissionTest(sender, currentCommand.getPermissionNode());
+            FlexCommandSettings commandSettings = currentCommand.getSettings();
+
+            CommandUtils.performPlayerTest(sender, commandSettings.isPlayerOnly());
+            CommandUtils.performPermissionTest(sender, commandSettings.getPermission());
 
             String[] fullNewArgs;
             if (args.length < curIndex) {
@@ -111,25 +124,22 @@ public final class FlexCommandWrapper implements CommandExecutor {
                 newArgs.add(newArg);
             }
 
-            if (currentCommand.settings.isDummyCommand || newArgs.size() < currentCommand.getRequiredArgs()) {
-                String defCommand = currentCommand.settings.defaultSubcommand;
+            if (commandSettings.isDummyCommand() || newArgs.size() < currentCommand.getRequiredArguments()) {
+                String defCommand = commandSettings.getDefaultSubcommand();
                 if (defCommand == null) {
-                    if (currentCommand.settings.isDummyCommand) {
-                        HelpTopic topic = currentCommand.plugin.getHelpTopic();
-                        if (topic != null) {
-                            FlexPlugin.getRegisteredModule(HelpManager.class).buildMessages(topic.getIdentifier(), sender, newArgs.size() == 0 ? label : newArgs.get(0), null).sendTo(sender, 1);
-                        }
+                    if (commandSettings.isDummyCommand()) {
+                        //TODO: Show usages of subcommands
                     } else {
-                        CommandUtils.performArgsTest(newArgs.size(), currentCommand.getRequiredArgs(), MessageReference.createPlain(currentCommand.buildUsage(sender)));
+                        CommandUtils.performArgsTest(newArgs.size(), currentCommand.getRequiredArguments(), MessageReference.createPlain(currentCommand.buildUsage(sender)));
                     }
                     return true;
                 }
 
-                currentCommand = currentCommand.subcommands.get(currentCommand.settings.defaultSubcommand);
+                currentCommand = currentCommand.getSubcommands().get(commandSettings.getDefaultSubcommand());
 
-                CommandUtils.performPlayerTest(sender, currentCommand.settings.isPlayerOnly);
-                CommandUtils.performPermissionTest(sender, currentCommand.getPermissionNode());
-                CommandUtils.performArgsTest(newArgs.size(), currentCommand.getRequiredArgs(), MessageReference.createPlain(currentCommand.buildUsage(sender)));
+                CommandUtils.performPlayerTest(sender, commandSettings.isPlayerOnly());
+                CommandUtils.performPermissionTest(sender, commandSettings.getPermission());
+                CommandUtils.performArgsTest(newArgs.size(), currentCommand.getRequiredArguments(), MessageReference.createPlain(currentCommand.buildUsage(sender)));
             }
 
             currentCommand.runCommand(sender, "/" + label + " " + ArrayUtils.stringArrayToString(args, " "), label, newArgs.toArray(new String[newArgs.size()]), parameters);

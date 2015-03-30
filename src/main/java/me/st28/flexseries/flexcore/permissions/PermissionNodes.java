@@ -8,6 +8,8 @@ public enum PermissionNodes implements PermissionNode {
     RELOAD,
     SAVE,
 
+    HOOKS,
+
     ITEM_INFO,
 
     MODULES,

@@ -14,12 +14,13 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.util.Collections;
 import java.util.Map;
 
 public final class CmdSave extends FlexCommand<FlexCore> {
 
     public CmdSave(FlexCore plugin) {
-        super(plugin, new String[]{ "flexsave" }, null, new FlexCommandSettings<FlexCore>().description("Universal save command for FlexPlugins").permission(PermissionNodes.SAVE), new CommandArgument("plugin", true));
+        super(plugin, "flexsave", Collections.singletonList(new CommandArgument("plugin", true)), new FlexCommandSettings().permission(PermissionNodes.SAVE));
     }
 
     @Override

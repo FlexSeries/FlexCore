@@ -1,10 +1,7 @@
 package me.st28.flexseries.flexcore.backend.commands.debug;
 
 import me.st28.flexseries.flexcore.FlexCore;
-import me.st28.flexseries.flexcore.commands.CommandArgument;
-import me.st28.flexseries.flexcore.commands.CommandUtils;
-import me.st28.flexseries.flexcore.commands.FlexCommand;
-import me.st28.flexseries.flexcore.commands.FlexCommandSettings;
+import me.st28.flexseries.flexcore.commands.*;
 import me.st28.flexseries.flexcore.commands.exceptions.CommandInterruptedException;
 import me.st28.flexseries.flexcore.debug.DebugManager;
 import me.st28.flexseries.flexcore.debug.DebugTest;
@@ -18,14 +15,15 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-public final class SCmdDebugList extends FlexCommand<FlexCore> {
+public final class SCmdDebugList extends FlexSubcommand<FlexCore> {
 
-    public SCmdDebugList(FlexCore plugin, CmdDebug cmdDebug) {
-        super(plugin, new String[]{"list"}, cmdDebug, new FlexCommandSettings<FlexCore>().description("Lists debug tests").setInheritPermission(), new CommandArgument("plugin", false), new CommandArgument("page", false));
+    public SCmdDebugList(CmdDebug cmdDebug) {
+        super(cmdDebug, "list", Arrays.asList(new CommandArgument("plugin", false), new CommandArgument("page", false)), new FlexCommandSettings<FlexCore>().description("Lists debug tests"));
     }
 
     @Override

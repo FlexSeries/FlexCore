@@ -4,10 +4,12 @@ import me.st28.flexseries.flexcore.FlexCore;
 import me.st28.flexseries.flexcore.commands.CommandArgument;
 import me.st28.flexseries.flexcore.commands.CommandUtils;
 import me.st28.flexseries.flexcore.commands.FlexCommand;
+import me.st28.flexseries.flexcore.commands.FlexCommandSettings;
 import me.st28.flexseries.flexcore.hooks.Hook;
 import me.st28.flexseries.flexcore.hooks.HookManager;
 import me.st28.flexseries.flexcore.hooks.HookStatus;
 import me.st28.flexseries.flexcore.lists.ListBuilder;
+import me.st28.flexseries.flexcore.permissions.PermissionNodes;
 import me.st28.flexseries.flexcore.plugins.FlexPlugin;
 import me.st28.flexseries.flexcore.utils.QuickMap;
 import org.bukkit.command.CommandSender;
@@ -18,13 +20,7 @@ import java.util.*;
 public final class CmdHooks extends FlexCommand<FlexCore> {
 
     public CmdHooks(FlexCore plugin) {
-        super(
-                plugin,
-                new String[]{"flexhooks", "hooks"},
-                null,
-                null,
-                new CommandArgument("page", false)
-        );
+        super(plugin, "flexhooks", Collections.singletonList(new CommandArgument("page", false)), new FlexCommandSettings().permission(PermissionNodes.HOOKS));
     }
 
     @Override

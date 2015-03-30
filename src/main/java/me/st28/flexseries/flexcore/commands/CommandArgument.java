@@ -1,9 +1,12 @@
 package me.st28.flexseries.flexcore.commands;
 
+/**
+ * Represents an argument for a command.
+ */
 public final class CommandArgument {
 
-    String label;
-    boolean isRequired;
+    private final String label;
+    private final boolean isRequired;
 
     public CommandArgument(String label, boolean isRequired) {
         this.label = label;
@@ -15,10 +18,16 @@ public final class CommandArgument {
         return (isRequired ? "<" : "[") + label + (isRequired ? ">" : "]");
     }
 
+    /**
+     * @return the label of the argument.
+     */
     public String getLabel() {
         return label;
     }
 
+    /**
+     * @return true if the argument is required.
+     */
     public boolean isRequired() {
         return isRequired;
     }

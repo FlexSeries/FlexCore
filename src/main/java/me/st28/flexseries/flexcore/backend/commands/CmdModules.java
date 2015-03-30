@@ -23,7 +23,7 @@ import java.util.*;
 public final class CmdModules extends FlexCommand<FlexCore> {
 
     public CmdModules(FlexCore plugin) {
-        super(plugin, new String[]{"flexmodules", "modules"}, null, new FlexCommandSettings<FlexCore>().description("View information about registered modules under loaded FlexPlugins").permission(PermissionNodes.MODULES), new CommandArgument("plugin", true), new CommandArgument("page", false));
+        super(plugin, "flexmodules", Arrays.asList(new CommandArgument("plugin", true), new CommandArgument("page", false)), new FlexCommandSettings().permission(PermissionNodes.RELOAD));
     }
 
     @Override

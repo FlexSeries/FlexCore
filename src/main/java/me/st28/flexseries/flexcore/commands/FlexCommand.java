@@ -1,15 +1,11 @@
 package me.st28.flexseries.flexcore.commands;
 
 import me.st28.flexseries.flexcore.cookies.CookieManager;
-import me.st28.flexseries.flexcore.help.CookieCommandHelpEntry;
-import me.st28.flexseries.flexcore.help.HelpManager;
-import me.st28.flexseries.flexcore.help.HelpTopic;
-import me.st28.flexseries.flexcore.permissions.PermissionNode;
 import me.st28.flexseries.flexcore.plugins.FlexPlugin;
+import me.st28.flexseries.flexcore.plugins.exceptions.ModuleDisabledException;
 import org.apache.commons.lang.Validate;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.PluginCommand;
-import org.bukkit.entity.Player;
 
 import java.util.*;
 
@@ -18,140 +14,110 @@ import java.util.*;
  *
  * @param <T> The plugin that owns the command.
  */
-//TODO: If the base command, should read label aliases from the plugin.yml
 public abstract class FlexCommand<T extends FlexPlugin> {
 
     /**
      * The plugin that owns this command.
      */
-    protected final T plugin;
+    private final T plugin;
 
     /**
-     * The default labels for the command.
+     * The label(s) for the command.
      */
-    final String[] labels;
+    private final List<String> labels = new ArrayList<>();
 
     /**
-     * The parent command to this subcommand.
+     * Label aliases that execute subcommands directly.
+     */
+    private final Map<String, FlexSubcommand<T>> subcommandLabels = new HashMap<>();
+
+    /**
+     * The command that this command exists under.
      */
     private final FlexCommand<T> parent;
 
     /**
-     * Subcommands for this particular command.
+     * The arguments for this command.
      */
-    final Map<String, FlexCommand<T>> subcommands = new HashMap<>();
-
     private final List<CommandArgument> arguments = new ArrayList<>();
 
-    protected final FlexCommandSettings<T> settings;
+    /**
+     * Subcommands under this command.
+     */
+    private final Map<String, FlexSubcommand<T>> subcommands = new HashMap<>();
 
-    public FlexCommand(T plugin, String label, FlexCommandSettings<T> settings, CommandArgument... arguments) {
+    /**
+     * The settings for this command.
+     */
+    private final FlexCommandSettings settings;
+
+    /**
+     * Instantiates a FlexCommand that is a base command for a plugin.
+     */
+    public FlexCommand(T plugin, String label, List<CommandArgument> arguments, FlexCommandSettings settings) {
         Validate.notNull(plugin, "Plugin cannot be null.");
         Validate.notNull(label, "Label cannot be null.");
-
-        this.plugin = plugin;
 
         PluginCommand pluginCommand = plugin.getCommand(label);
         if (pluginCommand == null) {
             throw new IllegalArgumentException("Command '" + label + "' is not a registered command for plugin '" + plugin.getName() + "'");
         }
 
-        List<String> rawLabels = new ArrayList<>();
-        rawLabels.add(label.toLowerCase());
-        rawLabels.addAll(pluginCommand.getAliases());
-        this.labels = rawLabels.toArray(new String[rawLabels.size()]);
+        this.plugin = plugin;
+        this.labels.add(label.toLowerCase());
+        this.parent = null;
+        if (arguments != null) {
+            Validate.noNullElements(arguments, "Arguments list cannot contain any null arguments.");
+            this.arguments.addAll(arguments);
+        }
 
         if (settings == null) {
-            this.settings = new FlexCommandSettings<>();
+            this.settings = new FlexCommandSettings();
         } else {
             this.settings = settings;
         }
 
-        String plDescription = pluginCommand.getDescription();
-        if (plDescription != null) {
-            this.settings.description(plDescription);
-        }
-        this.settings.isLocked = true;
-
-        Collections.addAll(this.arguments, arguments);
-
-        this.parent = null;
-
-        String helpPath = getHelpPath();
-        if (helpPath != null) {
-            HelpManager helpManager = FlexPlugin.getRegisteredModule(HelpManager.class);
-
-            if (getHelpTopic() == null) {
-                HelpTopic helpTopic;
-
-                helpTopic = new HelpTopic(helpPath, this.settings.description, null);
-
-                helpManager.addHelpTopic(helpTopic);
-            }
+        if (pluginCommand.getDescription() != null) {
+            this.settings.description(pluginCommand.getDescription());
         }
     }
 
     /**
-     * Creates a new FlexCommand.
-     *
-     * @param plugin The plugin that owns the command.
-     * @param labels The labels for the command.  <code>labels[0]</code> should be the primary label.
-     * @param settings The optional settings for this command.  Can be null.
+     * @param plugin the plugin that owns the command.
+     * @param label the main label of the command
+     * @param arguments The arguments for the command. Used to build usage messages for FlexCommands.
      */
-    public FlexCommand(T plugin, String[] labels, FlexCommand<T> parent, FlexCommandSettings<T> settings, CommandArgument... arguments) {
+    public FlexCommand(T plugin, String label, FlexCommand<T> parent, List<CommandArgument> arguments, FlexCommandSettings settings) {
         Validate.notNull(plugin, "Plugin cannot be null.");
-        Validate.notNull(labels, "Labels cannot be null.");
-        Validate.notEmpty(labels, "There must be at least one label.");
+        Validate.notNull(label, "Label cannot be null.");
 
         this.plugin = plugin;
-        this.labels = labels;
+        this.labels.add(label.toLowerCase());
         this.parent = parent;
+        if (arguments != null) {
+            Validate.noNullElements(arguments, "Arguments list cannot contain any null arguments.");
+            this.arguments.addAll(arguments);
+        }
 
         if (settings == null) {
-            this.settings = new FlexCommandSettings<>();
+            this.settings = new FlexCommandSettings();
         } else {
             this.settings = settings;
         }
-        this.settings.isLocked = true;
-
-        Collections.addAll(this.arguments, arguments);
-
-        String helpPath = getHelpPath();
-        if (helpPath != null) {
-            HelpManager helpManager = FlexPlugin.getRegisteredModule(HelpManager.class);
-
-            if (getHelpTopic() == null) {
-                HelpTopic helpTopic;
-
-                if (this.settings.shouldInheritHelpPath && parent != null) {
-                    helpTopic = new HelpTopic(
-                            helpPath,
-                            this.settings.description,
-                            helpManager.getHelpTopic(parent.getHelpPath())
-                    );
-                } else {
-                    helpTopic = new HelpTopic(helpPath, this.settings.description, null);
-                }
-
-                helpManager.addHelpTopic(helpTopic);
-            }
-        }
     }
 
-    public final FlexCommandSettings<T> getSettings() {
-        return settings;
+    /**
+     * @return the plugin that owns this command.
+     */
+    public final T getPlugin() {
+        return plugin;
     }
 
-    public final String[] getLabels() {
-        return labels;
-    }
-
-    String getLabelCookieIdentifier() {
-        return getClass().getCanonicalName() + "-label";
-    }
-
-    public final Map<String, FlexCommand<T>> getSubcommands() {
-        return Collections.unmodifiableMap(subcommands);
+    /**
+     * @return a list containing the label(s) for this command. Element 0 is the main label.
+     */
+    public final List<String> getLabels() {
+        return Collections.unmodifiableList(labels);
     }
 
     /**
@@ -187,45 +153,13 @@ public abstract class FlexCommand<T extends FlexPlugin> {
         return Collections.unmodifiableList(arguments);
     }
 
-    public final String buildUsage(CommandSender sender) {
-        StringBuilder sb = new StringBuilder();
-
-        Player cookieOwner = sender instanceof Player ? (Player) sender : null;
-        CookieManager cookieManager = FlexPlugin.getRegisteredModule(CookieManager.class);
-
-        List<FlexCommand<T>> hierarchy = getParents();
-
-        for (FlexCommand<T> curCommand : hierarchy) {
-            if (sb.length() == 0) {
-                sb.append("/");
-            } else {
-                sb.append(" ");
-            }
-
-            sb.append(cookieManager.getValue(cookieOwner, curCommand.labels[0], plugin.getClass(), curCommand.getLabelCookieIdentifier()));
-        }
-
-        if (sb.length() == 0) {
-            sb.append("/");
-        } else {
-            sb.append(" ");
-        }
-        sb.append(cookieManager.getValue(cookieOwner, labels[0], plugin.getClass(), getLabelCookieIdentifier()));
-
-        for (CommandArgument arg : arguments) {
-            sb.append(" ").append(arg.toString());
-        }
-
-        return sb.toString();
-    }
-
     /**
-     * @return the number of required arguments.
+     * @return the number of required arguments in the list returned by {@link #getArguments()}.
      */
-    public final int getRequiredArgs() {
+    public final int getRequiredArguments() {
         int count = 0;
         for (CommandArgument argument : arguments) {
-            if (argument.isRequired) {
+            if (argument.isRequired()) {
                 count++;
             }
         }
@@ -233,32 +167,85 @@ public abstract class FlexCommand<T extends FlexPlugin> {
     }
 
     /**
-     * @return the permission node for this command.
+     * @param sender The CommandSender that the usage message will be sent to.
+     * @return The usage message for this command.
      */
-    public PermissionNode getPermissionNode() {
-        if (settings.permission == null && this.parent != null && settings.shouldInheritPermission) {
-            return parent.getPermissionNode();
+    public final String buildUsage(CommandSender sender) {
+        StringBuilder sb = new StringBuilder("/");
+
+        CookieManager cookieManager;
+        try {
+            cookieManager = FlexPlugin.getRegisteredModule(CookieManager.class);
+        } catch (ModuleDisabledException ex) {
+            cookieManager = null;
         }
-        return settings.permission;
+
+        if (cookieManager == null || sender == null) {
+            // No cookies in use, build usage with default labels.
+
+            for (FlexCommand<T> curCommand : getParents()) {
+                if (sb.length() == 0) {
+                    sb.append("/");
+                } else {
+                    sb.append(" ");
+                }
+
+                sb.append(curCommand.labels.get(0));
+            }
+
+            // If nothing was added, assume this is the base command and add the slash.
+            if (sb.length() == 0) {
+                sb.append("/");
+            } else {
+                sb.append(" ");
+            }
+            sb.append(labels.get(0)); // Add the label for this command.
+
+            // Add the arguments for this command.
+            for (CommandArgument arg : arguments) {
+                sb.append(" ").append(arg.toString());
+            }
+        } else {
+            // Cookies in use, use the last used label alias.
+
+            String cookieUserId = CookieManager.getUserIdentifier(sender);
+
+            for (FlexCommand<T> curCommand : getParents()) {
+                if (sb.length() == 0) {
+                    sb.append("/");
+                } else {
+                    sb.append(" ");
+                }
+
+                sb.append(cookieManager.getValue(cookieUserId, curCommand.labels.get(0), plugin.getClass(), curCommand.getLabelCookieIdentifier()));
+            }
+
+            // If nothing was added, assume this is the base command and add the slash.
+            if (sb.length() == 0) {
+                sb.append("/");
+            } else {
+                sb.append(" ");
+            }
+            sb.append(cookieManager.getValue(cookieUserId, labels.get(0), plugin.getClass(), getLabelCookieIdentifier())); // Add the label for this command.
+
+            // Add the arguments for this command.
+            for (CommandArgument arg : arguments) {
+                sb.append(" ").append(arg.toString());
+            }
+        }
+
+        return sb.toString();
     }
 
     /**
-     * @return the help path for this command, including the parent path (where applicable).
+     * @return an unmodifiable map of the subcommands under this command.
      */
-    public final String getHelpPath() {
-        if (this.parent != null && settings.shouldInheritHelpPath) {
-            if (settings.helpPath == null) {
-                return parent.getHelpPath();
-            } else {
-                return parent.getHelpPath() + "." + settings.helpPath;
-            }
-        }
-        return settings.helpPath;
+    public final Map<String, FlexSubcommand<T>> getSubcommands() {
+        return Collections.unmodifiableMap(subcommands);
     }
 
-    public final HelpTopic getHelpTopic() {
-        String path = getHelpPath();
-        return path == null ? null : FlexPlugin.getRegisteredModule(HelpManager.class).getHelpTopic(path);
+    String getLabelCookieIdentifier() {
+        return "command-" + labels.get(0) + "-label";
     }
 
     /**
@@ -268,10 +255,10 @@ public abstract class FlexCommand<T extends FlexPlugin> {
      * @param labelAliases Aliases for the main command label that will execute a subcommand directly.
      * @return True if at least one label for the subcommand was registered successfully.
      */
-    protected final boolean registerSubcommand(FlexCommand<T> subcommand, String... labelAliases) {
+    protected final boolean registerSubcommand(FlexSubcommand<T> subcommand, String... labelAliases) {
         int registeredLabels = 0;
 
-        for (String subLabelAlias : subcommand.labels) {
+        for (String subLabelAlias : subcommand.getLabels()) {
             subLabelAlias = subLabelAlias.toLowerCase();
             if (!subcommands.containsKey(subLabelAlias)) {
                 subcommands.put(subLabelAlias, subcommand);
@@ -279,33 +266,29 @@ public abstract class FlexCommand<T extends FlexPlugin> {
             }
         }
 
-        for (String alias : labelAliases) {
+        /*for (String alias : labelAliases) {
             settings.subcommandAliases.put(alias, subcommand);
-        }
-
-        HelpTopic helpTopic = getHelpTopic();
-        if (helpTopic != null) {
-            //TODO: Make sure that the subcommand's help topic is the same, if not, create a subtopic
-            PermissionNode permission = subcommand.settings.permission;
-            String description = subcommand.settings.description;
-            if (description == null) {
-                description = "&c&oNo description set.";
-            }
-            //helpTopic.addEntry(new CommandHelpEntry(subcommand.buildUsage(null).replace("/", ""), description, permission == null ? null : permission.getNode()));
-            helpTopic.addEntry(new CookieCommandHelpEntry(subcommand));
-        }
+        }*/
 
         return registeredLabels != 0;
     }
 
     /**
+     * @return the {@link FlexCommandSettings} for this command.
+     */
+    public final FlexCommandSettings getSettings() {
+        return settings;
+    }
+
+    /**
      * Handles the execution of the command.
-     *  @param sender The sender of the command.
-     * @param command The full text that was entered by the sender.
-     * @param label The label that was used by the sender.
-     * @param args The {@link CommandArgument}s that were detected for the command.<br />
-     *             Arguments entered in quotes will appear as a single entry in the array.<br />
-     * @param parameters Optional flags that can be entered by the sender to change the command behavior, where supported.
+     *
+     * @param sender The sender of the command.
+     * @param command The full text that was entered by the sender. (ex. <code>/label hello world</code>)
+     * @param label The label that was used by the sender. (ex. <code>label</code>)
+     * @param args The given arguments for the command.<br />
+     *             Arguments entered in quotes will appear as a single entry in the array with the quotes removed.<br />
+     * @param parameters Optional flags entered by the sender to change the command behavior.
      */
     public abstract void runCommand(CommandSender sender, String command, String label, String[] args, Map<String, String> parameters);
 

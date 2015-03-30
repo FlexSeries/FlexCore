@@ -52,6 +52,25 @@ public abstract class FlexPlugin extends JavaPlugin {
     }
 
     /**
+     * Retrieves a registered {@link FlexModule} from any loaded {@link FlexPlugin} but returns null if an error occurred.
+     * @see #getRegisteredModule(Class)
+     */
+    public static <T extends FlexModule> T getRegisteredModuleSilent(Class<T> clazz) {
+        Validate.notNull(clazz, "Module class cannot be null.");
+
+        if (!REGISTERED_MODULES.containsKey(clazz)) {
+            return null;
+        }
+
+        FlexPlugin plugin = REGISTERED_MODULES.get(clazz);
+        if (plugin.getModuleStatus(clazz) != ModuleStatus.ENABLED) {
+            return null;
+        }
+
+        return plugin.getModule(clazz);
+    }
+
+    /**
      * The current status of the plugin.
      */
     private PluginStatus status;

@@ -9,53 +9,54 @@ import java.util.Map;
 
 public final class FlexCommandSettings<T extends FlexPlugin> {
 
-    boolean isLocked = false;
+    private boolean isLocked = false;
 
     /**
      * The description of the command.
      */
-    String description = null;
+    private String description = null;
 
     /**
      * If true, only players can use this command.
      */
-    boolean isPlayerOnly = false;
+    private boolean isPlayerOnly = false;
 
     /**
      * The default subcommand to use.<br />
      * If not specified, #runCommand should do something for this command.
      */
-    String defaultSubcommand;
+    private String defaultSubcommand;
 
     /**
      * Label aliases that execute subcommands directly.
      */
-    final Map<String, FlexCommand<T>> subcommandAliases = new HashMap<>();
+    private final Map<String, FlexCommand<T>> subcommandAliases = new HashMap<>();
 
     /**
      * If true, will use the default subcommand, regardless of argument count.
      */
-    boolean isDummyCommand = false;
+    private boolean isDummyCommand = false;
 
     /**
      * The permission node required to use this command.
      */
-    PermissionNode permission = null;
+    private PermissionNode permission = null;
 
     /**
-     * If true, will inherit the parent permission node, where applicable.
+     * Locks the settings instance to prevent modification.
      */
-    boolean shouldInheritPermission = false;
+    public void lock() {
+        checkState();
+
+        this.isLocked = true;
+    }
 
     /**
-     * If true, will inherit the parent help path.
+     * @return true if this settings instance cannot be modified any longer.
      */
-    boolean shouldInheritHelpPath = false;
-
-    /**
-     * The path of the help topic for this command.
-     */
-    String helpPath = null;
+    public final boolean isLocked() {
+        return isLocked;
+    }
 
     private void checkState() {
         if (isLocked) {
@@ -76,6 +77,9 @@ public final class FlexCommandSettings<T extends FlexPlugin> {
         return this;
     }
 
+    /**
+     * @return the description for this command.
+     */
     public final String getDescription() {
         return description;
     }
@@ -85,11 +89,18 @@ public final class FlexCommandSettings<T extends FlexPlugin> {
      *
      * @return The settings instance, for chaining.
      */
-    public final FlexCommandSettings<T> setPlayerOnly() {
+    public final FlexCommandSettings<T> setPlayerOnly(boolean isPlayerOnly) {
         checkState();
 
-        this.isPlayerOnly = true;
+        this.isPlayerOnly = isPlayerOnly;
         return this;
+    }
+
+    /**
+     * @return true if this command can only be run by players.
+     */
+    public final boolean isPlayerOnly() {
+        return isPlayerOnly;
     }
 
     /**
@@ -106,15 +117,26 @@ public final class FlexCommandSettings<T extends FlexPlugin> {
     }
 
     /**
+     * @return the default subcommand.
+     */
+    public final String getDefaultSubcommand() {
+        return defaultSubcommand;
+    }
+
+    /**
      * Makes this command a dummy command, meaning that it will use the default subcommand, regardless of argument count.
      *
      * @return The settings instance, for chaining.
      */
-    public final FlexCommandSettings<T> setDummyCommand() {
+    public final FlexCommandSettings<T> setDummyCommand(boolean isDummyCommand) {
         checkState();
 
-        this.isDummyCommand = true;
+        this.isDummyCommand = isDummyCommand;
         return this;
+    }
+
+    public final boolean isDummyCommand() {
+        return isDummyCommand;
     }
 
     /**
@@ -131,40 +153,10 @@ public final class FlexCommandSettings<T extends FlexPlugin> {
     }
 
     /**
-     * Makes this command inherit permissions from parent commands.
-     *
-     * @return The settings instance, for chaining.
+     * @return the {@link PermissionNode} required to use this command.
      */
-    public final FlexCommandSettings<T> setInheritPermission() {
-        checkState();
-
-        this.shouldInheritPermission = true;
-        return this;
-    }
-
-    /**
-     * Makes this command inherit the parent help path, where applicable.
-     *
-     * @return The settings instance, for chaining.
-     */
-    public final FlexCommandSettings<T> setInheritHelpPath() {
-        checkState();
-
-        this.shouldInheritHelpPath = true;
-        return this;
-    }
-
-    /**
-     * Sets the path for the help topic for this command.
-     *
-     * @return The settings instance, for chaining.
-     */
-    public final FlexCommandSettings<T> helpPath(String helpPath) {
-        Validate.notNull(helpPath, "Help path must not be null.");
-        checkState();
-
-        this.helpPath = helpPath;
-        return this;
+    public final PermissionNode getPermission() {
+        return permission;
     }
 
 }

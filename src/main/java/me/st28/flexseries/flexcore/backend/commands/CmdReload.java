@@ -14,12 +14,13 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.util.Collections;
 import java.util.Map;
 
 public final class CmdReload extends FlexCommand<FlexCore> {
 
     public CmdReload(FlexCore plugin) {
-        super(plugin, new String[]{"flexreload"}, null, new FlexCommandSettings<FlexCore>().description("Universal reload command for FlexPlugins").permission(PermissionNodes.RELOAD), new CommandArgument("plugin", true));
+        super(plugin, "flexreload", Collections.singletonList(new CommandArgument("plugin", true)), new FlexCommandSettings().permission(PermissionNodes.RELOAD));
     }
 
     @Override

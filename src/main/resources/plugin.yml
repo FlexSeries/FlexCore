@@ -69,6 +69,7 @@ permissions:
     default: op
     children:
       flexcore.debug: true
+      flexcore.hooks: true
       flexcore.iteminfo: true
       flexcore.modules: true
       flexcore.motd.list: true
