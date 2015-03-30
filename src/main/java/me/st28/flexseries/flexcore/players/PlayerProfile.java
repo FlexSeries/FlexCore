@@ -13,14 +13,12 @@ public final class PlayerProfile implements Comparable<PlayerProfile> {
 
     private final UUID uuid;
     private final String name;
-    private final String displayName;
 
     public PlayerProfile(UUID uuid) {
         this.uuid = uuid;
 
         PlayerUuidTracker uuidTracker = FlexPlugin.getRegisteredModule(PlayerUuidTracker.class);
         name = uuidTracker.getName(uuid);
-        displayName = uuidTracker.getDisplayName(uuid);
     }
 
     public UUID getUuid() {
@@ -31,12 +29,7 @@ public final class PlayerProfile implements Comparable<PlayerProfile> {
         return name;
     }
 
-    public String getDisplayName() {
-        return displayName;
-    }
-
     public String getTopLevelName() {
-        if (displayName != null) return displayName;
         return name == null ? uuid.toString() : name;
     }
 
