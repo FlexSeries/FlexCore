@@ -10,6 +10,7 @@ import me.st28.flexseries.flexcore.cookie.CookieManager;
 import me.st28.flexseries.flexcore.debug.ArgumentDebugTest;
 import me.st28.flexseries.flexcore.debug.DebugManager;
 import me.st28.flexseries.flexcore.debug.MCMLDebugTest;
+import me.st28.flexseries.flexcore.gui.GuiManager;
 import me.st28.flexseries.flexcore.hook.HookManager;
 import me.st28.flexseries.flexcore.item.CustomItemDebugTest;
 import me.st28.flexseries.flexcore.item.CustomItemManager;
@@ -41,6 +42,7 @@ public final class FlexCore extends FlexPlugin implements Listener {
         registerModule(new CookieManager(this));
         registerModule(new CustomItemManager(this));
         registerModule(new DebugManager(this));
+        registerModule(new GuiManager(this));
         registerModule(new HookManager(this));
         registerModule(new ListManager(this));
         registerModule(new MessageManager(this));
