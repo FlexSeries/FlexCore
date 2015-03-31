@@ -1,16 +1,20 @@
 package me.st28.flexseries.flexcore.backend.commands.debug;
 
 import me.st28.flexseries.flexcore.FlexCore;
+import me.st28.flexseries.flexcore.command.CommandArgument;
+import me.st28.flexseries.flexcore.command.CommandUtils;
+import me.st28.flexseries.flexcore.command.FlexCommandSettings;
+import me.st28.flexseries.flexcore.command.FlexSubcommand;
 import me.st28.flexseries.flexcore.commands.*;
-import me.st28.flexseries.flexcore.commands.exceptions.CommandInterruptedException;
+import me.st28.flexseries.flexcore.command.exceptions.CommandInterruptedException;
 import me.st28.flexseries.flexcore.debug.DebugManager;
 import me.st28.flexseries.flexcore.debug.DebugTest;
-import me.st28.flexseries.flexcore.lists.ListBuilder;
-import me.st28.flexseries.flexcore.messages.MessageReference;
-import me.st28.flexseries.flexcore.plugins.FlexPlugin;
-import me.st28.flexseries.flexcore.utils.PluginUtils;
-import me.st28.flexseries.flexcore.utils.QuickMap;
-import me.st28.flexseries.flexcore.utils.StringUtils;
+import me.st28.flexseries.flexcore.list.ListBuilder;
+import me.st28.flexseries.flexcore.message.MessageReference;
+import me.st28.flexseries.flexcore.plugin.FlexPlugin;
+import me.st28.flexseries.flexcore.util.PluginUtils;
+import me.st28.flexseries.flexcore.util.QuickMap;
+import me.st28.flexseries.flexcore.util.StringUtils;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
 

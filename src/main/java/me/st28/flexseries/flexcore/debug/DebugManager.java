@@ -2,8 +2,8 @@ package me.st28.flexseries.flexcore.debug;
 
 import me.st28.flexseries.flexcore.FlexCore;
 import me.st28.flexseries.flexcore.logging.LogHelper;
-import me.st28.flexseries.flexcore.plugins.FlexModule;
-import me.st28.flexseries.flexcore.utils.PluginUtils;
+import me.st28.flexseries.flexcore.plugin.module.FlexModule;
+import me.st28.flexseries.flexcore.util.PluginUtils;
 import org.apache.commons.lang.Validate;
 import org.bukkit.plugin.java.JavaPlugin;
 

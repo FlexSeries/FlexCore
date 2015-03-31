@@ -1,6 +1,6 @@
 package me.st28.flexseries.flexcore.events;
 
-import me.st28.flexseries.flexcore.messages.MessageReference;
+import me.st28.flexseries.flexcore.message.MessageReference;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.player.PlayerEvent;

@@ -1,8 +1,8 @@
 package me.st28.flexseries.flexcore.debug;
 
 import me.st28.flexseries.flexcore.FlexCore;
-import me.st28.flexseries.flexcore.commands.CommandArgument;
-import me.st28.flexseries.flexcore.commands.CommandUtils;
+import me.st28.flexseries.flexcore.command.CommandArgument;
+import me.st28.flexseries.flexcore.command.CommandUtils;
 import org.bukkit.command.CommandSender;
 
 import java.util.Arrays;

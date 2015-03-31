@@ -1,14 +1,14 @@
 package me.st28.flexseries.flexcore.backend.commands;
 
 import me.st28.flexseries.flexcore.FlexCore;
-import me.st28.flexseries.flexcore.commands.CommandArgument;
-import me.st28.flexseries.flexcore.commands.FlexCommand;
-import me.st28.flexseries.flexcore.commands.FlexCommandSettings;
-import me.st28.flexseries.flexcore.messages.MessageReference;
-import me.st28.flexseries.flexcore.messages.ReplacementMap;
-import me.st28.flexseries.flexcore.permissions.PermissionNodes;
-import me.st28.flexseries.flexcore.plugins.FlexPlugin;
-import me.st28.flexseries.flexcore.utils.PluginUtils;
+import me.st28.flexseries.flexcore.command.CommandArgument;
+import me.st28.flexseries.flexcore.command.FlexCommand;
+import me.st28.flexseries.flexcore.command.FlexCommandSettings;
+import me.st28.flexseries.flexcore.message.MessageReference;
+import me.st28.flexseries.flexcore.message.ReplacementMap;
+import me.st28.flexseries.flexcore.permission.PermissionNodes;
+import me.st28.flexseries.flexcore.plugin.FlexPlugin;
+import me.st28.flexseries.flexcore.util.PluginUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.Plugin;

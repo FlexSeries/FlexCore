@@ -1,6 +1,6 @@
 package me.st28.flexseries.flexcore.debug;
 
-import me.st28.flexseries.flexcore.messages.MessageReference;
+import me.st28.flexseries.flexcore.message.MessageReference;
 
 /**
  * Represents the output of {@link DebugTest#runTest(org.bukkit.command.CommandSender, String, String[])}.

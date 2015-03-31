@@ -1,9 +1,9 @@
 package me.st28.flexseries.flexcore.debug;
 
 import me.st28.flexseries.flexcore.FlexCore;
-import me.st28.flexseries.flexcore.commands.CommandArgument;
-import me.st28.flexseries.flexcore.messages.MessageReference;
-import me.st28.flexseries.flexcore.utils.ArrayUtils;
+import me.st28.flexseries.flexcore.command.CommandArgument;
+import me.st28.flexseries.flexcore.message.MessageReference;
+import me.st28.flexseries.flexcore.util.ArrayUtils;
 import org.bukkit.command.CommandSender;
 
 public final class MCMLDebugTest extends DebugTest<FlexCore> {

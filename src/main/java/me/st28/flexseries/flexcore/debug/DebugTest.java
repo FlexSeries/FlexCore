@@ -1,7 +1,7 @@
 package me.st28.flexseries.flexcore.debug;
 
-import me.st28.flexseries.flexcore.commands.CommandArgument;
-import me.st28.flexseries.flexcore.permissions.PermissionNode;
+import me.st28.flexseries.flexcore.command.CommandArgument;
+import me.st28.flexseries.flexcore.permission.PermissionNode;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;

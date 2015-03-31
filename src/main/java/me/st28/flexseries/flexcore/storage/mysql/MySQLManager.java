@@ -4,7 +4,7 @@ import com.jolbox.bonecp.BoneCP;
 import com.jolbox.bonecp.BoneCPConfig;
 import me.st28.flexseries.flexcore.FlexCore;
 import me.st28.flexseries.flexcore.logging.LogHelper;
-import me.st28.flexseries.flexcore.plugins.FlexModule;
+import me.st28.flexseries.flexcore.plugin.module.FlexModule;
 import org.bukkit.configuration.ConfigurationSection;
 
 import java.sql.Connection;

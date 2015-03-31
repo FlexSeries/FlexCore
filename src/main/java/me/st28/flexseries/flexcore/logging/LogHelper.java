@@ -1,6 +1,6 @@
 package me.st28.flexseries.flexcore.logging;
 
-import me.st28.flexseries.flexcore.plugins.FlexModule;
+import me.st28.flexseries.flexcore.plugin.module.FlexModule;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 

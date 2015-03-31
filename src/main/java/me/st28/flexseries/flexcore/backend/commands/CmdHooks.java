@@ -1,17 +1,17 @@
 package me.st28.flexseries.flexcore.backend.commands;
 
 import me.st28.flexseries.flexcore.FlexCore;
-import me.st28.flexseries.flexcore.commands.CommandArgument;
-import me.st28.flexseries.flexcore.commands.CommandUtils;
-import me.st28.flexseries.flexcore.commands.FlexCommand;
-import me.st28.flexseries.flexcore.commands.FlexCommandSettings;
-import me.st28.flexseries.flexcore.hooks.Hook;
-import me.st28.flexseries.flexcore.hooks.HookManager;
-import me.st28.flexseries.flexcore.hooks.HookStatus;
-import me.st28.flexseries.flexcore.lists.ListBuilder;
-import me.st28.flexseries.flexcore.permissions.PermissionNodes;
-import me.st28.flexseries.flexcore.plugins.FlexPlugin;
-import me.st28.flexseries.flexcore.utils.QuickMap;
+import me.st28.flexseries.flexcore.command.CommandArgument;
+import me.st28.flexseries.flexcore.command.CommandUtils;
+import me.st28.flexseries.flexcore.command.FlexCommand;
+import me.st28.flexseries.flexcore.command.FlexCommandSettings;
+import me.st28.flexseries.flexcore.hook.Hook;
+import me.st28.flexseries.flexcore.hook.HookManager;
+import me.st28.flexseries.flexcore.hook.HookStatus;
+import me.st28.flexseries.flexcore.list.ListBuilder;
+import me.st28.flexseries.flexcore.permission.PermissionNodes;
+import me.st28.flexseries.flexcore.plugin.FlexPlugin;
+import me.st28.flexseries.flexcore.util.QuickMap;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.Plugin;
 
