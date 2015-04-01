@@ -4,6 +4,7 @@ import me.st28.flexseries.flexcore.FlexCore;
 import me.st28.flexseries.flexcore.command.CommandArgument;
 import me.st28.flexseries.flexcore.command.FlexCommand;
 import me.st28.flexseries.flexcore.command.FlexCommandSettings;
+import me.st28.flexseries.flexcore.command.FlexTabCompleter;
 import me.st28.flexseries.flexcore.message.MessageReference;
 import me.st28.flexseries.flexcore.message.ReplacementMap;
 import me.st28.flexseries.flexcore.permission.PermissionNodes;
@@ -14,10 +15,12 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
-public final class CmdReload extends FlexCommand<FlexCore> {
+public final class CmdReload extends FlexCommand<FlexCore> implements FlexTabCompleter {
 
     public CmdReload(FlexCore plugin) {
         super(plugin, "flexreload", Collections.singletonList(new CommandArgument("plugin", true)), new FlexCommandSettings().permission(PermissionNodes.RELOAD));
@@ -39,6 +42,19 @@ public final class CmdReload extends FlexCommand<FlexCore> {
 
         ((FlexPlugin) targetPlugin).reloadAll();
         MessageReference.createGeneral((JavaPlugin) targetPlugin, "lib_plugin.notices.plugin_reloaded").sendTo(sender);
+    }
+
+    @Override
+    public List<String> getTabOptions(CommandSender sender, String[] args) {
+        List<String> returnList = new ArrayList<>();
+
+        for (Plugin plugin : Bukkit.getPluginManager().getPlugins()) {
+            if (plugin instanceof FlexPlugin) {
+                returnList.add(plugin.getName());
+            }
+        }
+
+        return returnList;
     }
 
 }

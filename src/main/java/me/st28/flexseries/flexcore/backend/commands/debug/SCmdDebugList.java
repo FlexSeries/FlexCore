@@ -1,10 +1,7 @@
 package me.st28.flexseries.flexcore.backend.commands.debug;
 
 import me.st28.flexseries.flexcore.FlexCore;
-import me.st28.flexseries.flexcore.command.CommandArgument;
-import me.st28.flexseries.flexcore.command.CommandUtils;
-import me.st28.flexseries.flexcore.command.FlexCommandSettings;
-import me.st28.flexseries.flexcore.command.FlexSubcommand;
+import me.st28.flexseries.flexcore.command.*;
 import me.st28.flexseries.flexcore.command.exceptions.CommandInterruptedException;
 import me.st28.flexseries.flexcore.debug.DebugManager;
 import me.st28.flexseries.flexcore.debug.DebugTest;
@@ -17,13 +14,10 @@ import me.st28.flexseries.flexcore.util.StringUtils;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 
-public final class SCmdDebugList extends FlexSubcommand<FlexCore> {
+public final class SCmdDebugList extends FlexSubcommand<FlexCore> implements FlexTabCompleter {
 
     public SCmdDebugList(CmdDebug cmdDebug) {
         super(cmdDebug, "list", Arrays.asList(new CommandArgument("plugin", false), new CommandArgument("page", false)), new FlexCommandSettings<FlexCore>().description("Lists debug tests"));
@@ -72,6 +66,18 @@ public final class SCmdDebugList extends FlexSubcommand<FlexCore> {
 
             builder.sendTo(sender, page);
         }
+    }
+
+    @Override
+    public List<String> getTabOptions(CommandSender sender, String[] args) {
+        Map<Class<? extends JavaPlugin>, Map<String, DebugTest>> debugTests = FlexPlugin.getRegisteredModule(DebugManager.class).getDebugTests();
+        List<String> returnList = new ArrayList<>();
+
+        for (Class<? extends JavaPlugin> pluginClass : debugTests.keySet()) {
+            returnList.add(JavaPlugin.getPlugin(pluginClass).getName());
+        }
+
+        return returnList;
     }
 
 }

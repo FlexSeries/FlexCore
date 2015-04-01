@@ -1,10 +1,7 @@
 package me.st28.flexseries.flexcore.backend.commands;
 
 import me.st28.flexseries.flexcore.FlexCore;
-import me.st28.flexseries.flexcore.command.CommandArgument;
-import me.st28.flexseries.flexcore.command.CommandUtils;
-import me.st28.flexseries.flexcore.command.FlexCommand;
-import me.st28.flexseries.flexcore.command.FlexCommandSettings;
+import me.st28.flexseries.flexcore.command.*;
 import me.st28.flexseries.flexcore.list.ListBuilder;
 import me.st28.flexseries.flexcore.message.MessageReference;
 import me.st28.flexseries.flexcore.message.ReplacementMap;
@@ -20,7 +17,7 @@ import org.bukkit.plugin.Plugin;
 
 import java.util.*;
 
-public final class CmdModules extends FlexCommand<FlexCore> {
+public final class CmdModules extends FlexCommand<FlexCore> implements FlexTabCompleter {
 
     public CmdModules(FlexCore plugin) {
         super(plugin, "flexmodules", Arrays.asList(new CommandArgument("plugin", true), new CommandArgument("page", false)), new FlexCommandSettings().permission(PermissionNodes.RELOAD));
@@ -79,6 +76,23 @@ public final class CmdModules extends FlexCommand<FlexCore> {
         //TODO: Don't include page number if one was specified
         builder.enableNextPageNotice(command.replace("/", ""));
         builder.sendTo(sender, page);
+    }
+
+    @Override
+    public List<String> getTabOptions(CommandSender sender, String[] args) {
+        if (args.length != 1) {
+            return null;
+        }
+
+        List<String> returnList = new ArrayList<>();
+
+        for (Plugin plugin : Bukkit.getPluginManager().getPlugins()) {
+            if (plugin instanceof FlexPlugin) {
+                returnList.add(plugin.getName());
+            }
+        }
+
+        return returnList;
     }
 
 }

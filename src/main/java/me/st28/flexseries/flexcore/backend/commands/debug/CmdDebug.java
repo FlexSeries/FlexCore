@@ -1,10 +1,7 @@
 package me.st28.flexseries.flexcore.backend.commands.debug;
 
 import me.st28.flexseries.flexcore.FlexCore;
-import me.st28.flexseries.flexcore.command.CommandArgument;
-import me.st28.flexseries.flexcore.command.CommandUtils;
-import me.st28.flexseries.flexcore.command.FlexCommand;
-import me.st28.flexseries.flexcore.command.FlexCommandSettings;
+import me.st28.flexseries.flexcore.command.*;
 import me.st28.flexseries.flexcore.command.exceptions.CommandInterruptedException;
 import me.st28.flexseries.flexcore.debug.DebugManager;
 import me.st28.flexseries.flexcore.debug.DebugTest;
@@ -19,10 +16,12 @@ import me.st28.flexseries.flexcore.util.QuickMap;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
-public final class CmdDebug extends FlexCommand<FlexCore> {
+public final class CmdDebug extends FlexCommand<FlexCore> implements FlexTabCompleter {
 
     public CmdDebug(FlexCore plugin) {
         super(plugin, "flexdebug", Arrays.asList(new CommandArgument("plugin", true), new CommandArgument("test", true)), new FlexCommandSettings().permission(PermissionNodes.DEBUG));
@@ -70,6 +69,27 @@ public final class CmdDebug extends FlexCommand<FlexCore> {
             MessageReference.create(FlexCore.class, "debug.errors.test_exception", new ReplacementMap("{OUTPUT}", "(" + ex.getClass().getCanonicalName() + ") " + ex.getMessage()).getMap()).sendTo(sender);
             ex.printStackTrace();
         }
+    }
+
+    @Override
+    public List<String> getTabOptions(CommandSender sender, String[] args) {
+        Map<Class<? extends JavaPlugin>, Map<String, DebugTest>> debugTests = FlexPlugin.getRegisteredModule(DebugManager.class).getDebugTests();
+
+        List<String> returnList = new ArrayList<>();
+        if (args.length == 1) {
+            for (Class<? extends JavaPlugin> pluginClass : debugTests.keySet()) {
+                returnList.add(JavaPlugin.getPlugin(pluginClass).getName());
+            }
+        } else {
+            JavaPlugin plugin = (JavaPlugin) PluginUtils.getPlugin(args[0]);
+            if (plugin == null) {
+                return null;
+            }
+
+            Map<String, DebugTest> tests = debugTests.get(plugin.getClass());
+            returnList.addAll(tests.keySet());
+        }
+        return returnList;
     }
 
 }
