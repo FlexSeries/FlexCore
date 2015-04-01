@@ -124,6 +124,7 @@ public final class MessageReference {
     }
 
     public void sendTo(Collection<CommandSender> recipients, Map<String, String> additionalReplacements) {
+        if (rawMessage == null) return;
         getMessage(additionalReplacements).send(recipients);
     }
 
