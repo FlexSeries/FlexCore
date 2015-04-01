@@ -4,11 +4,13 @@ import me.st28.flexseries.flexcore.FlexCore;
 import me.st28.flexseries.flexcore.logging.LogHelper;
 import me.st28.flexseries.flexcore.plugin.module.FlexModule;
 import me.st28.flexseries.flexcore.plugin.FlexPlugin;
+import org.apache.commons.lang.Validate;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * Helper for commands that have list-based output with a header.<br />
@@ -43,18 +45,18 @@ public final class ListManager extends FlexModule<FlexCore> {
     protected void handleReload() {
         FileConfiguration config = getConfig();
 
-        pageItems = config.getInt("General Config.page items", 8);
-        lineLength = config.getInt("General Config.line length", 54);
+        pageItems = config.getInt("general config.page items", 8);
+        lineLength = config.getInt("general config.line length", 54);
 
-        msgNextPage = config.getString("Messages.next page", "&c&oType &6&o/{COMMAND} {NEXTPAGE} &c&oto view the next page.");
-        msgNoElements = config.getString("Messages.no elements", "&c&oNothing here.");
+        msgNextPage = config.getString("messages.next page", "&c&oType &6&o/{COMMAND} {NEXTPAGE} &c&oto view the next page.");
+        msgNoElements = config.getString("messages.no elements", "&c&oNothing here.");
 
         formatsElement.clear();
-        ConfigurationSection elementSec = config.getConfigurationSection("Formats.Elements");
+        ConfigurationSection elementSec = config.getConfigurationSection("formats.elements");
         if (elementSec != null) {
             for (String key : elementSec.getKeys(false)) {
                 if (formatsElement.containsKey(key.toLowerCase())) {
-                    LogHelper.warning(FlexCore.class, "A element format named '" + key.toLowerCase() + "' is already loaded.");
+                    LogHelper.warning(this, "A element format named '" + key.toLowerCase() + "' is already loaded.");
                     continue;
                 }
 
@@ -63,11 +65,11 @@ public final class ListManager extends FlexModule<FlexCore> {
         }
 
         formatsHeader.clear();
-        ConfigurationSection headerSec = config.getConfigurationSection("Formats.Headers");
+        ConfigurationSection headerSec = config.getConfigurationSection("formats.headers");
         if (headerSec != null) {
             for (String key : headerSec.getKeys(false)) {
                 if (formatsHeader.containsKey(key.toLowerCase())) {
-                    LogHelper.warning(FlexCore.class, "A header format named '" + key.toLowerCase() + "' is already loaded.");
+                    LogHelper.warning(this, "A header format named '" + key.toLowerCase() + "' is already loaded.");
                     continue;
                 }
 
@@ -75,7 +77,7 @@ public final class ListManager extends FlexModule<FlexCore> {
                 try {
                     header = new ListHeader(headerSec.getConfigurationSection(key));
                 } catch (Exception ex) {
-                    LogHelper.warning(FlexCore.class, "An exception occurred while loading header '" + key.toLowerCase() + "'");
+                    LogHelper.warning(this, "An exception occurred while loading header '" + key.toLowerCase() + "'");
                     ex.printStackTrace();
                     continue;
                 }
@@ -84,14 +86,47 @@ public final class ListManager extends FlexModule<FlexCore> {
         }
     }
 
+    @Override
+    protected void handleSave(boolean async) {
+        ConfigurationSection config = getConfig().getConfigurationSection("formats.elements");
+
+        for (Entry<String, String> entry : formatsElement.entrySet()) {
+            config.set(entry.getKey(), entry.getValue());
+        }
+    }
+
+    /**
+     * @return a header format matching a given name.
+     */
+    public ListHeader getHeaderFormat(String name) {
+        Validate.notNull(name, "Name cannot be null.");
+        name = name.toLowerCase();
+        return !formatsHeader.containsKey(name) ? new ListHeader(name) : formatsHeader.get(name);
+    }
+
+    /**
+     * @return an element format matching a given name.
+     */
     public String getElementFormat(String name) {
+        Validate.notNull(name, "Name cannot be null.");
         name = name.toLowerCase();
         return !formatsElement.containsKey(name) ? UNKNOWN_ELEMENT_FORMAT.replace("{NAME}", name) : formatsElement.get(name);
     }
 
-    public ListHeader getHeaderFormat(String name) {
+    /**
+     * Creates an element format if it doesn't already exist in the configuration file.
+     *
+     * @param name The name of the format.
+     * @param defaultFormat The default format.  This will be saved to the configuration file if nothing is already set.
+     */
+    public void createElementFormat(String name, String defaultFormat) {
+        Validate.notNull(name, "Name cannot be null.");
+        Validate.notNull(defaultFormat, "Default format cannot be null.");
+
         name = name.toLowerCase();
-        return !formatsHeader.containsKey(name) ? new ListHeader(name) : formatsHeader.get(name);
+        if (!formatsElement.containsKey(name)) {
+            formatsElement.put(name, defaultFormat);
+        }
     }
 
 }
