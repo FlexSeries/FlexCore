@@ -184,19 +184,14 @@ public abstract class FlexCommand<T extends FlexPlugin> {
             // No cookies in use, build usage with default labels.
 
             for (FlexCommand<T> curCommand : getParents()) {
-                if (sb.length() == 0) {
-                    sb.append("/");
-                } else {
+                if (sb.length() > 1) {
                     sb.append(" ");
                 }
 
                 sb.append(curCommand.labels.get(0));
             }
 
-            // If nothing was added, assume this is the base command and add the slash.
-            if (sb.length() == 0) {
-                sb.append("/");
-            } else {
+            if (sb.length() > 1) {
                 sb.append(" ");
             }
             sb.append(labels.get(0)); // Add the label for this command.
@@ -211,19 +206,14 @@ public abstract class FlexCommand<T extends FlexPlugin> {
             String cookieUserId = CookieManager.getUserIdentifier(sender);
 
             for (FlexCommand<T> curCommand : getParents()) {
-                if (sb.length() == 0) {
-                    sb.append("/");
-                } else {
+                if (sb.length() > 1) {
                     sb.append(" ");
                 }
 
                 sb.append(cookieManager.getValue(cookieUserId, curCommand.labels.get(0), plugin.getClass(), curCommand.getLabelCookieIdentifier()));
             }
 
-            // If nothing was added, assume this is the base command and add the slash.
-            if (sb.length() == 0) {
-                sb.append("/");
-            } else {
+            if (sb.length() > 1) {
                 sb.append(" ");
             }
             sb.append(cookieManager.getValue(cookieUserId, labels.get(0), plugin.getClass(), getLabelCookieIdentifier())); // Add the label for this command.
