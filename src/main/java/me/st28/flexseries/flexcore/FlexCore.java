@@ -11,6 +11,7 @@ import me.st28.flexseries.flexcore.debug.ArgumentDebugTest;
 import me.st28.flexseries.flexcore.debug.DebugManager;
 import me.st28.flexseries.flexcore.debug.MCMLDebugTest;
 import me.st28.flexseries.flexcore.gui.GuiManager;
+import me.st28.flexseries.flexcore.gui.debug.GuiDebugTest;
 import me.st28.flexseries.flexcore.hook.HookManager;
 import me.st28.flexseries.flexcore.item.CustomItemDebugTest;
 import me.st28.flexseries.flexcore.item.CustomItemManager;
@@ -64,6 +65,7 @@ public final class FlexCore extends FlexPlugin implements Listener {
 
             debugManager.registerDebugTest(new ArgumentDebugTest(this));
             debugManager.registerDebugTest(new CustomItemDebugTest(this));
+            debugManager.registerDebugTest(new GuiDebugTest(this));
             debugManager.registerDebugTest(new MCMLDebugTest(this));
         } catch (ModuleDisabledException ex) {
             LogHelper.warning(this, "Unable to register default debug tests because the debug manager is not enabled.");
