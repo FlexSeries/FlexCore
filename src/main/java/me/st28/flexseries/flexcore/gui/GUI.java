@@ -35,6 +35,16 @@ public class GUI {
     private boolean autoDestroy;
 
     /**
+     * Allow items to be placed into the inventory.
+     */
+    private boolean allowPlacing;
+
+    /**
+     * Allow items to be taken from the inventory.
+     */
+    private boolean allowTaking;
+
+    /**
      * Contains all of the different pages of the GUI.
      */
     private final List<GuiPage> pages = new ArrayList<>();
@@ -45,6 +55,8 @@ public class GUI {
      */
     private final Map<UUID, Integer> playerInstances = new HashMap<>();
 
+    final Set<UUID> transitioningPlayers = new HashSet<>();
+
     /**
      * Creates a GUI.
      *
@@ -53,7 +65,7 @@ public class GUI {
      *              <code>{MAXPAGES}</code> is a placeholder for the total page count.
      * @param size The number of rows that the inventory should contain.
      */
-    public GUI(String title, int size, int defaultPage, boolean removeInstanceOnClose, boolean autoDestroy) {
+    public GUI(String title, int size, int defaultPage, boolean removeInstanceOnClose, boolean autoDestroy, boolean allowPlacing, boolean allowTaking) {
         Validate.notNull(title, "Title cannot be null.");
         Validate.isTrue(title.length() <= 32, "Title cannot be longer than 32 characters");
         Validate.isTrue(size >= 1 && size <= 9, "Size must be 1-9");
@@ -64,6 +76,8 @@ public class GUI {
         this.defaultPage = defaultPage;
         this.removeInstanceOnClose = removeInstanceOnClose;
         this.autoDestroy = autoDestroy;
+        this.allowPlacing = allowPlacing;
+        this.allowTaking = allowTaking;
     }
 
     /**
@@ -77,6 +91,7 @@ public class GUI {
 
         int pageCount = pages.size() + 1;
 
+        pages.add(page);
         page.items = Arrays.asList(new GuiItem[size * 9]);
         page.inventory = Bukkit.createInventory(null, size * 9, ChatColor.translateAlternateColorCodes('&', title).replace("{PAGE}", Integer.toString(pageCount)).replace("{MAXPAGES}", Integer.toString(pageCount)));
     }
@@ -137,11 +152,10 @@ public class GUI {
             page = defaultPage;
         }
 
-        Inventory inventory = pages.get(page).inventory;
-        playerInstances.put(uuid, defaultPage);
-        player.openInventory(inventory);
+        setPlayerPage(player, page);
 
         guiManager.setGui(player, this);
+        handleOpen(player);
     }
 
     /**
@@ -151,10 +165,36 @@ public class GUI {
      */
     protected void handleOpen(Player player) {}
 
+    public boolean setPlayerPage(Player player, int page) {
+        Validate.notNull(player, "Player cannot be null.");
+        if (page < 0 || page >= pages.size()) {
+            return false;
+        }
+
+        Inventory inventory = pages.get(page).inventory;
+
+        if (playerInstances.containsKey(player.getUniqueId())) {
+            transitioningPlayers.add(player.getUniqueId());
+        }
+
+        playerInstances.put(player.getUniqueId(), page);
+        player.openInventory(inventory);
+        return true;
+    }
+
+    public boolean nextPlayerPage(Player player) {
+        return setPlayerPage(player, playerInstances.get(player.getUniqueId()) + 1);
+    }
+
+    public boolean previousPlayerPage(Player player) {
+        return setPlayerPage(player, playerInstances.get(player.getUniqueId()) - 1);
+    }
+
     public final void inventoryClick(InventoryClickEvent e) {
         UUID uuid = e.getWhoClicked().getUniqueId();
         boolean isClickInGui = e.getRawSlot() < size * 9;
         int slot = e.getSlot();
+        if (slot < 0) return;
 
         GuiPage page = pages.get(playerInstances.get(uuid));
         GuiItem item = !isClickInGui ? null : page.items.get(slot);
@@ -175,12 +215,33 @@ public class GUI {
             item.handleClick((Player) e.getWhoClicked(), e.getClick());
         } else {
             switch (e.getAction()) {
-                case COLLECT_TO_CURSOR:
+                /*case COLLECT_TO_CURSOR:
                 case UNKNOWN:
                     e.setCancelled(true);
+                    break;*/
+
+                // Placing
+                case PLACE_ALL:
+                case PLACE_SOME:
+                case PLACE_ONE:
+                    if (!allowPlacing) {
+                        e.setCancelled(true);
+                    }
+                    break;
+
+                // Taking
+                case PICKUP_ALL:
+                case PICKUP_HALF:
+                case PICKUP_ONE:
+                case PICKUP_SOME:
+                case MOVE_TO_OTHER_INVENTORY:
+                    if (!allowTaking) {
+                        e.setCancelled(true);
+                    }
                     break;
 
                 default:
+                    e.setCancelled(true);
             }
         }
     }
