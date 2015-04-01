@@ -44,6 +44,7 @@ public final class FlexCommandWrapper implements CommandExecutor {
         }
 
         bukkitCommand.setExecutor(new FlexCommandWrapper(command));
+        bukkitCommand.setTabCompleter(new FlexTabCompleterWrapper(command));
     }
 
     private final FlexCommand<?> command;
