@@ -67,7 +67,7 @@ public final class CmdDebug extends FlexCommand<FlexCore> {
                 }
             }
         } catch (Exception ex) {
-            MessageReference.create(FlexCore.class, "debug.errors.test_exception", new ReplacementMap("{OUTPUT}", ex.getMessage()).getMap()).sendTo(sender);
+            MessageReference.create(FlexCore.class, "debug.errors.test_exception", new ReplacementMap("{OUTPUT}", "(" + ex.getClass().getCanonicalName() + ") " + ex.getMessage()).getMap()).sendTo(sender);
             ex.printStackTrace();
         }
     }
