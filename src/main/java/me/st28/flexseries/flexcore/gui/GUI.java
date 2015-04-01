@@ -196,8 +196,7 @@ public class GUI {
             throw new IllegalStateException("Player '" + player.getName() + "' does not have this inventory open.");
         }
 
-        player.closeInventory();
-        player.setItemOnCursor(null);
+        //player.closeInventory();
         handleClose(player);
 
         if (removeInstanceOnClose) {

@@ -8,6 +8,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 
 import java.util.HashMap;
@@ -53,11 +54,12 @@ public final class GuiManager extends FlexModule<FlexCore> implements Listener {
 
         UUID uuid = player.getUniqueId();
 
-        if (playerGuis.containsKey(uuid)) {
-            playerGuis.remove(uuid).closeForPlayer(player);
+        if (gui != null && playerGuis.containsKey(uuid)) {
+            throw new IllegalStateException("Player '" + player.getName() + "' already has a GUI open.");
         }
 
         if (gui == null) {
+            playerGuis.remove(uuid);
             return;
         }
 
@@ -79,7 +81,18 @@ public final class GuiManager extends FlexModule<FlexCore> implements Listener {
         GUI gui = playerGuis.get(uuid);
         if (gui == null) return;
 
-        e.setCancelled(true);
+        if (e.getInventorySlots().size() > 1) {
+            e.setCancelled(true);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onInventoryClose(InventoryCloseEvent e) {
+        UUID uuid = e.getPlayer().getUniqueId();
+        GUI gui = playerGuis.get(uuid);
+        if (gui == null || gui.transitioningPlayers.remove(uuid)) return;
+
+        gui.closeForPlayer((Player) e.getPlayer());
     }
 
 }
