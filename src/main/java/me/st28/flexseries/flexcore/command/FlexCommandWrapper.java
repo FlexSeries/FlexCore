@@ -82,12 +82,12 @@ public final class FlexCommandWrapper implements CommandExecutor {
                 FlexCommand subcommand = currentCommand.getSubcommands().get(args[curIndex].toLowerCase());
 
                 if (subcommand != null) {
-                    currentCommand = subcommand;
-                    curIndex++;
-
                     if (cookieManager != null) {
                         cookieManager.setValue(cookieUserId, args[curIndex].toLowerCase(), subcommand.getPlugin().getClass(), subcommand.getLabelCookieIdentifier());
                     }
+
+                    currentCommand = subcommand;
+                    curIndex++;
                 } else {
                     break;
                 }
