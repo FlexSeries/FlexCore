@@ -5,7 +5,6 @@ import me.st28.flexseries.flexcore.command.CommandArgument;
 import me.st28.flexseries.flexcore.command.CommandUtils;
 import me.st28.flexseries.flexcore.command.FlexCommandSettings;
 import me.st28.flexseries.flexcore.command.FlexSubcommand;
-import me.st28.flexseries.flexcore.commands.*;
 import me.st28.flexseries.flexcore.command.exceptions.CommandInterruptedException;
 import me.st28.flexseries.flexcore.debug.DebugManager;
 import me.st28.flexseries.flexcore.debug.DebugTest;

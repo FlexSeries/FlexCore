@@ -2,7 +2,6 @@ package me.st28.flexseries.flexcore.item;
 
 import me.st28.flexseries.flexcore.FlexCore;
 import me.st28.flexseries.flexcore.item.events.*;
-import me.st28.flexseries.flexcore.items.events.*;
 import me.st28.flexseries.flexcore.plugin.module.FlexModule;
 import me.st28.flexseries.flexcore.storage.flatfile.YamlFileManager;
 import org.apache.commons.lang.Validate;
