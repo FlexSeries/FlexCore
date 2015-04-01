@@ -59,7 +59,8 @@ formats:
   elements:
     command: '&c/&4{LABEL}(txt:&6Aliases: &e{ALIASES})&c{COMMAND} &8- &e{DESCRIPTION}'
     element: '&6{KEY}'
+    hook_enabled: '&e{PLUGIN}&8: &a{VERSION}'
+    hook_disabled: '&e{PLUGIN}&8: &c{STATUS}'
     lib_plugin_module: '&e{NAME}&8 &8({STATUS}&8): &6{DESCRIPTION}'
     number: '&e{INDEX}) &6{KEY}'
-    parties_party: '&e{INDEX}) &6{NAME} &8- &6{MEMBERS} member{S} &8- {LEADER}'
     title: '&e{KEY}: &6{VALUE}'
