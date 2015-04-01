@@ -1,7 +1,9 @@
-package me.st28.flexseries.flexcore.debug;
+package me.st28.flexseries.flexcore.backend.debug.tests;
 
 import me.st28.flexseries.flexcore.FlexCore;
 import me.st28.flexseries.flexcore.command.CommandArgument;
+import me.st28.flexseries.flexcore.debug.DebugTest;
+import me.st28.flexseries.flexcore.debug.DebugTestOutput;
 import me.st28.flexseries.flexcore.message.MessageReference;
 import me.st28.flexseries.flexcore.util.ArrayUtils;
 import org.bukkit.command.CommandSender;

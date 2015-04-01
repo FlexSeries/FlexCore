@@ -1,8 +1,9 @@
-package me.st28.flexseries.flexcore.gui.debug;
+package me.st28.flexseries.flexcore.backend.debug.tests;
 
 import me.st28.flexseries.flexcore.FlexCore;
 import me.st28.flexseries.flexcore.debug.DebugTest;
 import me.st28.flexseries.flexcore.debug.DebugTestOutput;
+import me.st28.flexseries.flexcore.gui.debug.DebugGui;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
