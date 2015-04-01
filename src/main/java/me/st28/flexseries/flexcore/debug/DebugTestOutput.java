@@ -11,7 +11,7 @@ public final class DebugTestOutput {
     private final MessageReference message;
 
     public DebugTestOutput(boolean isSuccess, String message) {
-        this(isSuccess, MessageReference.createPlain(message));
+        this(isSuccess, message == null ? null : MessageReference.createPlain(message));
     }
 
     public DebugTestOutput(boolean isSuccess, MessageReference message) {
