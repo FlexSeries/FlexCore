@@ -24,6 +24,10 @@ public final class FlexTabCompleterWrapper implements TabCompleter {
             args = CommandUtils.fixArguments(args);
             FlexCommand<?> currentCommand = this.command.getSubcommands().get(label.toLowerCase());;
 
+            if (currentCommand == null) {
+                currentCommand = this.command;
+            }
+
             int curIndex = 0;
             while (args.length > curIndex) {
                 FlexCommand subcommand = currentCommand.getSubcommands().get(args[curIndex].toLowerCase());
@@ -77,9 +81,7 @@ public final class FlexTabCompleterWrapper implements TabCompleter {
             if (currentCommand instanceof FlexTabCompleter) {
                 return ((FlexTabCompleter) currentCommand).getTabOptions(sender, newArgs.toArray(new String[newArgs.size()]));
             }
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
+        } catch (Exception ex) {}
         return null;
     }
 
