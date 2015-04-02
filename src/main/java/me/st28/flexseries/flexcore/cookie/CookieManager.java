@@ -2,6 +2,7 @@ package me.st28.flexseries.flexcore.cookie;
 
 import me.st28.flexseries.flexcore.FlexCore;
 import me.st28.flexseries.flexcore.events.PlayerLeaveEvent;
+import me.st28.flexseries.flexcore.logging.LogHelper;
 import me.st28.flexseries.flexcore.player.PlayerManager;
 import me.st28.flexseries.flexcore.player.loading.PlayerLoadCycle;
 import me.st28.flexseries.flexcore.player.loading.PlayerLoader;
@@ -28,7 +29,6 @@ import java.util.UUID;
  *     <li>Most frequently used command labels</li>
  * </ul>
  */
-//TODO: Make plugin function without the cookie manager being enabled.
 public final class CookieManager extends FlexModule<FlexCore> implements Listener, PlayerLoader {
 
     /**
@@ -74,13 +74,16 @@ public final class CookieManager extends FlexModule<FlexCore> implements Listene
     }
 
     private void loadEntry(String entry) {
-        FileConfiguration config = new YamlFileManager(cookieDir + File.separator + entry + ".yml").getConfig();
-
-        //TODO: Wipe file is there's an error with the YAML syntax.
-
         Map<String, String> values = new HashMap<>();
-        for (String key : config.getKeys(false)) {
-            values.put(key, config.getString(key));
+
+        try {
+            FileConfiguration config = new YamlFileManager(cookieDir + File.separator + entry + ".yml").getConfig();
+
+            for (String key : config.getKeys(false)) {
+                values.put(key, config.getString(key));
+            }
+        } catch (Exception ex) {
+            LogHelper.warning(this, "An error occurred while loading entry '" + entry + "' - starting fresh.");
         }
 
         loadedCookies.put(entry, values);

@@ -144,9 +144,7 @@ public final class FlexCommandWrapper implements CommandExecutor {
             if (commandSettings.isDummyCommand() || newArgs.size() < currentCommand.getRequiredArguments()) {
                 String defCommand = commandSettings.getDefaultSubcommand();
                 if (defCommand == null) {
-                    if (commandSettings.isDummyCommand()) {
-                        //TODO: Show usages of subcommands
-                    } else {
+                    if (!commandSettings.isDummyCommand()) {
                         CommandUtils.performArgsTest(newArgs.size(), currentCommand.getRequiredArguments(), MessageReference.createPlain(currentCommand.buildUsage(sender)));
                     }
                     return true;
