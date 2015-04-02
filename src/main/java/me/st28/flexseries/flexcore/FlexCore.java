@@ -1,39 +1,56 @@
+/**
+ * FlexCore - Licensed under the MIT License (MIT)
+ *
+ * Copyright (c) Stealth2800 <http://stealthyone.com/>
+ * Copyright (c) contributors <https://github.com/FlexSeries>
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package me.st28.flexseries.flexcore;
 
-import me.st28.flexseries.flexcore.commands.*;
-import me.st28.flexseries.flexcore.commands.debug.CmdDebug;
-import me.st28.flexseries.flexcore.commands.items.CmdItemInfo;
-import me.st28.flexseries.flexcore.commands.motd.CmdMotd;
-import me.st28.flexseries.flexcore.commands.ping.CmdPing;
-import me.st28.flexseries.flexcore.commands.terms.CmdTerms;
-import me.st28.flexseries.flexcore.cookies.CookieManager;
-import me.st28.flexseries.flexcore.debug.ArgumentDebugTest;
+import me.st28.flexseries.flexcore.backend.commands.CmdHooks;
+import me.st28.flexseries.flexcore.backend.commands.CmdModules;
+import me.st28.flexseries.flexcore.backend.commands.CmdReload;
+import me.st28.flexseries.flexcore.backend.commands.CmdSave;
+import me.st28.flexseries.flexcore.backend.commands.debug.CmdDebug;
+import me.st28.flexseries.flexcore.command.FlexCommandWrapper;
+import me.st28.flexseries.flexcore.cookie.CookieManager;
+import me.st28.flexseries.flexcore.backend.debug.tests.ArgumentDebugTest;
 import me.st28.flexseries.flexcore.debug.DebugManager;
-import me.st28.flexseries.flexcore.debug.MCMLDebugTest;
-import me.st28.flexseries.flexcore.help.HelpManager;
-import me.st28.flexseries.flexcore.hooks.HookManager;
-import me.st28.flexseries.flexcore.items.CustomItemDebugTest;
-import me.st28.flexseries.flexcore.items.CustomItemManager;
-import me.st28.flexseries.flexcore.items.ItemNameManager;
-import me.st28.flexseries.flexcore.lists.ListManager;
+import me.st28.flexseries.flexcore.backend.debug.tests.MCMLDebugTest;
+import me.st28.flexseries.flexcore.gui.GuiManager;
+import me.st28.flexseries.flexcore.backend.debug.tests.GuiDebugTest;
+import me.st28.flexseries.flexcore.hook.HookManager;
+import me.st28.flexseries.flexcore.backend.debug.tests.CustomItemDebugTest;
+import me.st28.flexseries.flexcore.item.CustomItemManager;
+import me.st28.flexseries.flexcore.list.ListManager;
 import me.st28.flexseries.flexcore.logging.LogHelper;
-import me.st28.flexseries.flexcore.messages.MessageManager;
-import me.st28.flexseries.flexcore.motd.MotdManager;
-import me.st28.flexseries.flexcore.ping.PingManager;
-import me.st28.flexseries.flexcore.players.PlayerManager;
-import me.st28.flexseries.flexcore.players.PlayerUUIDTracker;
-import me.st28.flexseries.flexcore.plugins.FlexPlugin;
-import me.st28.flexseries.flexcore.plugins.exceptions.ModuleDisabledException;
+import me.st28.flexseries.flexcore.message.MessageManager;
+import me.st28.flexseries.flexcore.player.PlayerManager;
+import me.st28.flexseries.flexcore.player.uuid_tracker.PlayerUuidTracker;
+import me.st28.flexseries.flexcore.plugin.FlexPlugin;
+import me.st28.flexseries.flexcore.plugin.exceptions.ModuleDisabledException;
 import me.st28.flexseries.flexcore.storage.mysql.MySQLManager;
-import me.st28.flexseries.flexcore.terms.TermsManager;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.event.Listener;
 
-import java.util.regex.Pattern;
-
 public final class FlexCore extends FlexPlugin implements Listener {
-
-    public final static Pattern CHARACTER_REGEX = Pattern.compile("\\\\(\\\\u[A-F0-9]{4})");
 
     public static FlexCore instance;
 
@@ -50,39 +67,29 @@ public final class FlexCore extends FlexPlugin implements Listener {
         registerModule(new CookieManager(this));
         registerModule(new CustomItemManager(this));
         registerModule(new DebugManager(this));
-        registerModule(new HelpManager(this));
+        registerModule(new GuiManager(this));
         registerModule(new HookManager(this));
-        registerModule(new ItemNameManager(this));
         registerModule(new ListManager(this));
         registerModule(new MessageManager(this));
-        registerModule(new MotdManager(this));
         registerModule(new MySQLManager(this));
-        registerModule(new PingManager(this));
         registerModule(new PlayerManager(this));
-        registerModule(new PlayerUUIDTracker(this));
-        registerModule(new TermsManager(this));
+        registerModule(new PlayerUuidTracker(this));
     }
 
     @Override
     public void handlePluginEnable() {
-        //TODO: Register commands automatically.
-
-        FlexCommandWrapper.registerCommand(this, "flexdebug", new CmdDebug(this));
-        FlexCommandWrapper.registerCommand(this, "flexhelp", new FlexHelpCommand<>(this, new String[]{"flexhelp", "help"}, null));
-        FlexCommandWrapper.registerCommand(this, "flexhooks", new CmdHooks(this));
-        FlexCommandWrapper.registerCommand(this, "flexiteminfo", new CmdItemInfo(this));
-        FlexCommandWrapper.registerCommand(this, "flexmodules", new CmdModules(this));
-        FlexCommandWrapper.registerCommand(this, "flexmotd", new CmdMotd(this));
-        FlexCommandWrapper.registerCommand(this, "flexping", new CmdPing(this));
-        FlexCommandWrapper.registerCommand(this, "flexreload", new CmdReload(this));
-        FlexCommandWrapper.registerCommand(this, "flexsave", new CmdSave(this));
-        FlexCommandWrapper.registerCommand(this, "flexterms", new CmdTerms(this));
+        FlexCommandWrapper.registerCommand(this, new CmdDebug(this));
+        FlexCommandWrapper.registerCommand(this, new CmdHooks(this));
+        FlexCommandWrapper.registerCommand(this, new CmdModules(this));
+        FlexCommandWrapper.registerCommand(this, new CmdReload(this));
+        FlexCommandWrapper.registerCommand(this, new CmdSave(this));
 
         try {
             DebugManager debugManager = FlexPlugin.getRegisteredModule(DebugManager.class);
 
             debugManager.registerDebugTest(new ArgumentDebugTest(this));
             debugManager.registerDebugTest(new CustomItemDebugTest(this));
+            debugManager.registerDebugTest(new GuiDebugTest(this));
             debugManager.registerDebugTest(new MCMLDebugTest(this));
         } catch (ModuleDisabledException ex) {
             LogHelper.warning(this, "Unable to register default debug tests because the debug manager is not enabled.");
