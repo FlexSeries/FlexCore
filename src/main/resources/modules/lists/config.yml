@@ -57,7 +57,7 @@ formats:
         suffix: ''
       center: '&aHelp: &6{KEY} &c(pg.{PAGE}/{MAXPAGES})'
   elements:
-    command: '&c/&4{LABEL}(txt:&6Aliases: &e{ALIASES})&c{COMMAND} &8- &e{DESCRIPTION}'
+    command: '&c{COMMAND} &8- &e{DESCRIPTION}'
     element: '&6{KEY}'
     hook_enabled: '&e{PLUGIN}&8: &a{VERSION}'
     hook_disabled: '&e{PLUGIN}&8: &c{STATUS}'

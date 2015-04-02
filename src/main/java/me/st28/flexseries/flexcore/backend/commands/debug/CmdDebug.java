@@ -24,7 +24,7 @@ import java.util.Map;
 public final class CmdDebug extends FlexCommand<FlexCore> implements FlexTabCompleter {
 
     public CmdDebug(FlexCore plugin) {
-        super(plugin, "flexdebug", Arrays.asList(new CommandArgument("plugin", true), new CommandArgument("test", true)), new FlexCommandSettings().permission(PermissionNodes.DEBUG));
+        super(plugin, "flexdebug", Arrays.asList(new CommandArgument("plugin", true), new CommandArgument("test", true)), new FlexCommandSettings().permission(PermissionNodes.DEBUG).defaultSubcommand("help"));
 
         registerSubcommand(new SCmdDebugList(this));
     }

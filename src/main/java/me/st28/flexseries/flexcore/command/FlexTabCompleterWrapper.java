@@ -70,11 +70,16 @@ public final class FlexTabCompleterWrapper implements TabCompleter {
             if (commandSettings.isDummyCommand() || newArgs.size() < currentCommand.getRequiredArguments()) {
                 String defCommand = commandSettings.getDefaultSubcommand();
                 if (defCommand != null) {
-                    currentCommand = currentCommand.getSubcommands().get(commandSettings.getDefaultSubcommand());
+                    FlexCommand<?> defaultCommand = currentCommand.getSubcommands().get(defCommand);
 
-                    CommandUtils.performPlayerTest(sender, commandSettings.isPlayerOnly());
-                    CommandUtils.performPermissionTest(sender, commandSettings.getPermission());
-                    CommandUtils.performArgsTest(newArgs.size(), currentCommand.getRequiredArguments(), MessageReference.createPlain(currentCommand.buildUsage(sender)));
+                    if (!defaultCommand.getClass().equals(FlexHelpCommand.class)) {
+                        currentCommand = currentCommand.getSubcommands().get(defCommand);
+
+
+                        CommandUtils.performPlayerTest(sender, commandSettings.isPlayerOnly());
+                        CommandUtils.performPermissionTest(sender, commandSettings.getPermission());
+                        CommandUtils.performArgsTest(newArgs.size(), currentCommand.getRequiredArguments(), MessageReference.createPlain(currentCommand.buildUsage(sender)));
+                    }
                 }
             }
 

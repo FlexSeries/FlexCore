@@ -32,7 +32,7 @@ public final class FlexCommandWrapper implements CommandExecutor {
      * @param plugin The plugin that owns the command.
      * @param command The command to register.
      */
-    public static void registerCommand(FlexPlugin plugin, FlexCommand<?> command) {
+    public static <T extends FlexPlugin> void registerCommand(FlexPlugin plugin, FlexCommand<T> command) {
         Validate.notNull(plugin, "Plugin cannot be null.");
         Validate.notNull(plugin, "Command cannot be null.");
 
@@ -45,6 +45,22 @@ public final class FlexCommandWrapper implements CommandExecutor {
 
         bukkitCommand.setExecutor(new FlexCommandWrapper(command));
         bukkitCommand.setTabCompleter(new FlexTabCompleterWrapper(command));
+
+        if (/*!command.getSubcommands().isEmpty() && */!command.getSubcommands().containsKey("help")) {
+            command.registerSubcommand(new FlexHelpCommand<>(command));
+            if (command.getSettings().isDummyCommand()) {
+                command.getSettings().defaultSubcommand("help");
+            }
+        }
+
+        for (FlexSubcommand<T> subcommand : command.getSubcommands().values()) {
+            if (/*!subcommand.getSubcommands().isEmpty() && */!subcommand.getSubcommands().containsKey("help")) {
+                subcommand.registerSubcommand(new FlexHelpCommand<>(subcommand));
+                if (subcommand.getSettings().isDummyCommand()) {
+                    subcommand.getSettings().defaultSubcommand("help");
+                }
+            }
+        }
     }
 
     private final FlexCommand<?> command;
