@@ -13,6 +13,8 @@ public final class FlexHelpCommand<T extends FlexPlugin> extends FlexSubcommand<
 
     public FlexHelpCommand(FlexCommand<T> parent) {
         super(parent, "help", Collections.singletonList(new CommandArgument("page", false)), new FlexCommandSettings().description("Views command help"));
+
+        //TODO: Create help permission node
     }
 
     @Override
@@ -25,16 +27,21 @@ public final class FlexHelpCommand<T extends FlexPlugin> extends FlexSubcommand<
         ListBuilder builder = new ListBuilder("page_subtitle", "Help", parent.getLabels().get(0), label);
 
         if (!parent.getSettings().isDummyCommand()) {
-            String description = parent.getSettings().getDescription();
-            if (description == null) {
-                //TODO: Make this configurable
-                description = "" + ChatColor.RED + ChatColor.ITALIC + "No description set.";
+            if (parent.getPermission() != null && parent.getPermission().isAllowed(sender)) {
+                String description = parent.getSettings().getDescription();
+                if (description == null) {
+                    //TODO: Make this configurable
+                    description = "" + ChatColor.RED + ChatColor.ITALIC + "No description set.";
+                }
+                builder.addMessage("command", new ReplacementMap("{COMMAND}", parent.buildUsage(sender)).put("{DESCRIPTION}", description).getMap());
             }
-            builder.addMessage("command", new ReplacementMap("{COMMAND}", parent.buildUsage(sender)).put("{DESCRIPTION}", description).getMap());
         }
 
-        //TODO: Permission check
         for (FlexSubcommand<T> subcommand : subcommands.values()) {
+            if (subcommand.getPermission() != null && !subcommand.getPermission().isAllowed(sender)) {
+                continue;
+            }
+
             String description = subcommand.getSettings().getDescription();
             if (description == null) {
                 //TODO: Make this configurable

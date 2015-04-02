@@ -43,7 +43,7 @@ public final class FlexTabCompleterWrapper implements TabCompleter {
             FlexCommandSettings commandSettings = currentCommand.getSettings();
 
             CommandUtils.performPlayerTest(sender, commandSettings.isPlayerOnly());
-            CommandUtils.performPermissionTest(sender, commandSettings.getPermission());
+            CommandUtils.performPermissionTest(sender, currentCommand.getPermission());
 
             String[] fullNewArgs;
             if (args.length < curIndex) {
@@ -75,9 +75,8 @@ public final class FlexTabCompleterWrapper implements TabCompleter {
                     if (!defaultCommand.getClass().equals(FlexHelpCommand.class)) {
                         currentCommand = currentCommand.getSubcommands().get(defCommand);
 
-
                         CommandUtils.performPlayerTest(sender, commandSettings.isPlayerOnly());
-                        CommandUtils.performPermissionTest(sender, commandSettings.getPermission());
+                        CommandUtils.performPermissionTest(sender, currentCommand.getPermission());
                         CommandUtils.performArgsTest(newArgs.size(), currentCommand.getRequiredArguments(), MessageReference.createPlain(currentCommand.buildUsage(sender)));
                     }
                 }

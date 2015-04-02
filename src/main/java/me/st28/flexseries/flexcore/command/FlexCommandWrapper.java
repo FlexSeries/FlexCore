@@ -113,7 +113,7 @@ public final class FlexCommandWrapper implements CommandExecutor {
             FlexCommandSettings commandSettings = currentCommand.getSettings();
 
             CommandUtils.performPlayerTest(sender, commandSettings.isPlayerOnly());
-            CommandUtils.performPermissionTest(sender, commandSettings.getPermission());
+            CommandUtils.performPermissionTest(sender, currentCommand.getPermission());
 
             String[] fullNewArgs;
             if (args.length < curIndex) {
@@ -155,7 +155,7 @@ public final class FlexCommandWrapper implements CommandExecutor {
                 currentCommand = currentCommand.getSubcommands().get(commandSettings.getDefaultSubcommand());
 
                 CommandUtils.performPlayerTest(sender, commandSettings.isPlayerOnly());
-                CommandUtils.performPermissionTest(sender, commandSettings.getPermission());
+                CommandUtils.performPermissionTest(sender, currentCommand.getPermission());
                 CommandUtils.performArgsTest(newArgs.size(), currentCommand.getRequiredArguments(), MessageReference.createPlain(currentCommand.buildUsage(sender)));
             }
 

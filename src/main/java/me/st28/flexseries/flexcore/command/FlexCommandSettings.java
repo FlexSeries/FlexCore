@@ -43,6 +43,11 @@ public final class FlexCommandSettings<T extends FlexPlugin> {
     private PermissionNode permission = null;
 
     /**
+     * If true, will inherit the parent permission node if {@link #permission} is null.
+     */
+    private boolean shouldInheritPermission = true;
+
+    /**
      * Locks the settings instance to prevent modification.
      */
     public void lock() {
@@ -153,10 +158,30 @@ public final class FlexCommandSettings<T extends FlexPlugin> {
     }
 
     /**
-     * @return the {@link PermissionNode} required to use this command.
+     * @return the {@link PermissionNode} required to use this command.<br />
+     *         In most cases, {@link FlexCommand#getPermission()} should be used over this.
      */
     public final PermissionNode getPermission() {
         return permission;
+    }
+
+    /**
+     * Sets whether this command inherits the parent permission.
+     *
+     * @return The settings instance, for chaining.
+     */
+    public final FlexCommandSettings<T> shouldInheritPermission(boolean shouldInheritPermission) {
+        checkState();
+
+        this.shouldInheritPermission = shouldInheritPermission;
+        return this;
+    }
+
+    /**
+     * @return true if this command inherits the parent permission.
+     */
+    public final boolean shouldInheritPermission() {
+        return shouldInheritPermission;
     }
 
 }

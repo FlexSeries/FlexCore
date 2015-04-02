@@ -1,6 +1,7 @@
 package me.st28.flexseries.flexcore.command;
 
 import me.st28.flexseries.flexcore.cookie.CookieManager;
+import me.st28.flexseries.flexcore.permission.PermissionNode;
 import me.st28.flexseries.flexcore.plugin.FlexPlugin;
 import me.st28.flexseries.flexcore.plugin.exceptions.ModuleDisabledException;
 import org.apache.commons.lang.Validate;
@@ -141,6 +142,17 @@ public abstract class FlexCommand<T extends FlexPlugin> {
 
         Collections.reverse(returnList);
         return returnList;
+    }
+
+    /**
+     * @return the {@link PermissionNode} for this command.
+     */
+    public final PermissionNode getPermission() {
+        PermissionNode permission = settings.getPermission();
+        if (permission == null && settings.shouldInheritPermission()) {
+            return getParent().getPermission();
+        }
+        return permission;
     }
 
     /**
