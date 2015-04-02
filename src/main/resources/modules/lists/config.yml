@@ -1,11 +1,11 @@
-General Config:
+general config:
   page items: 8
   line length: 54
-Messages:
+messages:
   next page: '&c&oType &6&o/{COMMAND} {NEXTPAGE}[cmd:/{COMMAND} {NEXTPAGE}](txt:&aClick to go to the next page) &c&oto view the next page.'
   no elements: '&c&oNothing here.'
-Formats:
-  Headers:
+formats:
+  headers:
     page:
       left side:
         prefix: '&8&m'
@@ -56,15 +56,11 @@ Formats:
         text: '-'
         suffix: ''
       center: '&aHelp: &6{KEY} &c(pg.{PAGE}/{MAXPAGES})'
-  Elements:
-    chat_channel: '&a{ACTIVE}{COLOR}{CHANNEL} &8({STATUS}&8) &8- &6{CHATTERS} chatter{S}'
-    command: '&c/&4{LABEL}(txt:&6Aliases: &e{ALIASES})&c{COMMAND} &8- &e{DESCRIPTION}'
+  elements:
+    command: '&c{COMMAND} &8- &e{DESCRIPTION}'
     element: '&6{KEY}'
-    friends_friend: '{PLAYER} &8- &7{TIME}'
-    friends_friend_request: '&e&oRequest from &6&o{PLAYER}'
     hook_enabled: '&e{PLUGIN}&8: &a{VERSION}'
     hook_disabled: '&e{PLUGIN}&8: &c{STATUS}'
     lib_plugin_module: '&e{NAME}&8 &8({STATUS}&8): &6{DESCRIPTION}'
     number: '&e{INDEX}) &6{KEY}'
-    parties_party: '&e{INDEX}) &6{NAME} &8- &6{MEMBERS} member{S} &8- {LEADER}'
     title: '&e{KEY}: &6{VALUE}'

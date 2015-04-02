@@ -11,10 +11,10 @@ commands:
   # Plugin Library Commands #
   ###########################
   flexhooks:
-    description: 'Command for viewing all registered hooks and their statuses'
+    description: 'View all registered hooks and their statuses'
     aliases: [hooks]
   flexmodules:
-    description: 'Command for viewing an FlexPlugin implementation''s registered modules and their statuses'
+    description: 'Viewing a FlexPlugin implementation''s registered modules and their statuses'
     aliases: [modules]
   flexreload:
     description: 'Universal reload command for FlexPlugin implementations'
@@ -35,30 +35,12 @@ commands:
   #--------------------------------------------------------------------------------------------------------------------#
 
   ###########################
-  #  Item-related Commands  #
-  ###########################
-  flexiteminfo:
-    description: 'Shows information about an item.'
-    aliases: [iteminfo, itemdb]
-
-  #--------------------------------------------------------------------------------------------------------------------#
-
-  ###########################
   #      Misc Commands      #
   ###########################
 
   flexdebug:
-    description: 'Command for running registered debug tests'
+    description: 'Runs a registered debug tests'
     aliases: [debug]
-  flexmotd:
-    description: 'Command for viewing loaded MOTDs and setting current MOTD'
-    aliases: [motd]
-  flexping:
-    description: 'Command for viewing loaded server list messages and setting current message'
-    aliases: [ping]
-  flexterms:
-    description: 'Command for viewing and accepting/declining various TOS for the server'
-    aliases: [terms, tos]
 
 permissions:
   ##########
@@ -69,12 +51,8 @@ permissions:
     default: op
     children:
       flexcore.debug: true
-      flexcore.iteminfo: true
+      flexcore.hooks: true
       flexcore.modules: true
-      flexcore.motd.list: true
-      flexcore.motd.set: true
-      flexcore.ping.list: true
-      flexcore.ping.set: true
       flexcore.reload: true
       flexcore.save: true
 
@@ -82,8 +60,6 @@ permissions:
     default: true
     children:
       flexcore.help: true
-      flexcore.terms: true
-      flexcore.terms.list: true
 
   #########
   # Nodes #
@@ -100,30 +76,8 @@ permissions:
   flexcore.hooks:
     description: 'Access to hooks command.'
     default: false
-  flexcore.iteminfo:
-    description: 'View information on an item.'
-    default: false
   flexcore.modules:
     description: 'View FlexPlugin modules'
-    default: false
-  flexcore.motd.list:
-    description: 'List loaded MOTDs'
-    default: false
-  flexcore.motd.set:
-    description: 'Set current MOTD'
-    default: false
-  flexcore.ping.list:
-    description: 'List loaded server list messages'
-    default: false
-  flexcore.ping.set:
-    description: 'Set current server list message'
-    default: false
-
-  flexcore.terms:
-    description: 'Base TOS command'
-    default: false
-  flexcore.terms.list:
-    description: 'Ability to view ability TOS'
     default: false
 
   flexcore.reload:

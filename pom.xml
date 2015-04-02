@@ -6,11 +6,16 @@
 
     <groupId>me.st28.flexseries</groupId>
     <artifactId>flexcore</artifactId>
-    <version>3.0.1</version>
+    <version>4.0.0</version>
     <name>FlexCore</name>
     <description>Powerful library for Bukkit plugins</description>
     <url>http://stealthyone.com/</url>
     <inceptionYear>2015</inceptionYear>
+
+    <organization>
+        <name>FlexSeries</name>
+        <url>http://github.com/FlexSeries</url>
+    </organization>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -259,6 +264,38 @@
                         <item>timestamp</item>
                     </items>
                 </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>com.mycila</groupId>
+                <artifactId>license-maven-plugin</artifactId>
+                <version>2.2</version>
+                <executions>
+                    <execution>
+                        <phase>clean</phase>
+                        <goals>
+                            <goal>format</goal>
+                        </goals>
+                        <configuration>
+                            <encoding>UTF-8</encoding>
+
+                            <header>LICENSE.txt</header>
+
+                            <mapping>
+                                <java>JAVADOC_STYLE</java>
+                            </mapping>
+
+                            <properties>
+                                <name>${project.name}</name>
+                            </properties>
+
+                            <includes>
+                                <include>src/main/java/**</include>
+                                <include>src/test/java/**</include>
+                            </includes>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
 
             <plugin>

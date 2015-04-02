@@ -1,16 +1,43 @@
+/**
+ * FlexCore - Licensed under the MIT License (MIT)
+ *
+ * Copyright (c) Stealth2800 <http://stealthyone.com/>
+ * Copyright (c) contributors <https://github.com/FlexSeries>
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package me.st28.flexseries.flexcore.storage.mysql;
 
 import com.jolbox.bonecp.BoneCP;
 import com.jolbox.bonecp.BoneCPConfig;
 import me.st28.flexseries.flexcore.FlexCore;
 import me.st28.flexseries.flexcore.logging.LogHelper;
-import me.st28.flexseries.flexcore.plugins.FlexModule;
+import me.st28.flexseries.flexcore.plugin.module.FlexModule;
 import org.bukkit.configuration.ConfigurationSection;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
+/**
+ * Manages a MySQL connection pool with the BoneCP library.
+ */
 public final class MySQLManager extends FlexModule<FlexCore> {
 
     private BoneCP pool;
@@ -22,7 +49,7 @@ public final class MySQLManager extends FlexModule<FlexCore> {
     }
 
     @Override
-    public void handleLoad() throws Exception {
+    public final void handleLoad() {
         LogHelper.info(this, "Setting up database.");
 
         ConfigurationSection dbConf = getConfig().getConfigurationSection("Database");
@@ -53,7 +80,7 @@ public final class MySQLManager extends FlexModule<FlexCore> {
             pool = new BoneCP(cpConfig);
         } catch (Exception ex) {
             LogHelper.severe(FlexCore.class, "An error occurred while trying to create the BoneCP connection pool: " + ex.getMessage());
-            throw ex;
+            throw new RuntimeException(ex);
         }
     }
 
