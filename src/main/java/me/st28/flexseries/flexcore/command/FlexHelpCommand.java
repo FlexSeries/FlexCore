@@ -2,9 +2,14 @@ package me.st28.flexseries.flexcore.command;
 
 import me.st28.flexseries.flexcore.list.ListBuilder;
 import me.st28.flexseries.flexcore.message.ReplacementMap;
+import me.st28.flexseries.flexcore.permission.PermissionNode;
+import me.st28.flexseries.flexcore.permission.SimplePermissionNode;
 import me.st28.flexseries.flexcore.plugin.FlexPlugin;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.permissions.Permission;
+import org.bukkit.permissions.PermissionDefault;
 
 import java.util.Collections;
 import java.util.Map;
@@ -14,7 +19,13 @@ public final class FlexHelpCommand<T extends FlexPlugin> extends FlexSubcommand<
     public FlexHelpCommand(FlexCommand<T> parent) {
         super(parent, "help", Collections.singletonList(new CommandArgument("page", false)), new FlexCommandSettings().description("Views command help"));
 
-        //TODO: Create help permission node
+        PermissionNode parentPerm = parent.getPermission();
+        if (parentPerm != null) {
+            String helpPerm = parentPerm.getNode() + ".help";
+            Bukkit.getPluginManager().addPermission(new Permission(helpPerm, PermissionDefault.TRUE));
+
+            getSettings().permission(new SimplePermissionNode(helpPerm));
+        }
     }
 
     @Override
