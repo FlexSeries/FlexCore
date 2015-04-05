@@ -52,11 +52,6 @@ public abstract class FlexCommand<T extends FlexPlugin> {
     private final List<String> labels = new ArrayList<>();
 
     /**
-     * Label aliases that execute subcommands directly.
-     */
-    private final Map<String, FlexSubcommand<T>> subcommandLabels = new HashMap<>();
-
-    /**
      * The command that this command exists under.
      */
     private final FlexCommand<T> parent;
@@ -139,7 +134,7 @@ public abstract class FlexCommand<T extends FlexPlugin> {
     }
 
     /**
-     * @return a list containing the label(s) for this command. Element 0 is the main label.
+     * @return an unmodifiable list containing the label(s) for this command. Element 0 is the main label.
      */
     public final List<String> getLabels() {
         return Collections.unmodifiableList(labels);

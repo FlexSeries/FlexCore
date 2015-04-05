@@ -105,7 +105,11 @@ public final class FlexCommandWrapper implements CommandExecutor {
             String cookieUserId = null;
 
             args = CommandUtils.fixArguments(args);
-            FlexCommand<?> currentCommand = this.command.getSubcommands().get(label.toLowerCase());;
+            FlexCommand<?> currentCommand = this.command.getSubcommands().get(((FlexCommandSettings<?>) this.command.getSettings()).getSubcommandAliases().get(label.toLowerCase()));
+
+            if (currentCommand == null) {
+                currentCommand = this.command.getSubcommands().get(label.toLowerCase());
+            }
 
             // Set the cookie for this command label
             if (cookieManager != null) {

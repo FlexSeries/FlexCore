@@ -28,6 +28,7 @@ import me.st28.flexseries.flexcore.permission.PermissionNode;
 import me.st28.flexseries.flexcore.plugin.FlexPlugin;
 import org.apache.commons.lang.Validate;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -54,7 +55,7 @@ public final class FlexCommandSettings<T extends FlexPlugin> {
     /**
      * Label aliases that execute subcommands directly.
      */
-    private final Map<String, FlexCommand<T>> subcommandAliases = new HashMap<>();
+    private final Map<String, String> subcommandAliases = new HashMap<>();
 
     /**
      * If true, will use the default subcommand, regardless of argument count.
@@ -150,6 +151,44 @@ public final class FlexCommandSettings<T extends FlexPlugin> {
      */
     public final String getDefaultSubcommand() {
         return defaultSubcommand;
+    }
+
+    /**
+     * @return the aliases for labels that should execute subcommands directly.
+     */
+    public final Map<String, String> getSubcommandAliases() {
+        return Collections.unmodifiableMap(subcommandAliases);
+    }
+
+    /**
+     * Sets a subcommand alias.
+     *
+     * @param alias The main label alias.
+     * @param subcommand The subcommand that should be executed directly for the given alias.
+     * @return The settings instance, for chaining.
+     */
+    public final FlexCommandSettings<T> subcommandAlias(String alias, FlexCommand<T> subcommand) {
+        Validate.notNull(alias, "Alias cannot be null.");
+        Validate.notNull(subcommand, "Subcommand cannot be null.");
+        checkState();
+
+        return subcommandAlias(alias, subcommand.getLabels().get(0));
+    }
+
+    /**
+     * Sets a subcommand alias.
+     *
+     * @param alias The main label alias.
+     * @param subcommand The subcommand that should be executed directly for the given alias.
+     * @return The settings instance, for chaining.
+     */
+    public final FlexCommandSettings<T> subcommandAlias(String alias, String subcommand) {
+        Validate.notNull(alias, "Alias cannot be null.");
+        Validate.notNull(subcommand, "Subcommand cannot be null.");
+        checkState();
+
+        subcommandAliases.put(alias, subcommand);
+        return this;
     }
 
     /**

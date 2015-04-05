@@ -29,8 +29,11 @@ import me.st28.flexseries.flexcore.events.PlayerJoinLoadedEvent;
 import me.st28.flexseries.flexcore.events.PlayerLeaveEvent;
 import me.st28.flexseries.flexcore.message.MessageReference;
 import me.st28.flexseries.flexcore.player.loading.PlayerLoadCycle;
+import me.st28.flexseries.flexcore.player.loading.PlayerLoader;
 import me.st28.flexseries.flexcore.plugin.module.FlexModule;
+import me.st28.flexseries.flexcore.storage.flatfile.YamlFileManager;
 import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
@@ -43,10 +46,11 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerKickEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
+import java.io.File;
 import java.util.*;
 import java.util.Map.Entry;
 
-public final class PlayerManager extends FlexModule<FlexCore> implements Listener {
+public final class PlayerManager extends FlexModule<FlexCore> implements Listener, PlayerLoader {
 
     private String unloadedMessage;
 
@@ -57,15 +61,26 @@ public final class PlayerManager extends FlexModule<FlexCore> implements Listene
     private boolean enableJoinMessageChange;
     private boolean enableQuitMessageChange;
 
-    final Set<UUID> handledPlayers = new HashSet<>();
+    private final Set<UUID> handledPlayers = new HashSet<>();
     private final Map<UUID, PlayerLoadCycle> cachedCycles = new HashMap<>();
+
+    private File playerDir;
+    private final Map<UUID, PlayerData> playerData = new HashMap<>();
 
     public PlayerManager(FlexCore plugin) {
         super(plugin, "players", "Manages players", true);
     }
 
     @Override
+    protected void handleLoad() {
+        playerDir = new File(getDataFolder() + File.separator + "userdata");
+        playerDir.mkdirs();
+    }
+
+    @Override
     protected void handleReload() {
+        playerDir.mkdirs();
+
         FileConfiguration config = getConfig();
 
         loadTimeout = config.getLong("load timeout", 100L);
@@ -78,7 +93,67 @@ public final class PlayerManager extends FlexModule<FlexCore> implements Listene
         unloadedMessage = StringEscapeUtils.unescapeJava(config.getString("player join.unloaded message", "Unable to load your data.\nPlease try again."));
     }
 
+    @Override
+    protected void handleSave(boolean async) {
+        for (UUID uuid : playerData.keySet()) {
+            savePlayer(uuid);
+        }
+    }
+
+    private void savePlayer(UUID uuid) {
+        PlayerData data = getPlayerData(uuid);
+        if (data == null) return;
+
+        YamlFileManager file = new YamlFileManager(playerDir + File.separator + uuid.toString() + ".yml");
+
+        data.save(file.getConfig());
+
+        file.save();
+    }
+
+    @Override
+    public boolean isPlayerLoadSync() {
+        return true;
+    }
+
+    @Override
+    public boolean loadPlayer(UUID uuid, String name, PlayerLoadCycle cycle) {
+        if (!playerData.containsKey(uuid)) {
+            PlayerData data = new PlayerData(uuid, new YamlFileManager(playerDir + File.separator + uuid.toString() + ".yml").getConfig());
+            playerData.put(uuid, data);
+        }
+
+        PlayerLoadCycle.completedCycle(cycle, this);
+        return true;
+    }
+
+    /**
+     * @return a {@link PlayerData} instance for a specified player.
+     */
+    public PlayerData getPlayerData(UUID uuid) {
+        Validate.notNull(uuid, "UUID cannot be null.");
+        return playerData.get(uuid);
+    }
+
     private void handleOfficialLogin(final Player p, final PlayerLoadCycle cycle, final String joinMessage) {
+        PlayerData playerData = getPlayerData(p.getUniqueId());
+        if (playerData.firstJoin == null) {
+            playerData.firstJoin = System.currentTimeMillis();
+        }
+        playerData.lastLogin = System.currentTimeMillis();
+
+        String curIp = p.getAddress().toString();
+        playerData.lastIp = curIp;
+        if (!playerData.ips.contains(curIp)) {
+            playerData.ips.add(curIp);
+        }
+
+        String curName = p.getName();
+        playerData.lastName = curName;
+        if (!playerData.names.contains(curName)) {
+            playerData.names.add(curName);
+        }
+
         PlayerJoinLoadedEvent newJoinEvent = new PlayerJoinLoadedEvent(p, cycle.getCustomData());
         if (enableJoinMessageChange) {
             newJoinEvent.setJoinMessage(MessageReference.createPlain(joinMessage));
@@ -153,6 +228,8 @@ public final class PlayerManager extends FlexModule<FlexCore> implements Listene
             return;
         }
 
+        getPlayerData(p.getUniqueId()).lastLogout = System.currentTimeMillis();
+
         PlayerLeaveEvent newLeaveEvent = new PlayerLeaveEvent(p);
         if (enableQuitMessageChange) {
             newLeaveEvent.setLeaveMessage(MessageReference.createPlain(message));
@@ -169,6 +246,8 @@ public final class PlayerManager extends FlexModule<FlexCore> implements Listene
                 }
             }
         }
+
+        savePlayer(p.getUniqueId());
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
