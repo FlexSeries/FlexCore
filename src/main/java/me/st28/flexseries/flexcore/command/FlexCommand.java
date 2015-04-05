@@ -85,6 +85,7 @@ public abstract class FlexCommand<T extends FlexPlugin> {
 
         this.plugin = plugin;
         this.labels.add(label.toLowerCase());
+        this.labels.addAll(pluginCommand.getAliases());
         this.parent = null;
         if (arguments != null) {
             Validate.noNullElements(arguments, "Arguments list cannot contain any null arguments.");
