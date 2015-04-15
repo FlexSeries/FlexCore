@@ -40,7 +40,12 @@ public final class StringUtils {
     }
 
     public static <T> String collectionToString(Collection<T> collection, StringConverter<T> converter, String delimiter) {
+        return collectionToString(collection, converter, delimiter, null);
+    }
+
+    public static <T> String collectionToString(Collection<T> collection, StringConverter<T> converter, String delimiter, String defaultValue) {
         if (collection == null) return "";
+
         StringBuilder sb = new StringBuilder();
         for (T item : collection) {
             if (sb.length() > 0) {
@@ -48,7 +53,7 @@ public final class StringUtils {
             }
             sb.append(converter.toString(item));
         }
-        return sb.toString();
+        return sb.length() == 0 ? defaultValue : sb.toString();
     }
 
     public static <T> List<String> collectionToStringList(Collection<T> collection, StringConverter<T> converter) {
