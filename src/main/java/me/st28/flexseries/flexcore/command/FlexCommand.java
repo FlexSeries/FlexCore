@@ -64,7 +64,7 @@ public abstract class FlexCommand<T extends FlexPlugin> {
     /**
      * Subcommands under this command.
      */
-    private final Map<String, FlexSubcommand<T>> subcommands = new HashMap<>();
+    private final Map<String, FlexSubcommand<T>> subcommands = new LinkedHashMap<>();
 
     /**
      * The settings for this command.
@@ -170,7 +170,7 @@ public abstract class FlexCommand<T extends FlexPlugin> {
     public final PermissionNode getPermission() {
         PermissionNode permission = settings.getPermission();
         if (permission == null && settings.shouldInheritPermission()) {
-            return getParent().getPermission();
+            return getParent() == null ? null : getParent().getPermission();
         }
         return permission;
     }
