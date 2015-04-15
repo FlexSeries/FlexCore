@@ -46,7 +46,9 @@ public final class FlexHelpCommand<T extends FlexPlugin> extends FlexSubcommand<
         PermissionNode parentPerm = parent.getPermission();
         if (parentPerm != null) {
             String helpPerm = parentPerm.getNode() + ".help";
-            Bukkit.getPluginManager().addPermission(new Permission(helpPerm, PermissionDefault.TRUE));
+            try {
+                Bukkit.getPluginManager().addPermission(new Permission(helpPerm, PermissionDefault.TRUE));
+            } catch (IllegalArgumentException ex) {}
 
             getSettings().permission(new SimplePermissionNode(helpPerm));
         }
