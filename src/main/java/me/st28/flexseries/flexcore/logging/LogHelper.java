@@ -46,9 +46,19 @@ public final class LogHelper {
         LogHelper.debug(JavaPlugin.getPlugin(pluginClass), message);
     }
 
+    public static void debug(Class<? extends JavaPlugin> pluginClass, String message, Throwable throwable) {
+        LogHelper.debug(JavaPlugin.getPlugin(pluginClass), message, throwable);
+    }
+
     public static void debug(JavaPlugin plugin, String message) {
         if (plugin.getConfig().getBoolean("debug")) {
             Bukkit.getLogger().log(Level.INFO, String.format("[%s DEBUG] %s", plugin.getName(), message));
+        }
+    }
+
+    public static void debug(JavaPlugin plugin, String message, Throwable throwable) {
+        if (plugin.getConfig().getBoolean("debug")) {
+            Bukkit.getLogger().log(Level.INFO, String.format("[%s DEBUG] %s", plugin.getName(), message), throwable);
         }
     }
 
@@ -58,40 +68,82 @@ public final class LogHelper {
         }
     }
 
+    public static void debug(FlexModule module, String message, Throwable throwable) {
+        if (module.getPlugin().getConfig().getBoolean("debug")) {
+            Bukkit.getLogger().log(Level.INFO, String.format("[%s/%s DEBUG] %s", module.getPlugin().getName(), module.getIdentifier(), message), throwable);
+        }
+    }
+
     public static void info(Class<? extends JavaPlugin> pluginClass, String message) {
         LogHelper.info(JavaPlugin.getPlugin(pluginClass), message);
+    }
+
+    public static void info(Class<? extends JavaPlugin> pluginClass, String message, Throwable throwable) {
+        LogHelper.info(JavaPlugin.getPlugin(pluginClass), message, throwable);
     }
 
     public static void info(JavaPlugin plugin, String message) {
         Bukkit.getLogger().log(Level.INFO, String.format("[%s] %s", plugin.getName(), message));
     }
 
+    public static void info(JavaPlugin plugin, String message, Throwable throwable) {
+        Bukkit.getLogger().log(Level.INFO, String.format("[%s] %s", plugin.getName(), message), throwable);
+    }
+
     public static void info(FlexModule module, String message) {
         Bukkit.getLogger().log(Level.INFO, String.format("[%s/%s] %s", module.getPlugin().getName(), module.getIdentifier(), message));
+    }
+
+    public static void info(FlexModule module, String message, Throwable throwable) {
+        Bukkit.getLogger().log(Level.INFO, String.format("[%s/%s] %s", module.getPlugin().getName(), module.getIdentifier(), message), throwable);
     }
 
     public static void warning(Class<? extends JavaPlugin> pluginClass, String message) {
         LogHelper.warning(JavaPlugin.getPlugin(pluginClass), message);
     }
 
+    public static void warning(Class<? extends JavaPlugin> pluginClass, String message, Throwable throwable) {
+        LogHelper.warning(JavaPlugin.getPlugin(pluginClass), message, throwable);
+    }
+
     public static void warning(JavaPlugin plugin, String message) {
         Bukkit.getLogger().log(Level.WARNING, String.format("[%s] %s", plugin.getName(), message));
+    }
+
+    public static void warning(JavaPlugin plugin, String message, Throwable throwable) {
+        Bukkit.getLogger().log(Level.WARNING, String.format("[%s] %s", plugin.getName(), message), throwable);
     }
 
     public static void warning(FlexModule module, String message) {
         Bukkit.getLogger().log(Level.WARNING, String.format("[%s/%s] %s", module.getPlugin().getName(), module.getIdentifier(), message));
     }
 
+    public static void warning(FlexModule module, String message, Throwable throwable) {
+        Bukkit.getLogger().log(Level.WARNING, String.format("[%s/%s] %s", module.getPlugin().getName(), module.getIdentifier(), message), throwable);
+    }
+
     public static void severe(Class<? extends JavaPlugin> pluginClass, String message) {
         LogHelper.severe(JavaPlugin.getPlugin(pluginClass), message);
+    }
+
+    public static void severe(Class<? extends JavaPlugin> pluginClass, String message, Throwable throwable) {
+        LogHelper.severe(JavaPlugin.getPlugin(pluginClass), message, throwable);
     }
 
     public static void severe(JavaPlugin plugin, String message) {
         Bukkit.getLogger().log(Level.SEVERE, String.format("[%s] %s", plugin.getName(), message));
     }
 
+    public static void severe(JavaPlugin plugin, String message, Throwable throwable) {
+        Bukkit.getLogger().log(Level.SEVERE, String.format("[%s] %s", plugin.getName(), message), throwable);
+    }
+
     public static void severe(FlexModule module, String message) {
         Bukkit.getLogger().log(Level.SEVERE, String.format("[%s/%s] %s", module.getPlugin().getName(), module.getIdentifier(), message));
+    }
+
+    public static void severe(FlexModule module, String message, Throwable throwable) {
+        Bukkit.getLogger().log(Level.SEVERE, String.format("[%s/%s] %s", module.getPlugin().getName(), module.getIdentifier(), message), throwable);
     }
 
 }
