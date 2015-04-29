@@ -202,20 +202,20 @@ public final class PlayerManager extends FlexModule<FlexCore> implements Listene
             return;
         }
 
+        handleOfficialLogin(p, cachedCycles.remove(uuid), e.getJoinMessage());
+
         if (enableJoinMessageChange) {
             e.setJoinMessage(null);
         }
-
-        handleOfficialLogin(p, cachedCycles.remove(uuid), e.getJoinMessage());
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerQuitHighest(PlayerQuitEvent e) {
+        handlePlayerLeave(e.getPlayer(), e.getQuitMessage());
+
         if (enableQuitMessageChange) {
             e.setQuitMessage(null);
         }
-
-        handlePlayerLeave(e.getPlayer(), e.getQuitMessage());
     }
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
