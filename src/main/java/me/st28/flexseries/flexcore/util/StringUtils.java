@@ -40,7 +40,12 @@ public final class StringUtils {
     }
 
     public static <T> String collectionToString(Collection<T> collection, StringConverter<T> converter, String delimiter) {
+        return collectionToString(collection, converter, delimiter, null);
+    }
+
+    public static <T> String collectionToString(Collection<T> collection, StringConverter<T> converter, String delimiter, String defaultValue) {
         if (collection == null) return "";
+
         StringBuilder sb = new StringBuilder();
         for (T item : collection) {
             if (sb.length() > 0) {
@@ -48,7 +53,7 @@ public final class StringUtils {
             }
             sb.append(converter.toString(item));
         }
-        return sb.toString();
+        return sb.length() == 0 ? defaultValue : sb.toString();
     }
 
     public static <T> List<String> collectionToStringList(Collection<T> collection, StringConverter<T> converter) {
@@ -78,15 +83,16 @@ public final class StringUtils {
      * @return A string containing the contents of the collection, separated by the given delimiter.
      */
     public static String stringCollectionToString(Collection<String> collection, String delimiter) {
-        if (collection == null) return "";
-        StringBuilder sb = new StringBuilder();
-        for (String item : collection) {
-            if (sb.length() > 0) {
-                sb.append(delimiter);
+        return stringCollectionToString(collection, delimiter, null);
+    }
+
+    public static String stringCollectionToString(Collection<String> collection, String delimiter, String defaultValue) {
+        return collectionToString(collection, new StringConverter<String>() {
+            @Override
+            public String toString(String string) {
+                return string;
             }
-            sb.append(item);
-        }
-        return sb.toString();
+        }, delimiter, defaultValue);
     }
 
     /**

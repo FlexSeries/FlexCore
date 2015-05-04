@@ -52,11 +52,6 @@ public abstract class FlexCommand<T extends FlexPlugin> {
     private final List<String> labels = new ArrayList<>();
 
     /**
-     * Label aliases that execute subcommands directly.
-     */
-    private final Map<String, FlexSubcommand<T>> subcommandLabels = new HashMap<>();
-
-    /**
      * The command that this command exists under.
      */
     private final FlexCommand<T> parent;
@@ -69,7 +64,7 @@ public abstract class FlexCommand<T extends FlexPlugin> {
     /**
      * Subcommands under this command.
      */
-    private final Map<String, FlexSubcommand<T>> subcommands = new HashMap<>();
+    private final Map<String, FlexSubcommand<T>> subcommands = new LinkedHashMap<>();
 
     /**
      * The settings for this command.
@@ -90,6 +85,7 @@ public abstract class FlexCommand<T extends FlexPlugin> {
 
         this.plugin = plugin;
         this.labels.add(label.toLowerCase());
+        this.labels.addAll(pluginCommand.getAliases());
         this.parent = null;
         if (arguments != null) {
             Validate.noNullElements(arguments, "Arguments list cannot contain any null arguments.");
@@ -139,7 +135,7 @@ public abstract class FlexCommand<T extends FlexPlugin> {
     }
 
     /**
-     * @return a list containing the label(s) for this command. Element 0 is the main label.
+     * @return an unmodifiable list containing the label(s) for this command. Element 0 is the main label.
      */
     public final List<String> getLabels() {
         return Collections.unmodifiableList(labels);
@@ -174,7 +170,7 @@ public abstract class FlexCommand<T extends FlexPlugin> {
     public final PermissionNode getPermission() {
         PermissionNode permission = settings.getPermission();
         if (permission == null && settings.shouldInheritPermission()) {
-            return getParent().getPermission();
+            return getParent() == null ? null : getParent().getPermission();
         }
         return permission;
     }

@@ -29,6 +29,9 @@ import me.st28.flexseries.flexcore.command.exceptions.CommandInterruptedExceptio
 import me.st28.flexseries.flexcore.message.MessageReference;
 import me.st28.flexseries.flexcore.message.ReplacementMap;
 import me.st28.flexseries.flexcore.permission.PermissionNode;
+import me.st28.flexseries.flexcore.player.uuid_tracker.PlayerUuidTracker;
+import me.st28.flexseries.flexcore.plugin.FlexPlugin;
+import me.st28.flexseries.flexcore.util.QuickMap;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -166,6 +169,67 @@ public final class CommandUtils {
         }
 
         return player;
+    }
+
+    /**
+     * Gets a player's UUID based on name.
+     *
+     * @param sender The sender of the command.
+     * @param name The name entered by the sender.
+     * @param notSender True to make sure the target is not the sender.
+     * @return The UUID of the matched player.<br />
+     *         Null if no matching player was found.
+     */
+    public static UUID getPlayerUuid(CommandSender sender, String name, boolean notSender, boolean isOnline, boolean silent) {
+        UUID found = null;
+
+        PlayerUuidTracker uuidTracker = FlexPlugin.getRegisteredModule(PlayerUuidTracker.class);
+
+        // 1) Try getting by exact name
+        Player online = Bukkit.getPlayerExact(name);
+        if (online != null) {
+            found = online.getUniqueId();
+        }
+
+        if (found == null) {
+            // 2) Try getting by matching name
+            List<String> matchedNames = new ArrayList<>();
+
+            for (String curName : uuidTracker.getNamesToUuids().keySet()) {
+                if (name.equalsIgnoreCase(curName)) {
+                    // Exact match
+                    matchedNames.add(name);
+                    break;
+                }
+
+                if (curName.toLowerCase().contains(name.toLowerCase())) {
+                    // Partial match
+                    matchedNames.add(curName);
+                }
+            }
+
+            if (matchedNames.size() == 1) {
+                found = uuidTracker.getUuid(matchedNames.get(0));
+                name = uuidTracker.getName(found);
+            }
+        }
+
+        if (found != null && notSender && sender instanceof Player && ((Player) sender).getUniqueId().equals(found)) {
+            if (!silent) {
+                throw new CommandInterruptedException(MessageReference.create(FlexCore.class, "general.errors.players_cannot_be_self"));
+            }
+            return null;
+        } else if (found != null && isOnline && Bukkit.getPlayer(found) == null) {
+            if (!silent) {
+                throw new CommandInterruptedException(MessageReference.create(FlexCore.class, "general.errors.players_matched_offline", new QuickMap<>("{NAME}", name).getMap()));
+            }
+            return null;
+        } else if (found == null) {
+            if (!silent) {
+                throw new CommandInterruptedException(MessageReference.create(FlexCore.class, "general.errors.players_matched_none_offline", new QuickMap<>("{NAME}", name).getMap()));
+            }
+        }
+        return found;
     }
 
 }

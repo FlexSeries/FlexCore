@@ -336,7 +336,9 @@ public abstract class FlexPlugin extends JavaPlugin {
      * @param async If true, should save asynchronously (where applicable).
      */
     public final void saveAll(boolean async) {
-        saveConfig();
+        if (hasConfig) {
+            saveConfig();
+        }
 
         for (FlexModule<?> module : modules.values()) {
             if (getModuleStatus(module.getClass()) == ModuleStatus.ENABLED) {

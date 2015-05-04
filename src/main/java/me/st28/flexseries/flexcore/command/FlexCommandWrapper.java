@@ -72,7 +72,7 @@ public final class FlexCommandWrapper implements CommandExecutor {
 
         if (/*!command.getSubcommands().isEmpty() && */!command.getSubcommands().containsKey("help")) {
             command.registerSubcommand(new FlexHelpCommand<>(command));
-            if (command.getSettings().isDummyCommand()) {
+            if (command.getSettings().isDummyCommand() && command.getSettings().getDefaultSubcommand() == null) {
                 command.getSettings().defaultSubcommand("help");
             }
         }
@@ -80,7 +80,7 @@ public final class FlexCommandWrapper implements CommandExecutor {
         for (FlexSubcommand<T> subcommand : command.getSubcommands().values()) {
             if (/*!subcommand.getSubcommands().isEmpty() && */!subcommand.getSubcommands().containsKey("help")) {
                 subcommand.registerSubcommand(new FlexHelpCommand<>(subcommand));
-                if (subcommand.getSettings().isDummyCommand()) {
+                if (subcommand.getSettings().isDummyCommand() && subcommand.getSettings().getDefaultSubcommand() == null) {
                     subcommand.getSettings().defaultSubcommand("help");
                 }
             }
@@ -105,7 +105,11 @@ public final class FlexCommandWrapper implements CommandExecutor {
             String cookieUserId = null;
 
             args = CommandUtils.fixArguments(args);
-            FlexCommand<?> currentCommand = this.command.getSubcommands().get(label.toLowerCase());;
+            FlexCommand<?> currentCommand = this.command.getSubcommands().get(((FlexCommandSettings<?>) this.command.getSettings()).getSubcommandAliases().get(label.toLowerCase()));
+
+            if (currentCommand == null) {
+                currentCommand = this.command.getSubcommands().get(label.toLowerCase());
+            }
 
             // Set the cookie for this command label
             if (cookieManager != null) {
