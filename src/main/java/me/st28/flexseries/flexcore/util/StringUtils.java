@@ -24,6 +24,8 @@
  */
 package me.st28.flexseries.flexcore.util;
 
+import org.apache.commons.lang.Validate;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -133,6 +135,23 @@ public final class StringUtils {
             }
         }
         return false;
+    }
+
+    /**
+     * Converts a collection of strings into a collection of lowercase strings.
+     *
+     * @param input The input string collection.
+     * @param output The collection to use for the output strings.
+     * @return The output collection, filled with the lowercase strings taken from the input collection.
+     */
+    public static Collection<String> stringCollectionToLowercase(Collection<String> input, Collection<String> output) {
+        Validate.notNull(input, "Input cannot be null.");
+        Validate.notNull(output, "Output cannot be null.");
+
+        for (String string : input) {
+            output.add(string.toLowerCase());
+        }
+        return output;
     }
 
 }
