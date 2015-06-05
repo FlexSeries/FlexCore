@@ -29,15 +29,12 @@ import me.st28.flexseries.flexcore.backend.commands.CmdModules;
 import me.st28.flexseries.flexcore.backend.commands.CmdReload;
 import me.st28.flexseries.flexcore.backend.commands.CmdSave;
 import me.st28.flexseries.flexcore.backend.commands.debug.CmdDebug;
+import me.st28.flexseries.flexcore.backend.debug.tests.*;
 import me.st28.flexseries.flexcore.command.FlexCommandWrapper;
 import me.st28.flexseries.flexcore.cookie.CookieManager;
-import me.st28.flexseries.flexcore.backend.debug.tests.ArgumentDebugTest;
 import me.st28.flexseries.flexcore.debug.DebugManager;
-import me.st28.flexseries.flexcore.backend.debug.tests.MCMLDebugTest;
 import me.st28.flexseries.flexcore.gui.GuiManager;
-import me.st28.flexseries.flexcore.backend.debug.tests.GuiDebugTest;
 import me.st28.flexseries.flexcore.hook.HookManager;
-import me.st28.flexseries.flexcore.backend.debug.tests.CustomItemDebugTest;
 import me.st28.flexseries.flexcore.item.CustomItemManager;
 import me.st28.flexseries.flexcore.list.ListManager;
 import me.st28.flexseries.flexcore.logging.LogHelper;
@@ -87,6 +84,7 @@ public final class FlexCore extends FlexPlugin implements Listener {
         try {
             DebugManager debugManager = FlexPlugin.getRegisteredModule(DebugManager.class);
 
+            debugManager.registerDebugTest(new ActionBarDebugTest(this));
             debugManager.registerDebugTest(new ArgumentDebugTest(this));
             debugManager.registerDebugTest(new CustomItemDebugTest(this));
             debugManager.registerDebugTest(new GuiDebugTest(this));

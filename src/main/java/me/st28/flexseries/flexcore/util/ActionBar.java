@@ -34,7 +34,7 @@ public final class ActionBar {
 
     private ActionBar() { }
 
-    public static void sendActionBar(Player player, String message) {
+    /*public static void sendActionBar(Player player, String message) {
         try {
             Class classCraftPlayer = InternalUtils.getCBClass("entity.CraftPlayer");
             Class classEntityPlayer = InternalUtils.getNMSClass("EntityPlayer");
@@ -56,6 +56,36 @@ public final class ActionBar {
             Object playerConnection = fieldPlayerConnection.get(playerHandle);
 
             Method methodSendPacket = classPlayerConnection.getDeclaredMethod("sendPacket");
+
+            methodSendPacket.invoke(playerConnection, packet);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }*/
+
+    public static void sendActionBar(Player player, String message) {
+        try {
+            Class classCraftPlayer = InternalUtils.getCBClass("entity.CraftPlayer");
+            Class classEntityPlayer = InternalUtils.getNMSClass("EntityPlayer");
+            Class classPlayerConnection = InternalUtils.getNMSClass("PlayerConnection");
+            Class classIChatBaseComponent = InternalUtils.getNMSClass("IChatBaseComponent");
+            Class classChatComponentText = InternalUtils.getNMSClass("ChatComponentText");
+            Class classPacketPlayOutChat = InternalUtils.getNMSClass("PacketPlayOutChat");
+            Class classPacket = InternalUtils.getNMSClass("Packet");
+
+            Constructor constructorComponentText = classChatComponentText.getConstructor(String.class);
+            Object componentText = constructorComponentText.newInstance(message);
+
+            Constructor constructorPacket = classPacketPlayOutChat.getConstructor(classIChatBaseComponent, byte.class);
+            Object packet = constructorPacket.newInstance(componentText, (byte) 2);
+
+            Method methodGetHandle = classCraftPlayer.getDeclaredMethod("getHandle");
+            Object playerHandle = methodGetHandle.invoke(player);
+
+            Field fieldPlayerConnection = classEntityPlayer.getDeclaredField("playerConnection");
+            Object playerConnection = fieldPlayerConnection.get(playerHandle);
+
+            Method methodSendPacket = classPlayerConnection.getDeclaredMethod("sendPacket", classPacket);
 
             methodSendPacket.invoke(playerConnection, packet);
         } catch (Exception ex) {
