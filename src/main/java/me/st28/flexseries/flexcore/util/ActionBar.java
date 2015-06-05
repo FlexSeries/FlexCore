@@ -24,24 +24,43 @@
  */
 package me.st28.flexseries.flexcore.util;
 
-import net.minecraft.server.v1_8_R1.ChatSerializer;
-import net.minecraft.server.v1_8_R1.IChatBaseComponent;
-import net.minecraft.server.v1_8_R1.PacketPlayOutChat;
-import org.bukkit.craftbukkit.v1_8_R1.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 
-/**
- * v1.1.1 - http://www.spigotmc.org/resources/actionbarapi.1315/
- */
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+
 public final class ActionBar {
 
     private ActionBar() { }
 
-    public static void sendActionBar(Player player, String message){
-        CraftPlayer p = (CraftPlayer) player;
-        IChatBaseComponent cbc = ChatSerializer.a("{\"text\": \"" + message + "\"}");
-        PacketPlayOutChat ppoc = new PacketPlayOutChat(cbc, (byte) 2);
-        p.getHandle().playerConnection.sendPacket(ppoc);
+    public static void sendActionBar(Player player, String message) {
+        try {
+            Class classCraftPlayer = InternalUtils.getCBClass("entity.CraftPlayer");
+            Class classEntityPlayer = InternalUtils.getNMSClass("EntityPlayer");
+            Class classPlayerConnection = InternalUtils.getNMSClass("PlayerConnection");
+            Class classIChatBaseComponent = InternalUtils.getNMSClass("IChatBaseComponent");
+            Class classIChatBaseComponent$ChatSerializer = InternalUtils.getNMSClass("IChatBaseComponent.ChatSerializer");
+            Class classPacketPlayOutChat = InternalUtils.getNMSClass("PacketPlayOutChat");
+
+            Method methodSerialize = classIChatBaseComponent$ChatSerializer.getDeclaredMethod("a", String.class);
+            Object chatComponent = methodSerialize.invoke(null, "{\"text\": \"" + message + "\"}");
+
+            Constructor constructorPacket = classPacketPlayOutChat.getConstructor(classIChatBaseComponent, byte.class);
+            Object packet = constructorPacket.newInstance(chatComponent, (byte) 2);
+
+            Method methodGetHandle = classCraftPlayer.getDeclaredMethod("getHandle");
+            Object playerHandle = methodGetHandle.invoke(player);
+
+            Field fieldPlayerConnection = classEntityPlayer.getDeclaredField("playerConnection");
+            Object playerConnection = fieldPlayerConnection.get(playerHandle);
+
+            Method methodSendPacket = classPlayerConnection.getDeclaredMethod("sendPacket");
+
+            methodSendPacket.invoke(playerConnection, packet);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
     }
 
 }
