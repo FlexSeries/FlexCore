@@ -24,46 +24,29 @@
  */
 package me.st28.flexseries.flexcore.player.loading;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-
 /**
- * Represents a class that loads player data on join.<br />
- * Must be registered using {@link PlayerLoadCycle#registerLoader(PlayerLoader)}
+ * Represents the status of a {@link PlayerLoader} in a {@link PlayerLoadCycle}.
  */
-public interface PlayerLoader {
+public enum PlayerLoaderStatus {
 
     /**
-     * @return a list of PlayerLoaders that this loader requires.
+     * The loader hasn't been started yet.
      */
-    default List<String> getLoaderDependencies() {
-        return new ArrayList<>();
-    }
+    NOT_STARTED,
 
     /**
-     * @return true if the loader should be called asynchronously.
+     * The loader has been started.
      */
-    default boolean isPlayerLoadAsync() {
-        return false;
-    }
+    STARTED,
 
     /**
-     * @return true if this loader must load successfully. If this is set to true and the loader fails, the player will be kicked.
+     * The loader successfully loaded the player's data.
      */
-    default boolean isPlayerLoaderRequired() {
-        return false;
-    }
+    SUCCEEDED,
 
     /**
-     * Loads the player data for the manager.
-     *
-     * @param uuid The UUID of the player being loaded.
-     * @param name The name of the player being loaded.
-     * @param cycle The load cycle that this player loader is loading for.
-     * @return True if the loading began successfully.<br />
-     *         False if the loading is unable to start yet.
+     * The loader failed to load the player's data.
      */
-    boolean loadPlayer(UUID uuid, String name, PlayerLoadCycle cycle);
+    FAILED
 
 }

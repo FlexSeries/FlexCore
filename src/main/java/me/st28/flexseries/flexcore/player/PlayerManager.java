@@ -32,6 +32,7 @@ import me.st28.flexseries.flexcore.player.loading.PlayerLoadCycle;
 import me.st28.flexseries.flexcore.player.loading.PlayerLoader;
 import me.st28.flexseries.flexcore.plugin.module.FlexModule;
 import me.st28.flexseries.flexcore.storage.flatfile.YamlFileManager;
+import me.st28.flexseries.flexcore.util.ArgumentCallback;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
@@ -40,8 +41,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
-import org.bukkit.event.player.AsyncPlayerPreLoginEvent.Result;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerKickEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
@@ -112,7 +111,7 @@ public final class PlayerManager extends FlexModule<FlexCore> implements Listene
     }
 
     @Override
-    public boolean isPlayerLoadSync() {
+    public boolean isPlayerLoaderRequired() {
         return true;
     }
 
@@ -123,7 +122,7 @@ public final class PlayerManager extends FlexModule<FlexCore> implements Listene
             playerData.put(uuid, data);
         }
 
-        PlayerLoadCycle.completedCycle(cycle, this);
+        PlayerLoadCycle.setLoaderSuccess(cycle, this);
         return true;
     }
 
@@ -191,18 +190,35 @@ public final class PlayerManager extends FlexModule<FlexCore> implements Listene
         }
     }
 
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onPlayerJoinLowest(PlayerJoinEvent e) {
+        Player player = e.getPlayer();
+
+    }
+
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerJoinHighest(PlayerJoinEvent e) {
         Player p = e.getPlayer();
         UUID uuid = p.getUniqueId();
+        String joinMessage = e.getJoinMessage();
 
-        // Make sure the player's data was properly loaded.
-        if (!handledPlayers.contains(uuid)) {
-            p.kickPlayer(unloadedMessage);
-            return;
-        }
+        ArgumentCallback<PlayerLoadCycle> callback = new ArgumentCallback<PlayerLoadCycle>() {
+            @Override
+            public boolean isSynchronous() {
+                return true;
+            }
 
-        handleOfficialLogin(p, cachedCycles.remove(uuid), e.getJoinMessage());
+            @Override
+            public void callback(PlayerLoadCycle argument) {
+                Player player = Bukkit.getPlayer(argument.getPlayerUuid());
+                if (player != null) {
+                    handleOfficialLogin(player, argument, joinMessage);
+                }
+            }
+        };
+
+        PlayerLoadCycle cycle = new PlayerLoadCycle(uuid, p.getName(), loadTimeout);
+        cycle.startLoading(callback);
 
         if (enableJoinMessageChange) {
             e.setJoinMessage(null);
@@ -248,40 +264,6 @@ public final class PlayerManager extends FlexModule<FlexCore> implements Listene
         }
 
         savePlayer(p.getUniqueId());
-    }
-
-    @EventHandler(priority = EventPriority.HIGHEST)
-    public void onAsyncPlayerPreLogin(AsyncPlayerPreLoginEvent e) {
-        if (e.getLoginResult() != Result.ALLOWED) return;
-
-        final UUID uuid = e.getUniqueId();
-        if (uuid == null) return;
-        handledPlayers.add(uuid);
-
-        // Begin loading
-        PlayerLoadCycle cycle = new PlayerLoadCycle(uuid, e.getName(), loadTimeout);
-
-        final Object loadLock = new Object();
-
-        cycle.startLoading(loadLock);
-
-        synchronized (loadLock) {
-            while (cycle.getLoadResult() == null) {
-                try {
-                    loadLock.wait();
-                } catch (InterruptedException ex) {
-                    break;
-                }
-            }
-        }
-
-        if (!cycle.getLoadResult().isSuccess()) {
-            e.disallow(Result.KICK_OTHER, cycle.getLoadResult().getFailMessage());
-        } else {
-            e.allow();
-
-            cachedCycles.put(uuid, cycle);
-        }
     }
 
 }
