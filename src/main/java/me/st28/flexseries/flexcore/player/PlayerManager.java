@@ -210,12 +210,6 @@ public final class PlayerManager extends FlexModule<FlexCore> implements Listene
         }
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
-    public void onPlayerJoinLowest(PlayerJoinEvent e) {
-        Player player = e.getPlayer();
-
-    }
-
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerJoinHighest(PlayerJoinEvent e) {
         Player p = e.getPlayer();
