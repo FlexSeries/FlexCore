@@ -60,8 +60,8 @@ public final class PlayerManager extends FlexModule<FlexCore> implements Listene
     private boolean enableJoinMessageChange;
     private boolean enableQuitMessageChange;
 
-    private final Set<UUID> handledPlayers = new HashSet<>();
-    private final Map<UUID, PlayerLoadCycle> cachedCycles = new HashMap<>();
+    private int autoUnloadInterval;
+    private int autoUnloadIntervalTaskId = -1;
 
     private File playerDir;
     private final Map<UUID, PlayerData> playerData = new HashMap<>();
@@ -85,6 +85,25 @@ public final class PlayerManager extends FlexModule<FlexCore> implements Listene
         loadTimeout = config.getLong("load timeout", 100L);
         enableJoinMessageChange = config.getBoolean("modify join message", true);
         enableQuitMessageChange = config.getBoolean("modify quit message", true);
+
+        autoUnloadInterval = config.getInt("auto unload interval", 5);
+        if (autoUnloadIntervalTaskId != -1) {
+            Bukkit.getScheduler().cancelTask(autoUnloadIntervalTaskId);
+        }
+
+        if (autoUnloadInterval > 0) {
+            Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, () -> {
+                Iterator<Entry<UUID, PlayerData>> iterator = playerData.entrySet().iterator();
+                while (iterator.hasNext()) {
+                    Entry<UUID, PlayerData> next = iterator.next();
+
+                    if (Bukkit.getPlayer(next.getKey()) == null) {
+                        savePlayer(next.getKey());
+                        iterator.remove();
+                    }
+                }
+            }, autoUnloadInterval * 1200L, autoUnloadInterval * 1200L);
+        }
 
         loginMessageOrder.clear();
         loginMessageOrder.addAll(config.getStringList("player join.message order"));
@@ -117,10 +136,7 @@ public final class PlayerManager extends FlexModule<FlexCore> implements Listene
 
     @Override
     public boolean loadPlayer(UUID uuid, String name, PlayerLoadCycle cycle) {
-        if (!playerData.containsKey(uuid)) {
-            PlayerData data = new PlayerData(uuid, new YamlFileManager(playerDir + File.separator + uuid.toString() + ".yml").getConfig());
-            playerData.put(uuid, data);
-        }
+        getPlayerData(uuid);
 
         PlayerLoadCycle.setLoaderSuccess(cycle, this);
         return true;
@@ -131,6 +147,10 @@ public final class PlayerManager extends FlexModule<FlexCore> implements Listene
      */
     public PlayerData getPlayerData(UUID uuid) {
         Validate.notNull(uuid, "UUID cannot be null.");
+        if (!playerData.containsKey(uuid)) {
+            PlayerData data = new PlayerData(uuid, new YamlFileManager(playerDir + File.separator + uuid.toString() + ".yml").getConfig());
+            playerData.put(uuid, data);
+        }
         return playerData.get(uuid);
     }
 
@@ -240,11 +260,11 @@ public final class PlayerManager extends FlexModule<FlexCore> implements Listene
     }
 
     private void handlePlayerLeave(Player p, String message) {
-        if (!handledPlayers.remove(p.getUniqueId())) {
-            return;
-        }
+        boolean isPlayerLoaded = playerData.containsKey(p.getUniqueId());
 
-        getPlayerData(p.getUniqueId()).lastLogout = System.currentTimeMillis();
+        if (isPlayerLoaded) {
+            getPlayerData(p.getUniqueId()).lastLogout = System.currentTimeMillis();
+        }
 
         PlayerLeaveEvent newLeaveEvent = new PlayerLeaveEvent(p);
         if (enableQuitMessageChange) {
@@ -263,7 +283,9 @@ public final class PlayerManager extends FlexModule<FlexCore> implements Listene
             }
         }
 
-        savePlayer(p.getUniqueId());
+        if (isPlayerLoaded) {
+            savePlayer(p.getUniqueId());
+        }
     }
 
 }
