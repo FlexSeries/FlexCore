@@ -24,6 +24,7 @@
  */
 package me.st28.flexseries.flexcore.player;
 
+import me.st28.flexseries.flexcore.plugin.FlexPlugin;
 import org.apache.commons.lang.Validate;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -138,6 +139,14 @@ public final class PlayerData {
         return (T) customData.get(key);
     }
 
+    public <T> T getCustomData(Class<? extends FlexPlugin> plugin, String key, T type) {
+        Validate.notNull(plugin, "Plugin cannot be null.");
+        Validate.notNull(key, "Key cannot be null.");
+        Validate.notNull(type, "Type cannot be null.");
+
+        return (T) customData.get(plugin.getCanonicalName() + "-" + key);
+    }
+
     public void setCustomData(String key, Object data) {
         Validate.notNull(key, "Key cannot be null.");
 
@@ -145,6 +154,18 @@ public final class PlayerData {
             customData.remove(key);
         } else {
             customData.put(key, data);
+        }
+    }
+
+    public void setCustomData(Class<? extends FlexPlugin> plugin, String key, Object data) {
+        Validate.notNull(plugin, "Plugin cannot be null.");
+        Validate.notNull(key, "Key cannot be null.");
+
+        String fullKey = plugin.getCanonicalName() + "-" + key;
+        if (data == null) {
+            customData.remove(fullKey);
+        } else {
+            customData.put(fullKey, data);
         }
     }
 
