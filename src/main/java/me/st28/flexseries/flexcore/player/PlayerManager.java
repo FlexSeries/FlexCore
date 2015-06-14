@@ -33,7 +33,6 @@ import me.st28.flexseries.flexcore.player.loading.PlayerLoader;
 import me.st28.flexseries.flexcore.plugin.module.FlexModule;
 import me.st28.flexseries.flexcore.storage.flatfile.YamlFileManager;
 import me.st28.flexseries.flexcore.util.ArgumentCallback;
-import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -49,9 +48,8 @@ import java.io.File;
 import java.util.*;
 import java.util.Map.Entry;
 
+//TODO: Freeze players on load
 public final class PlayerManager extends FlexModule<FlexCore> implements Listener, PlayerLoader {
-
-    private String unloadedMessage;
 
     private final List<String> loginMessageOrder = new ArrayList<>();
 
@@ -107,8 +105,6 @@ public final class PlayerManager extends FlexModule<FlexCore> implements Listene
 
         loginMessageOrder.clear();
         loginMessageOrder.addAll(config.getStringList("player join.message order"));
-
-        unloadedMessage = StringEscapeUtils.unescapeJava(config.getString("player join.unloaded message", "Unable to load your data.\nPlease try again."));
     }
 
     @Override
