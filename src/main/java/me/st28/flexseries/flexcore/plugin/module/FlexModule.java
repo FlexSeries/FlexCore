@@ -34,7 +34,10 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.event.Listener;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -197,13 +200,21 @@ public abstract class FlexModule<T extends FlexPlugin> {
         }
 
         if (plugin.getResource("modules/" + identifier + "/config.yml") != null) {
-            if (useModuleFolder) {
-                configFile = new YamlFileManager(dataFolder + File.separator + "config.yml");
-            } else {
-                configFile = new YamlFileManager(plugin.getDataFolder() + File.separator + "config-" + getIdentifier() + ".yml");
-            }
+            configFile = new YamlFileManager(plugin.getDataFolder() + File.separator + "config-" + getIdentifier() + ".yml");
         } else {
             configFile = null;
+        }
+
+        if (configFile != null && useModuleFolder) {
+            File oldConfig = new File(getDataFolder() + File.separator + "config.yml");
+            if (oldConfig.exists()) {
+                try {
+                    Files.copy(oldConfig.toPath(), new File(plugin.getDataFolder() + File.separator + "config-" + getIdentifier() + ".yml").toPath(), StandardCopyOption.REPLACE_EXISTING);
+                    oldConfig.renameTo(new File("config.yml.old"));
+                } catch (IOException ex) {
+                    throw new RuntimeException("An exception occurred while moving the old config file.", ex);
+                }
+            }
         }
 
         reloadConfig();
