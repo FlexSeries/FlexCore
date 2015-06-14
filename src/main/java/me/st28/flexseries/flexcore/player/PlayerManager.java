@@ -58,7 +58,6 @@ public final class PlayerManager extends FlexModule<FlexCore> implements Listene
     private boolean enableJoinMessageChange;
     private boolean enableQuitMessageChange;
 
-    private int autoUnloadInterval;
     private int autoUnloadIntervalTaskId = -1;
 
     private File playerDir;
@@ -84,13 +83,13 @@ public final class PlayerManager extends FlexModule<FlexCore> implements Listene
         enableJoinMessageChange = config.getBoolean("modify join message", true);
         enableQuitMessageChange = config.getBoolean("modify quit message", true);
 
-        autoUnloadInterval = config.getInt("auto unload interval", 5);
+        int autoUnloadInterval = config.getInt("auto unload interval", 5);
         if (autoUnloadIntervalTaskId != -1) {
             Bukkit.getScheduler().cancelTask(autoUnloadIntervalTaskId);
         }
 
         if (autoUnloadInterval > 0) {
-            Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, () -> {
+            autoUnloadIntervalTaskId = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, () -> {
                 Iterator<Entry<UUID, PlayerData>> iterator = playerData.entrySet().iterator();
                 while (iterator.hasNext()) {
                     Entry<UUID, PlayerData> next = iterator.next();
