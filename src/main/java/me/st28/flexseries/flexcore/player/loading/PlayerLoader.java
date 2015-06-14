@@ -38,9 +38,7 @@ public interface PlayerLoader {
      * @param uuid The UUID of the player being loaded.
      * @param name The name of the player being loaded.
      * @param cycle The load cycle that this player loader is loading for.
-     * @return True if the loading began successfully.<br />
-     *         False if the loading is unable to start yet.
      */
-    boolean loadPlayer(UUID uuid, String name, PlayerLoadCycle cycle);
+    void loadPlayer(UUID uuid, String name, PlayerLoadCycle cycle);
 
 }

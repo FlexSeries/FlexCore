@@ -230,12 +230,11 @@ public final class PlayerLoadCycle {
                 }
             }
 
-            if (playerLoader.loadPlayer(playerUuid, playerName, this)) {
-                if (loaderStatuses.get(playerLoader.getClass().getCanonicalName()) == PlayerLoaderStatus.NOT_STARTED) {
-                    loaderStatuses.put(playerLoader.getClass().getCanonicalName(), PlayerLoaderStatus.STARTED);
-                }
-                LogHelper.debug(FlexCore.class, "Player loader '" + playerLoader.getClass().getCanonicalName() + "' BEGAN loading.");
+            LogHelper.debug(FlexCore.class, "Starting player loader '" + playerLoader.getClass().getCanonicalName() + "'");
+            if (loaderStatuses.get(playerLoader.getClass().getCanonicalName()) == PlayerLoaderStatus.NOT_STARTED) {
+                loaderStatuses.put(playerLoader.getClass().getCanonicalName(), PlayerLoaderStatus.STARTED);
             }
+            playerLoader.loadPlayer(playerUuid, playerName, this);
         } catch (Exception ex) {
             LogHelper.severe(FlexCore.class, "An exception occurred while loading player '" + playerName + "' (" + playerUuid.toString() + ")");
             PlayerLoadCycle.setLoaderFailure(this, playerLoader);

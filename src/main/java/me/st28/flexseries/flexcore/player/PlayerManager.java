@@ -126,11 +126,10 @@ public final class PlayerManager extends FlexModule<FlexCore> implements Listene
     }
 
     @Override
-    public boolean loadPlayer(UUID uuid, String name, PlayerLoadCycle cycle) {
+    public void loadPlayer(UUID uuid, String name, PlayerLoadCycle cycle) {
         getPlayerData(uuid);
 
         PlayerLoadCycle.setLoaderSuccess(cycle, this);
-        return true;
     }
 
     /**
