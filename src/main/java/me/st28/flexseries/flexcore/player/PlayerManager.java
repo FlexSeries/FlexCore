@@ -32,7 +32,7 @@ import me.st28.flexseries.flexcore.player.loading.PlayerLoadCycle;
 import me.st28.flexseries.flexcore.player.loading.PlayerLoader;
 import me.st28.flexseries.flexcore.plugin.module.FlexModule;
 import me.st28.flexseries.flexcore.storage.flatfile.YamlFileManager;
-import org.apache.commons.lang.StringEscapeUtils;
+import me.st28.flexseries.flexcore.util.ArgumentCallback;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -40,8 +40,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
-import org.bukkit.event.player.AsyncPlayerPreLoginEvent.Result;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerKickEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
@@ -50,9 +48,8 @@ import java.io.File;
 import java.util.*;
 import java.util.Map.Entry;
 
+//TODO: Freeze players on load
 public final class PlayerManager extends FlexModule<FlexCore> implements Listener, PlayerLoader {
-
-    private String unloadedMessage;
 
     private final List<String> loginMessageOrder = new ArrayList<>();
 
@@ -61,8 +58,8 @@ public final class PlayerManager extends FlexModule<FlexCore> implements Listene
     private boolean enableJoinMessageChange;
     private boolean enableQuitMessageChange;
 
-    private final Set<UUID> handledPlayers = new HashSet<>();
-    private final Map<UUID, PlayerLoadCycle> cachedCycles = new HashMap<>();
+    private int autoUnloadInterval;
+    private int autoUnloadIntervalTaskId = -1;
 
     private File playerDir;
     private final Map<UUID, PlayerData> playerData = new HashMap<>();
@@ -87,10 +84,27 @@ public final class PlayerManager extends FlexModule<FlexCore> implements Listene
         enableJoinMessageChange = config.getBoolean("modify join message", true);
         enableQuitMessageChange = config.getBoolean("modify quit message", true);
 
+        autoUnloadInterval = config.getInt("auto unload interval", 5);
+        if (autoUnloadIntervalTaskId != -1) {
+            Bukkit.getScheduler().cancelTask(autoUnloadIntervalTaskId);
+        }
+
+        if (autoUnloadInterval > 0) {
+            Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, () -> {
+                Iterator<Entry<UUID, PlayerData>> iterator = playerData.entrySet().iterator();
+                while (iterator.hasNext()) {
+                    Entry<UUID, PlayerData> next = iterator.next();
+
+                    if (Bukkit.getPlayer(next.getKey()) == null) {
+                        savePlayer(next.getKey());
+                        iterator.remove();
+                    }
+                }
+            }, autoUnloadInterval * 1200L, autoUnloadInterval * 1200L);
+        }
+
         loginMessageOrder.clear();
         loginMessageOrder.addAll(config.getStringList("player join.message order"));
-
-        unloadedMessage = StringEscapeUtils.unescapeJava(config.getString("player join.unloaded message", "Unable to load your data.\nPlease try again."));
     }
 
     @Override
@@ -112,18 +126,15 @@ public final class PlayerManager extends FlexModule<FlexCore> implements Listene
     }
 
     @Override
-    public boolean isPlayerLoadSync() {
+    public boolean isPlayerLoaderRequired() {
         return true;
     }
 
     @Override
     public boolean loadPlayer(UUID uuid, String name, PlayerLoadCycle cycle) {
-        if (!playerData.containsKey(uuid)) {
-            PlayerData data = new PlayerData(uuid, new YamlFileManager(playerDir + File.separator + uuid.toString() + ".yml").getConfig());
-            playerData.put(uuid, data);
-        }
+        getPlayerData(uuid);
 
-        PlayerLoadCycle.completedCycle(cycle, this);
+        PlayerLoadCycle.setLoaderSuccess(cycle, this);
         return true;
     }
 
@@ -132,6 +143,10 @@ public final class PlayerManager extends FlexModule<FlexCore> implements Listene
      */
     public PlayerData getPlayerData(UUID uuid) {
         Validate.notNull(uuid, "UUID cannot be null.");
+        if (!playerData.containsKey(uuid)) {
+            PlayerData data = new PlayerData(uuid, new YamlFileManager(playerDir + File.separator + uuid.toString() + ".yml").getConfig());
+            playerData.put(uuid, data);
+        }
         return playerData.get(uuid);
     }
 
@@ -195,14 +210,25 @@ public final class PlayerManager extends FlexModule<FlexCore> implements Listene
     public void onPlayerJoinHighest(PlayerJoinEvent e) {
         Player p = e.getPlayer();
         UUID uuid = p.getUniqueId();
+        String joinMessage = e.getJoinMessage();
 
-        // Make sure the player's data was properly loaded.
-        if (!handledPlayers.contains(uuid)) {
-            p.kickPlayer(unloadedMessage);
-            return;
-        }
+        ArgumentCallback<PlayerLoadCycle> callback = new ArgumentCallback<PlayerLoadCycle>() {
+            @Override
+            public boolean isSynchronous() {
+                return true;
+            }
 
-        handleOfficialLogin(p, cachedCycles.remove(uuid), e.getJoinMessage());
+            @Override
+            public void callback(PlayerLoadCycle argument) {
+                Player player = Bukkit.getPlayer(argument.getPlayerUuid());
+                if (player != null) {
+                    handleOfficialLogin(player, argument, joinMessage);
+                }
+            }
+        };
+
+        PlayerLoadCycle cycle = new PlayerLoadCycle(uuid, p.getName(), loadTimeout);
+        cycle.startLoading(callback);
 
         if (enableJoinMessageChange) {
             e.setJoinMessage(null);
@@ -224,11 +250,11 @@ public final class PlayerManager extends FlexModule<FlexCore> implements Listene
     }
 
     private void handlePlayerLeave(Player p, String message) {
-        if (!handledPlayers.remove(p.getUniqueId())) {
-            return;
-        }
+        boolean isPlayerLoaded = playerData.containsKey(p.getUniqueId());
 
-        getPlayerData(p.getUniqueId()).lastLogout = System.currentTimeMillis();
+        if (isPlayerLoaded) {
+            getPlayerData(p.getUniqueId()).lastLogout = System.currentTimeMillis();
+        }
 
         PlayerLeaveEvent newLeaveEvent = new PlayerLeaveEvent(p);
         if (enableQuitMessageChange) {
@@ -247,40 +273,8 @@ public final class PlayerManager extends FlexModule<FlexCore> implements Listene
             }
         }
 
-        savePlayer(p.getUniqueId());
-    }
-
-    @EventHandler(priority = EventPriority.HIGHEST)
-    public void onAsyncPlayerPreLogin(AsyncPlayerPreLoginEvent e) {
-        if (e.getLoginResult() != Result.ALLOWED) return;
-
-        final UUID uuid = e.getUniqueId();
-        if (uuid == null) return;
-        handledPlayers.add(uuid);
-
-        // Begin loading
-        PlayerLoadCycle cycle = new PlayerLoadCycle(uuid, e.getName(), loadTimeout);
-
-        final Object loadLock = new Object();
-
-        cycle.startLoading(loadLock);
-
-        synchronized (loadLock) {
-            while (cycle.getLoadResult() == null) {
-                try {
-                    loadLock.wait();
-                } catch (InterruptedException ex) {
-                    break;
-                }
-            }
-        }
-
-        if (!cycle.getLoadResult().isSuccess()) {
-            e.disallow(Result.KICK_OTHER, cycle.getLoadResult().getFailMessage());
-        } else {
-            e.allow();
-
-            cachedCycles.put(uuid, cycle);
+        if (isPlayerLoaded) {
+            savePlayer(p.getUniqueId());
         }
     }
 

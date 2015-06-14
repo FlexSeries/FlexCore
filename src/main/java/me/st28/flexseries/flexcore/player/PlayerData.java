@@ -24,14 +24,14 @@
  */
 package me.st28.flexseries.flexcore.player;
 
+import me.st28.flexseries.flexcore.plugin.FlexPlugin;
+import org.apache.commons.lang.Validate;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
+import java.util.Map.Entry;
 
 public final class PlayerData {
 
@@ -46,6 +46,8 @@ public final class PlayerData {
 
     String lastName;
     final List<String> names = new ArrayList<>();
+
+    final Map<String, Object> customData = new HashMap<>();
 
     PlayerData(UUID uuid, FileConfiguration config) {
         this.uuid = uuid;
@@ -67,6 +69,21 @@ public final class PlayerData {
 
         lastName = config.getString("name.last");
         names.addAll(config.getStringList("name.previous"));
+
+        ConfigurationSection customSec = config.getConfigurationSection("custom");
+        if (customSec != null) {
+            loadCustomData(customSec, "");
+        }
+    }
+
+    private void loadCustomData(ConfigurationSection currentSec, String currentKey) {
+        for (String key : currentSec.getKeys(false)) {
+            if (currentSec.get(key) instanceof ConfigurationSection) {
+                loadCustomData(currentSec.getConfigurationSection(key), currentKey + "." + key);
+            } else {
+                customData.put(currentKey + "." + key, currentSec.get(key));
+            }
+        }
     }
 
     void save(ConfigurationSection config) {
@@ -77,6 +94,15 @@ public final class PlayerData {
         config.set("ip.previous", ips);
         config.set("name.last", lastName);
         config.set("name.previous", names);
+
+        ConfigurationSection customSec = config.createSection("custom");
+        for (Entry<String, Object> entry : customData.entrySet()) {
+            customSec.set(entry.getKey(), entry.getValue());
+        }
+    }
+
+    public UUID getUuid() {
+        return uuid;
     }
 
     public Timestamp getFirstJoin() {
@@ -105,6 +131,42 @@ public final class PlayerData {
 
     public List<String> getNames() {
         return Collections.unmodifiableList(names);
+    }
+
+    public <T> T getCustomData(String key, T type) {
+        Validate.notNull(key, "Key cannot be null.");
+        Validate.notNull(type, "Type cannot be null.");
+        return (T) customData.get(key);
+    }
+
+    public <T> T getCustomData(Class<? extends FlexPlugin> plugin, String key, T type) {
+        Validate.notNull(plugin, "Plugin cannot be null.");
+        Validate.notNull(key, "Key cannot be null.");
+        Validate.notNull(type, "Type cannot be null.");
+
+        return (T) customData.get(plugin.getCanonicalName() + "-" + key);
+    }
+
+    public void setCustomData(String key, Object data) {
+        Validate.notNull(key, "Key cannot be null.");
+
+        if (data == null) {
+            customData.remove(key);
+        } else {
+            customData.put(key, data);
+        }
+    }
+
+    public void setCustomData(Class<? extends FlexPlugin> plugin, String key, Object data) {
+        Validate.notNull(plugin, "Plugin cannot be null.");
+        Validate.notNull(key, "Key cannot be null.");
+
+        String fullKey = plugin.getCanonicalName() + "-" + key;
+        if (data == null) {
+            customData.remove(fullKey);
+        } else {
+            customData.put(fullKey, data);
+        }
     }
 
 }

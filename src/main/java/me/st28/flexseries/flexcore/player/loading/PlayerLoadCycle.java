@@ -25,11 +25,17 @@
 package me.st28.flexseries.flexcore.player.loading;
 
 import me.st28.flexseries.flexcore.FlexCore;
+import me.st28.flexseries.flexcore.events.PlayerJoinLoadedEvent;
 import me.st28.flexseries.flexcore.logging.LogHelper;
+import me.st28.flexseries.flexcore.util.ArgumentCallback;
+import me.st28.flexseries.flexcore.util.TaskChain;
+import me.st28.flexseries.flexcore.util.TaskChain.GenericTask;
+import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Handles the loading process for a player that connects to the server.
@@ -38,30 +44,6 @@ public final class PlayerLoadCycle {
 
     private static FlexCore getPluginInstance() {
         return FlexCore.getInstance();
-    }
-
-    /**
-     * Utility method for ending a cycle due to a {@link PlayerLoader} failing.
-     *
-     * @param cycle The load cycle instance.
-     * @param playerLoader The loader that failed to load the player's data.
-     */
-    public static void failedCycle(PlayerLoadCycle cycle, PlayerLoader playerLoader) {
-        LogHelper.debug(FlexCore.class, playerLoader.getClass().getCanonicalName() + " failed to load player data.");
-        cycle.handleFailedLoad();
-        cycle.setLoadResult(new LoadResult(false, "Failed to load data"));
-    }
-
-    /**
-     * Utility method for marking a {@link PlayerLoader} as complete in a given cycle.
-     *
-     * @param cycle The load cycle instance.
-     * @param playerLoader The loader that just completed loading the player.
-     */
-    public static void completedCycle(PlayerLoadCycle cycle, PlayerLoader playerLoader) {
-        LogHelper.debug(FlexCore.class, playerLoader.getClass().getCanonicalName() + " COMPLETED cycle.");
-        cycle.completedLoaders.add(playerLoader.getClass().getCanonicalName());
-        cycle.isFullyLoaded();
     }
 
     private static Set<PlayerLoader> registeredLoaders = new HashSet<>();
@@ -74,6 +56,8 @@ public final class PlayerLoadCycle {
      *         False if already registered.
      */
     public static boolean registerLoader(PlayerLoader playerLoader) {
+        Validate.notNull(playerLoader, "Player loader cannot be null.");
+
         boolean result = registeredLoaders.add(playerLoader);
         if (result) {
             LogHelper.debug(FlexCore.class, "Registered PlayerLoader: " + playerLoader.getClass().getCanonicalName());
@@ -81,61 +65,102 @@ public final class PlayerLoadCycle {
         return result;
     }
 
-    private UUID playerUuid;
-    private String playerName;
+    /**
+     * Utility method to indicate that a {@link PlayerLoader} successfully loaded a player's data.
+     */
+    public static void setLoaderSuccess(PlayerLoadCycle cycle, PlayerLoader playerLoader) {
+        Validate.notNull(cycle, "Cycle cannot be null.");
+        Validate.notNull(playerLoader, "Player loader cannot be null.");
+
+        cycle.loaderStatuses.put(playerLoader.getClass().getCanonicalName(), PlayerLoaderStatus.SUCCEEDED);
+        LogHelper.debug(FlexCore.class, "Player loader '" + playerLoader.getClass().getCanonicalName() + "' successfully loaded player data.");
+
+        cycle.isFullyLoaded();
+    }
+
+    /**
+     * Utility method to indicate that a {@link PlayerLoader} failed to load a player's data.
+     */
+    public static void setLoaderFailure(PlayerLoadCycle cycle, PlayerLoader playerLoader) {
+        Validate.notNull(cycle, "Cycle cannot be null.");
+        Validate.notNull(playerLoader, "Player loader cannot be null.");
+
+        cycle.loaderStatuses.put(playerLoader.getClass().getCanonicalName(), PlayerLoaderStatus.FAILED);
+        LogHelper.debug(FlexCore.class, "Player loader '" + playerLoader.getClass().getCanonicalName() + "' failed to load player data.");
+
+        if (playerLoader.isPlayerLoaderRequired()) {
+            LogHelper.debug(FlexCore.class, "Kicking player because player loader '" + playerLoader.getClass().getCanonicalName() + "' is required.");
+            cycle.kickPlayer();
+            return;
+        }
+    }
+
+    private final UUID playerUuid;
+    private final String playerName;
+    private final Map<String, Object> customData = new ConcurrentHashMap<>();
+
+    private int timeoutTaskId = -1;
     private int taskId = -1;
-    private Set<String> startedLoaders = new HashSet<>();
-    Set<String> completedLoaders = new HashSet<>();
-    private Map<String, Object> customData = new HashMap<>();
 
-    LoadResult loadResult;
+    private final Map<String, PlayerLoaderStatus> loaderStatuses = new ConcurrentHashMap<>();
 
-    Object loadLock;
+    private ArgumentCallback<PlayerLoadCycle> callback;
 
+    /**
+     * Creates a new player loading instance.
+     *
+     * @param playerUuid The UUID of the player being loaded.
+     * @param playerName The name of the player being loaded.
+     * @param timeout The maximum time (in ticks) that this loader can be running.
+     */
     public PlayerLoadCycle(UUID playerUuid, String playerName, long timeout) {
         this.playerUuid = playerUuid;
         this.playerName = playerName;
 
-        Bukkit.getScheduler().runTaskLaterAsynchronously(getPluginInstance(), new Runnable() {
-            @Override
-            public void run() {
-                if (loadResult == null) {
-                    setLoadResult(new LoadResult(false, "Load timed out"));
-                }
-            }
-        }, timeout);
-    }
-
-    private void setLoadResult(LoadResult loadResult) {
-        this.loadResult = loadResult;
-        synchronized (loadLock) {
-            loadLock.notify();
+        for (PlayerLoader loader : registeredLoaders) {
+            loaderStatuses.put(loader.getClass().getCanonicalName(), PlayerLoaderStatus.NOT_STARTED);
         }
+
+        timeoutTaskId = Bukkit.getScheduler().runTaskLaterAsynchronously(getPluginInstance(), () -> {
+            //timed out
+            LogHelper.debug(FlexCore.class, "Player load cycle for '" + playerUuid + "' timed out.");
+        }, timeout).getTaskId();
     }
 
     /**
      * @return the UUID of the player the cycle is loading.
      */
-    public UUID getPlayerUuid() {
+    public final UUID getPlayerUuid() {
         return playerUuid;
     }
 
     /**
      * @return the name of the player the cycle is loading.
      */
-    public String getPlayerName() {
+    public final String getPlayerName() {
         return playerName;
     }
 
     /**
-     * @return custom data to include in the PlayerJoinLoadedEvent.
+     * @return custom data to include in the {@link PlayerJoinLoadedEvent}.
      */
-    public Map<String, Object> getCustomData() {
+    public final Map<String, Object> getCustomData() {
         return customData;
     }
 
-    public final LoadResult getLoadResult() {
-        return loadResult;
+    /**
+     * Begins the load cycle.
+     */
+    public void startLoading(ArgumentCallback<PlayerLoadCycle> callback) {
+        Validate.notNull(callback, "Callback cannot be null.");
+        this.callback = callback;
+
+        for (PlayerLoader playerLoader : registeredLoaders) {
+            startLoader(playerLoader);
+            LogHelper.debug(FlexCore.class, "Starting player loader: '" + playerLoader.getClass().getCanonicalName() + "'");
+        }
+
+        taskId = Bukkit.getScheduler().runTaskTimerAsynchronously(getPluginInstance(), this::checkStartStatuses, 2L, 2L).getTaskId();
     }
 
     /**
@@ -143,38 +168,16 @@ public final class PlayerLoadCycle {
      *         Will also end the loader and officially make the player join the server.
      */
     public boolean isFullyLoaded() {
-        if (completedLoaders.size() != registeredLoaders.size()) {
-            return false;
-        }
-
-        cancelTask();
-        setLoadResult(new LoadResult(true, null));
-        return true;
-    }
-
-    /**
-     * @return True if the specified loader has completed loading.
-     */
-    public boolean isLoaderComplete(Class<? extends PlayerLoader> clazz) {
-        return completedLoaders.contains(clazz.getCanonicalName());
-    }
-
-    /**
-     * Begins the load cycle.
-     */
-    public void startLoading(Object loadLock) {
-        this.loadLock = loadLock;
-        for (PlayerLoader playerLoader : registeredLoaders) {
-            startLoader(playerLoader);
-            LogHelper.debug(FlexCore.class, "Starting loader: " + playerLoader.getClass().getCanonicalName());
-        }
-
-        taskId = Bukkit.getScheduler().runTaskTimerAsynchronously(getPluginInstance(), new Runnable() {
-            @Override
-            public void run() {
-                checkStartStates();
+        for (PlayerLoaderStatus status : loaderStatuses.values()) {
+            if (status != PlayerLoaderStatus.SUCCEEDED && status != PlayerLoaderStatus.FAILED) {
+                return false;
             }
-        }, 2L, 2L).getTaskId();
+        }
+
+        cancelTasks();
+
+        callback.run(PlayerLoadCycle.this);
+        return true;
     }
 
     /**
@@ -184,13 +187,52 @@ public final class PlayerLoadCycle {
      */
     private void startLoader(PlayerLoader playerLoader) {
         try {
+            List<String> dependencies = playerLoader.getLoaderDependencies();
+            if (dependencies != null && !dependencies.isEmpty()) {
+                for (String dependency : dependencies) {
+                    PlayerLoaderStatus depStatus = loaderStatuses.get(dependency);
+                    if (depStatus == null) {
+                        LogHelper.debug(FlexCore.class, "Loader dependency '" + dependency + "' for loader '" + playerLoader.getClass().getCanonicalName() + "'not found.");
+
+                        if (playerLoader.isPlayerLoaderRequired()) {
+                            kickPlayer();
+                            return;
+                        }
+                        continue;
+                    }
+
+                    switch (depStatus) {
+                        case NOT_STARTED:
+                        case STARTED:
+                            LogHelper.debug(FlexCore.class, "Unable to start loader '" + playerLoader.getClass().getCanonicalName() + "': dependency '" + dependency + "' not loaded yet.");
+                            return;
+
+                        case FAILED:
+                            if (playerLoader.isPlayerLoaderRequired()) {
+                                loaderStatuses.put(playerLoader.getClass().getCanonicalName(), PlayerLoaderStatus.FAILED);
+                                kickPlayer();
+                                return;
+                            }
+
+                            break;
+
+                        case SUCCEEDED:
+                            break;
+
+                        default:
+                    }
+                }
+            }
+
             if (playerLoader.loadPlayer(playerUuid, playerName, this)) {
-                startedLoaders.add(playerLoader.getClass().getCanonicalName());
-                LogHelper.debug(FlexCore.class, playerLoader.getClass().getCanonicalName() + " BEGAN cycle.");
+                if (loaderStatuses.get(playerLoader.getClass().getCanonicalName()) == PlayerLoaderStatus.NOT_STARTED) {
+                    loaderStatuses.put(playerLoader.getClass().getCanonicalName(), PlayerLoaderStatus.STARTED);
+                }
+                LogHelper.debug(FlexCore.class, "Player loader '" + playerLoader.getClass().getCanonicalName() + "' BEGAN loading.");
             }
         } catch (Exception ex) {
-            PlayerLoadCycle.failedCycle(this, playerLoader);
             LogHelper.severe(FlexCore.class, "An exception occurred while loading player '" + playerName + "' (" + playerUuid.toString() + ")");
+            PlayerLoadCycle.setLoaderFailure(this, playerLoader);
             ex.printStackTrace();
         }
     }
@@ -198,46 +240,64 @@ public final class PlayerLoadCycle {
     /**
      * Checks to see if all of the player loaders have been started.
      */
-    private void checkStartStates() {
+    private void checkStartStatuses() {
+        LogHelper.debug(FlexCore.class, "Checking player loader statuses");
+
         boolean allStarted = true;
-        LogHelper.debug(FlexCore.class, "Checking load states");
         for (PlayerLoader playerLoader : registeredLoaders) {
-            LogHelper.debug(FlexCore.class, "Checking load state for " + playerLoader.getClass().getCanonicalName());
-            if (!startedLoaders.contains(playerLoader.getClass().getCanonicalName())) {
-                LogHelper.debug(FlexCore.class, "Loader " + playerLoader.getClass().getCanonicalName() + " hasn't started yet.");
-                startLoader(playerLoader);
+            LogHelper.debug(FlexCore.class, "Checking player loader status: '" + playerLoader.getClass().getCanonicalName() + "'");
+
+            if (loaderStatuses.get(playerLoader.getClass().getCanonicalName()) == PlayerLoaderStatus.NOT_STARTED) {
+                LogHelper.debug(FlexCore.class, "Player loader '" + playerLoader.getClass().getCanonicalName() + "' hasn't started yet.");
+
+                if (!playerLoader.isPlayerLoadAsync()) {
+                    new TaskChain().add(new GenericTask() {
+                        @Override
+                        protected void run() {
+                            startLoader(playerLoader);
+                        }
+                    }).execute();
+                } else {
+                    startLoader(playerLoader);
+                }
+
                 allStarted = false;
             }
         }
 
         if (allStarted) {
-            cancelTask();
+            cancelTasks();
         }
     }
 
     /**
      * Cancels the runnable that attempts to start loaders that haven't begun loading yet.
      */
-    private void cancelTask() {
-        Bukkit.getScheduler().cancelTask(taskId);
+    private void cancelTasks() {
+        if (timeoutTaskId != -1) {
+            Bukkit.getScheduler().cancelTask(timeoutTaskId);
+            timeoutTaskId = -1;
+        }
+
+        if (taskId != -1) {
+            Bukkit.getScheduler().cancelTask(taskId);
+            taskId = -1;
+        }
     }
 
     /**
-     * Handles a loader failing to load a player.
+     * Kicks a player due to a failed load.
      */
-    private void handleFailedLoad() {
-        Bukkit.getScheduler().scheduleSyncDelayedTask(getPluginInstance(), new Runnable() {
-            @Override
-            public void run() {
-                Player p = Bukkit.getPlayer(playerUuid);
-                if (p == null) {
-                    return;
-                }
-
-                setLoadResult(new LoadResult(false, "An error occurred while trying to load your data.\nPlease contact an administrator and notify them."));
+    private void kickPlayer() {
+        Bukkit.getScheduler().scheduleSyncDelayedTask(getPluginInstance(), () -> {
+            Player p = Bukkit.getPlayer(playerUuid);
+            if (p == null) {
+                return;
             }
+
+            p.kickPlayer("An error occurred while trying to load your data.\nPlease contact an administrator and notify them.");
         });
-        cancelTask();
+        cancelTasks();
     }
 
 }
