@@ -219,7 +219,8 @@ public abstract class FlexModule<T extends FlexPlugin> {
             if (oldConfig.exists()) {
                 try {
                     Files.copy(oldConfig.toPath(), new File(plugin.getDataFolder() + File.separator + "config-" + getIdentifier() + ".yml").toPath(), StandardCopyOption.REPLACE_EXISTING);
-                    oldConfig.renameTo(new File("config.yml.old"));
+                    Files.copy(oldConfig.toPath(), new File(getDataFolder() + File.separator + "config.yml.old").toPath());
+                    oldConfig.delete();
                 } catch (IOException ex) {
                     throw new RuntimeException("An exception occurred while moving the old config file.", ex);
                 }
