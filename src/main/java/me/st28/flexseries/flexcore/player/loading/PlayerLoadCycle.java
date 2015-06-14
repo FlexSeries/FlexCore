@@ -46,7 +46,11 @@ public final class PlayerLoadCycle {
         return FlexCore.getInstance();
     }
 
-    private static Set<PlayerLoader> registeredLoaders = new HashSet<>();
+    private static Map<PlayerLoader, LoaderOptions> registeredLoaders = new HashMap<>();
+
+    private static LoaderOptions getLoaderOptions(PlayerLoader loader) {
+        return registeredLoaders.get(loader);
+    }
 
     /**
      * Registers a {@link PlayerLoader}.
@@ -55,14 +59,16 @@ public final class PlayerLoadCycle {
      * @return True if registered.<br />
      *         False if already registered.
      */
-    public static boolean registerLoader(PlayerLoader playerLoader) {
+    public static boolean registerLoader(PlayerLoader playerLoader, LoaderOptions options) {
         Validate.notNull(playerLoader, "Player loader cannot be null.");
+        if (options == null) options = new LoaderOptions();
 
-        boolean result = registeredLoaders.add(playerLoader);
-        if (result) {
-            LogHelper.debug(FlexCore.class, "Registered PlayerLoader: " + playerLoader.getClass().getCanonicalName());
+        if (registeredLoaders.containsKey(playerLoader)) {
+            return false;
         }
-        return result;
+
+        LogHelper.debug(FlexCore.class, "Registered PlayerLoader: '" + playerLoader.getClass().getCanonicalName() + "' (required: " + options.isRequired() + ")");
+        return true;
     }
 
     /**
@@ -88,7 +94,7 @@ public final class PlayerLoadCycle {
         cycle.loaderStatuses.put(playerLoader.getClass().getCanonicalName(), PlayerLoaderStatus.FAILED);
         LogHelper.debug(FlexCore.class, "Player loader '" + playerLoader.getClass().getCanonicalName() + "' failed to load player data.");
 
-        if (playerLoader.isPlayerLoaderRequired()) {
+        if (registeredLoaders.get(playerLoader).isRequired()) {
             LogHelper.debug(FlexCore.class, "Kicking player because player loader '" + playerLoader.getClass().getCanonicalName() + "' is required.");
             cycle.kickPlayer();
             return;
@@ -117,7 +123,7 @@ public final class PlayerLoadCycle {
         this.playerUuid = playerUuid;
         this.playerName = playerName;
 
-        for (PlayerLoader loader : registeredLoaders) {
+        for (PlayerLoader loader : registeredLoaders.keySet()) {
             loaderStatuses.put(loader.getClass().getCanonicalName(), PlayerLoaderStatus.NOT_STARTED);
         }
 
@@ -155,7 +161,7 @@ public final class PlayerLoadCycle {
         Validate.notNull(callback, "Callback cannot be null.");
         this.callback = callback;
 
-        for (PlayerLoader playerLoader : registeredLoaders) {
+        for (PlayerLoader playerLoader : registeredLoaders.keySet()) {
             startLoader(playerLoader);
             LogHelper.debug(FlexCore.class, "Starting player loader: '" + playerLoader.getClass().getCanonicalName() + "'");
         }
@@ -187,14 +193,14 @@ public final class PlayerLoadCycle {
      */
     private void startLoader(PlayerLoader playerLoader) {
         try {
-            List<String> dependencies = playerLoader.getLoaderDependencies();
+            List<String> dependencies = getLoaderOptions(playerLoader).getDependencies();
             if (dependencies != null && !dependencies.isEmpty()) {
                 for (String dependency : dependencies) {
                     PlayerLoaderStatus depStatus = loaderStatuses.get(dependency);
                     if (depStatus == null) {
                         LogHelper.debug(FlexCore.class, "Loader dependency '" + dependency + "' for loader '" + playerLoader.getClass().getCanonicalName() + "'not found.");
 
-                        if (playerLoader.isPlayerLoaderRequired()) {
+                        if (getLoaderOptions(playerLoader).isRequired()) {
                             kickPlayer();
                             return;
                         }
@@ -208,7 +214,7 @@ public final class PlayerLoadCycle {
                             return;
 
                         case FAILED:
-                            if (playerLoader.isPlayerLoaderRequired()) {
+                            if (getLoaderOptions(playerLoader).isRequired()) {
                                 loaderStatuses.put(playerLoader.getClass().getCanonicalName(), PlayerLoaderStatus.FAILED);
                                 kickPlayer();
                                 return;
@@ -244,13 +250,13 @@ public final class PlayerLoadCycle {
         LogHelper.debug(FlexCore.class, "Checking player loader statuses");
 
         boolean allStarted = true;
-        for (PlayerLoader playerLoader : registeredLoaders) {
+        for (PlayerLoader playerLoader : registeredLoaders.keySet()) {
             LogHelper.debug(FlexCore.class, "Checking player loader status: '" + playerLoader.getClass().getCanonicalName() + "'");
 
             if (loaderStatuses.get(playerLoader.getClass().getCanonicalName()) == PlayerLoaderStatus.NOT_STARTED) {
                 LogHelper.debug(FlexCore.class, "Player loader '" + playerLoader.getClass().getCanonicalName() + "' hasn't started yet.");
 
-                if (!playerLoader.isPlayerLoadAsync()) {
+                if (!getLoaderOptions(playerLoader).isAsynchronous()) {
                     new TaskChain().add(new GenericTask() {
                         @Override
                         protected void run() {

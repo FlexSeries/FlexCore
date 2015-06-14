@@ -28,6 +28,7 @@ import me.st28.flexseries.flexcore.FlexCore;
 import me.st28.flexseries.flexcore.events.PlayerJoinLoadedEvent;
 import me.st28.flexseries.flexcore.events.PlayerLeaveEvent;
 import me.st28.flexseries.flexcore.message.MessageReference;
+import me.st28.flexseries.flexcore.player.loading.LoaderOptions;
 import me.st28.flexseries.flexcore.player.loading.PlayerLoadCycle;
 import me.st28.flexseries.flexcore.player.loading.PlayerLoader;
 import me.st28.flexseries.flexcore.plugin.module.FlexModule;
@@ -64,7 +65,7 @@ public final class PlayerManager extends FlexModule<FlexCore> implements Listene
     private final Map<UUID, PlayerData> playerData = new HashMap<>();
 
     public PlayerManager(FlexCore plugin) {
-        super(plugin, "players", "Manages players", true);
+        super(plugin, "players", "Manages players", true, new LoaderOptions().setRequired(true));
     }
 
     @Override
@@ -122,11 +123,6 @@ public final class PlayerManager extends FlexModule<FlexCore> implements Listene
         data.save(file.getConfig());
 
         file.save();
-    }
-
-    @Override
-    public boolean isPlayerLoaderRequired() {
-        return true;
     }
 
     @Override

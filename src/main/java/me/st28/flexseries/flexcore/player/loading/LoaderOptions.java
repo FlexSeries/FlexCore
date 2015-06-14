@@ -24,23 +24,54 @@
  */
 package me.st28.flexseries.flexcore.player.loading;
 
-import java.util.UUID;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
- * Represents a class that loads player data on join.<br />
- * Must be registered using {@link PlayerLoadCycle#registerLoader(PlayerLoader, LoaderOptions)}}
+ * Represents custom settings for a {@link PlayerLoader}.
  */
-public interface PlayerLoader {
+public class LoaderOptions {
+
+    private boolean isAsynchronous = false;
+    private boolean isRequired = false;
+
+    private final List<String> dependencies = new ArrayList<>();
 
     /**
-     * Loads the player data for the manager.
-     *
-     * @param uuid The UUID of the player being loaded.
-     * @param name The name of the player being loaded.
-     * @param cycle The load cycle that this player loader is loading for.
-     * @return True if the loading began successfully.<br />
-     *         False if the loading is unable to start yet.
+     * @return true if this loader can run asynchronously.
      */
-    boolean loadPlayer(UUID uuid, String name, PlayerLoadCycle cycle);
+    public boolean isAsynchronous() {
+        return isAsynchronous;
+    }
+
+    public LoaderOptions setAsynchronous(boolean isAsynchronous) {
+        this.isAsynchronous = isAsynchronous;
+        return this;
+    }
+
+    /**
+     * @return true if this loader must successfully complete for the player to be allowed on the server.
+     */
+    public boolean isRequired() {
+        return isRequired;
+    }
+
+    public LoaderOptions setRequired(boolean isRequired) {
+        this.isRequired = isRequired;
+        return this;
+    }
+
+    /**
+     * @return a list of other modules that this loader requires.
+     */
+    public List<String> getDependencies() {
+        return dependencies;
+    }
+
+    public LoaderOptions addDependencies(String... dependencies) {
+        Collections.addAll(this.dependencies, dependencies);
+        return this;
+    }
 
 }

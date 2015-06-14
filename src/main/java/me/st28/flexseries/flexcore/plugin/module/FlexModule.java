@@ -24,6 +24,7 @@
  */
 package me.st28.flexseries.flexcore.plugin.module;
 
+import me.st28.flexseries.flexcore.player.loading.LoaderOptions;
 import me.st28.flexseries.flexcore.player.loading.PlayerLoadCycle;
 import me.st28.flexseries.flexcore.player.loading.PlayerLoader;
 import me.st28.flexseries.flexcore.plugin.FlexPlugin;
@@ -93,11 +94,19 @@ public abstract class FlexModule<T extends FlexPlugin> {
     private YamlFileManager configFile;
 
     public FlexModule(T plugin, String identifier, String description, boolean useModuleFolder, Class<? extends FlexModule>... dependencies) {
+        this(plugin, identifier, description, useModuleFolder, null, dependencies);
+    }
+
+    public FlexModule(T plugin, String identifier, String description, boolean useModuleFolder, LoaderOptions loaderOptions, Class<? extends FlexModule>... dependencies) {
         this.plugin = plugin;
         this.identifier = identifier;
         this.description = description;
         this.useModuleFolder = useModuleFolder;
         Collections.addAll(this.dependencies, dependencies);
+
+        if (this instanceof PlayerLoader) {
+            PlayerLoadCycle.registerLoader((PlayerLoader) this, loaderOptions);
+        }
     }
 
     /**
@@ -223,10 +232,6 @@ public abstract class FlexModule<T extends FlexPlugin> {
 
         if (this instanceof Listener) {
             Bukkit.getPluginManager().registerEvents((Listener) this, plugin);
-        }
-
-        if (this instanceof PlayerLoader) {
-            PlayerLoadCycle.registerLoader((PlayerLoader) this);
         }
     }
 

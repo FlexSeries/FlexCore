@@ -186,11 +186,6 @@ public final class CookieManager extends FlexModule<FlexCore> implements Listene
     }
 
     @Override
-    public boolean isPlayerLoadAsync() {
-        return false;
-    }
-
-    @Override
     public boolean loadPlayer(UUID uuid, String name, PlayerLoadCycle cycle) {
         loadEntry(uuid.toString());
         PlayerLoadCycle.setLoaderSuccess(cycle, this);
