@@ -27,7 +27,6 @@ package me.st28.flexseries.flexcore.command;
 import me.st28.flexseries.flexcore.cookie.CookieManager;
 import me.st28.flexseries.flexcore.permission.PermissionNode;
 import me.st28.flexseries.flexcore.plugin.FlexPlugin;
-import me.st28.flexseries.flexcore.plugin.exceptions.ModuleDisabledException;
 import org.apache.commons.lang.Validate;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.PluginCommand;
@@ -205,12 +204,7 @@ public abstract class FlexCommand<T extends FlexPlugin> {
     public final String buildUsage(CommandSender sender) {
         StringBuilder sb = new StringBuilder("/");
 
-        CookieManager cookieManager;
-        try {
-            cookieManager = FlexPlugin.getRegisteredModule(CookieManager.class);
-        } catch (ModuleDisabledException ex) {
-            cookieManager = null;
-        }
+        CookieManager cookieManager = FlexPlugin.getRegisteredModuleSilent(CookieManager.class);
 
         if (cookieManager == null || sender == null) {
             // No cookies in use, build usage with default labels.
