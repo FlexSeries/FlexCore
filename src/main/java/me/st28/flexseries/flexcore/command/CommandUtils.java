@@ -26,12 +26,15 @@ package me.st28.flexseries.flexcore.command;
 
 import me.st28.flexseries.flexcore.FlexCore;
 import me.st28.flexseries.flexcore.command.exceptions.CommandInterruptedException;
+import me.st28.flexseries.flexcore.hook.HookManager;
+import me.st28.flexseries.flexcore.hook.hooks.VaultHook;
 import me.st28.flexseries.flexcore.message.MessageReference;
 import me.st28.flexseries.flexcore.message.ReplacementMap;
 import me.st28.flexseries.flexcore.permission.PermissionNode;
 import me.st28.flexseries.flexcore.player.uuid_tracker.PlayerUuidTracker;
 import me.st28.flexseries.flexcore.plugin.FlexPlugin;
 import me.st28.flexseries.flexcore.util.QuickMap;
+import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -230,6 +233,22 @@ public final class CommandUtils {
             }
         }
         return found;
+    }
+
+    /**
+     * Attempts to take money from a player. Will stop the command if they don't have enough money.
+     */
+    public static void attemptPayment(CommandSender sender, double price) {
+        if (price <= 0D || !(sender instanceof Player)) {
+            return;
+        }
+
+        Economy economy = FlexPlugin.getRegisteredModule(HookManager.class).getHook(VaultHook.class).getEconomy();
+
+        if (economy.getBalance((Player) sender, null) < price) {
+            throw new CommandInterruptedException(MessageReference.create(FlexCore.class, "general.errors.not_enough_money"));
+        }
+        economy.withdrawPlayer((Player) sender, null, price);
     }
 
 }

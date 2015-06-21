@@ -5,6 +5,7 @@ general:
     must_be_player: '&cYou must be a player to do this.'
     must_hold_item: '&cYou must be holding an item.'
     no_permission: '&cYou do not have permission to do this.'
+    not_enough_money: '&cYou do not have enough money.'
     number_invalid_range: '&c{ITEM} must be between {MIN} and {MAX}.'
     number_invalid_minimum: '&c{ITEM} must be {MIN} or more.'
     number_invalid_maximum: '&c{ITEM} must be {MAX} or less.'
