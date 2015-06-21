@@ -35,6 +35,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 import java.util.*;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -68,6 +69,7 @@ public final class PlayerLoadCycle {
         }
 
         LogHelper.debug(FlexCore.class, "Registered PlayerLoader: '" + playerLoader.getClass().getCanonicalName() + "' (required: " + options.isRequired() + ")");
+        registeredLoaders.put(playerLoader, options);
         return true;
     }
 
@@ -130,6 +132,16 @@ public final class PlayerLoadCycle {
         timeoutTaskId = Bukkit.getScheduler().runTaskLaterAsynchronously(getPluginInstance(), () -> {
             //timed out
             LogHelper.debug(FlexCore.class, "Player load cycle for '" + playerUuid + "' timed out.");
+
+            for (Entry<PlayerLoader, LoaderOptions> entry : registeredLoaders.entrySet()) {
+                if (loaderStatuses.get(entry.getKey().getClass().getCanonicalName()) != PlayerLoaderStatus.SUCCEEDED && entry.getValue().isRequired()) {
+                    kickPlayer();
+                    return;
+                }
+            }
+
+            cancelTasks(true);
+            callback.run(PlayerLoadCycle.this);
         }, timeout).getTaskId();
     }
 
@@ -180,7 +192,7 @@ public final class PlayerLoadCycle {
             }
         }
 
-        cancelTasks();
+        cancelTasks(true);
 
         callback.run(PlayerLoadCycle.this);
         return true;
@@ -271,15 +283,15 @@ public final class PlayerLoadCycle {
         }
 
         if (allStarted) {
-            cancelTasks();
+            cancelTasks(false);
         }
     }
 
     /**
      * Cancels the runnable that attempts to start loaders that haven't begun loading yet.
      */
-    private void cancelTasks() {
-        if (timeoutTaskId != -1) {
+    private void cancelTasks(boolean cancelTimeout) {
+        if (cancelTimeout && timeoutTaskId != -1) {
             Bukkit.getScheduler().cancelTask(timeoutTaskId);
             timeoutTaskId = -1;
         }
@@ -302,7 +314,7 @@ public final class PlayerLoadCycle {
 
             p.kickPlayer("An error occurred while trying to load your data.\nPlease contact an administrator and notify them.");
         });
-        cancelTasks();
+        cancelTasks(true);
     }
 
 }
