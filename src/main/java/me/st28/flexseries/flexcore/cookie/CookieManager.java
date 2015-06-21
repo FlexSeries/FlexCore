@@ -114,6 +114,10 @@ public final class CookieManager extends FlexModule<FlexCore> implements Listene
     }
 
     private void saveEntry(String entry) {
+        if (!loadedCookies.containsKey(entry)) {
+            return;
+        }
+
         YamlFileManager file = new YamlFileManager(cookieDir + File.separator + entry + ".yml");
         FileConfiguration config = file.getConfig();
 
