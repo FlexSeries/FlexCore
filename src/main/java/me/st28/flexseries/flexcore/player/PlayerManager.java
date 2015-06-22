@@ -148,6 +148,8 @@ public final class PlayerManager extends FlexModule<FlexCore> implements Listene
         PlayerData playerData = getPlayerData(p.getUniqueId());
         if (playerData.firstJoin == null) {
             playerData.firstJoin = System.currentTimeMillis();
+
+            playerData.setCustomData("firstJoin", true);
         }
         playerData.lastLogin = System.currentTimeMillis();
 
