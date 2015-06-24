@@ -145,11 +145,12 @@ public final class PlayerManager extends FlexModule<FlexCore> implements Listene
     }
 
     private void handleOfficialLogin(final Player p, final PlayerLoadCycle cycle, final String joinMessage) {
+        boolean isFirstJoin = false;
         PlayerData playerData = getPlayerData(p.getUniqueId());
         if (playerData.firstJoin == null) {
             playerData.firstJoin = System.currentTimeMillis();
 
-            playerData.setCustomData("firstJoin", true);
+            isFirstJoin = true;
         }
         playerData.lastLogin = System.currentTimeMillis();
 
@@ -168,6 +169,10 @@ public final class PlayerManager extends FlexModule<FlexCore> implements Listene
         PlayerJoinLoadedEvent newJoinEvent = new PlayerJoinLoadedEvent(p, cycle.getCustomData());
         if (enableJoinMessageChange) {
             newJoinEvent.setJoinMessage(MessageReference.createPlain(joinMessage));
+        }
+
+        if (isFirstJoin) {
+            newJoinEvent.getCustomData().put("firstJoin", true);
         }
 
         Bukkit.getPluginManager().callEvent(newJoinEvent);

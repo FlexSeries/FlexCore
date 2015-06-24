@@ -37,9 +37,9 @@ public final class PlayerData {
 
     private final UUID uuid;
 
-    Long firstJoin;
-    Long lastLogin;
-    Long lastLogout;
+    Long firstJoin = null;
+    Long lastLogin = null;
+    Long lastLogout = null;
 
     String lastIp;
     final List<String> ips = new ArrayList<>();
