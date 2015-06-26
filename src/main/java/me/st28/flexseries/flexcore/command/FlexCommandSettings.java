@@ -73,6 +73,11 @@ public final class FlexCommandSettings<T extends FlexPlugin> {
     private boolean shouldInheritPermission = true;
 
     /**
+     * If true, will run the argument fixer (make arguments contained within quotes into a single argument in the array).
+     */
+    private boolean shouldFixArguments = true;
+
+    /**
      * Locks the settings instance to prevent modification.
      */
     public void lock() {
@@ -245,6 +250,23 @@ public final class FlexCommandSettings<T extends FlexPlugin> {
      */
     public final boolean shouldInheritPermission() {
         return shouldInheritPermission;
+    }
+
+    /**
+     * Sets whether or not to fix the arguments for this command.
+     *
+     * @return The settings instance, for chaining.
+     */
+    public final FlexCommandSettings<T> shouldFixArguments(boolean shouldFixArguments) {
+        this.shouldFixArguments = shouldFixArguments;
+        return this;
+    }
+
+    /**
+     * @return true if the arguments for this command should be fixed.
+     */
+    public final boolean shouldFixArguments() {
+        return shouldFixArguments;
     }
 
 }

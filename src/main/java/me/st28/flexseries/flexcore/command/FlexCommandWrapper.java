@@ -104,7 +104,6 @@ public final class FlexCommandWrapper implements CommandExecutor {
             CookieManager cookieManager = FlexPlugin.getRegisteredModuleSilent(CookieManager.class);
             String cookieUserId = null;
 
-            args = CommandUtils.fixArguments(args);
             FlexCommand<?> currentCommand = this.command.getSubcommands().get(((FlexCommandSettings<?>) this.command.getSettings()).getSubcommandAliases().get(label.toLowerCase()));
 
             if (currentCommand == null) {
@@ -185,6 +184,9 @@ public final class FlexCommandWrapper implements CommandExecutor {
                 CommandUtils.performArgsTest(newArgs.size(), currentCommand.getRequiredArguments(), MessageReference.createPlain(currentCommand.buildUsage(sender)));
             }
 
+            if (currentCommand.getSettings().shouldFixArguments()) {
+                args = CommandUtils.fixArguments(args);
+            }
             currentCommand.runCommand(sender, "/" + label + " " + ArrayUtils.stringArrayToString(args, " "), label, newArgs.toArray(new String[newArgs.size()]), parameters);
         } catch (CommandInterruptedException ex) {
             if (ex.getMessage() != null) {

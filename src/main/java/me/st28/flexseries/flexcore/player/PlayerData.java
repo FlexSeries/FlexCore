@@ -133,7 +133,7 @@ public final class PlayerData {
         return Collections.unmodifiableList(names);
     }
 
-    public <T> T getCustomData(String key, T type) {
+    public <T> T getCustomData(String key, Class<T> type) {
         Validate.notNull(key, "Key cannot be null.");
         Validate.notNull(type, "Type cannot be null.");
         return (T) customData.get(key);
@@ -145,6 +145,11 @@ public final class PlayerData {
         Validate.notNull(type, "Type cannot be null.");
 
         return (T) customData.get(plugin.getCanonicalName() + "-" + key);
+    }
+
+    public boolean containsCustomData(String key) {
+        Validate.notNull(key, "Key cannot be null.");
+        return customData.containsKey(key);
     }
 
     public void setCustomData(String key, Object data) {
