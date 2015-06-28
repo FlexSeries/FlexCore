@@ -111,14 +111,14 @@ public final class FlexCommandWrapper implements CommandExecutor {
             }
 
             // Set the cookie for this command label
+            if (currentCommand == null) {
+                currentCommand = this.command;
+            }
+
             if (cookieManager != null) {
                 cookieUserId = CookieManager.getUserIdentifier(sender);
 
-                if (currentCommand == null) {
-                    currentCommand = this.command;
-
-                    cookieManager.setValue(cookieUserId, label, currentCommand.getPlugin().getClass(), currentCommand.getLabelCookieIdentifier());
-                }
+                cookieManager.setValue(cookieUserId, label, currentCommand.getPlugin().getClass(), currentCommand.getLabelCookieIdentifier());
             }
 
             int curIndex = 0;
