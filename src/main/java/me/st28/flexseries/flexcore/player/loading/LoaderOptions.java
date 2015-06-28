@@ -36,7 +36,7 @@ public class LoaderOptions {
     private boolean isAsynchronous = false;
     private boolean isRequired = false;
 
-    private final List<String> dependencies = new ArrayList<>();
+    private final List<Class<? extends PlayerLoader>> dependencies = new ArrayList<>();
 
     /**
      * @return true if this loader can run asynchronously.
@@ -65,11 +65,11 @@ public class LoaderOptions {
     /**
      * @return a list of other modules that this loader requires.
      */
-    public List<String> getDependencies() {
+    public List<Class<? extends PlayerLoader>> getDependencies() {
         return dependencies;
     }
 
-    public LoaderOptions addDependencies(String... dependencies) {
+    public LoaderOptions addDependencies(Class<? extends PlayerLoader>... dependencies) {
         Collections.addAll(this.dependencies, dependencies);
         return this;
     }

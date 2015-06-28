@@ -80,7 +80,7 @@ public final class PlayerLoadCycle {
         Validate.notNull(cycle, "Cycle cannot be null.");
         Validate.notNull(playerLoader, "Player loader cannot be null.");
 
-        cycle.loaderStatuses.put(playerLoader.getClass().getCanonicalName(), PlayerLoaderStatus.SUCCEEDED);
+        cycle.loaderStatuses.put(playerLoader.getClass(), PlayerLoaderStatus.SUCCEEDED);
         LogHelper.debug(FlexCore.class, "Player loader '" + playerLoader.getClass().getCanonicalName() + "' successfully loaded player data.");
 
         cycle.isFullyLoaded();
@@ -93,7 +93,7 @@ public final class PlayerLoadCycle {
         Validate.notNull(cycle, "Cycle cannot be null.");
         Validate.notNull(playerLoader, "Player loader cannot be null.");
 
-        cycle.loaderStatuses.put(playerLoader.getClass().getCanonicalName(), PlayerLoaderStatus.FAILED);
+        cycle.loaderStatuses.put(playerLoader.getClass(), PlayerLoaderStatus.FAILED);
         LogHelper.debug(FlexCore.class, "Player loader '" + playerLoader.getClass().getCanonicalName() + "' failed to load player data.");
 
         if (registeredLoaders.get(playerLoader).isRequired()) {
@@ -110,7 +110,7 @@ public final class PlayerLoadCycle {
     private int timeoutTaskId = -1;
     private int taskId = -1;
 
-    private final Map<String, PlayerLoaderStatus> loaderStatuses = new ConcurrentHashMap<>();
+    private final Map<Class<? extends PlayerLoader>, PlayerLoaderStatus> loaderStatuses = new ConcurrentHashMap<>();
 
     private ArgumentCallback<PlayerLoadCycle> callback;
 
@@ -126,7 +126,7 @@ public final class PlayerLoadCycle {
         this.playerName = playerName;
 
         for (PlayerLoader loader : registeredLoaders.keySet()) {
-            loaderStatuses.put(loader.getClass().getCanonicalName(), PlayerLoaderStatus.NOT_STARTED);
+            loaderStatuses.put(loader.getClass(), PlayerLoaderStatus.NOT_STARTED);
         }
 
         timeoutTaskId = Bukkit.getScheduler().runTaskLaterAsynchronously(getPluginInstance(), () -> {
@@ -134,7 +134,7 @@ public final class PlayerLoadCycle {
             LogHelper.debug(FlexCore.class, "Player load cycle for '" + playerUuid + "' timed out.");
 
             for (Entry<PlayerLoader, LoaderOptions> entry : registeredLoaders.entrySet()) {
-                if (loaderStatuses.get(entry.getKey().getClass().getCanonicalName()) != PlayerLoaderStatus.SUCCEEDED && entry.getValue().isRequired()) {
+                if (loaderStatuses.get(entry.getKey().getClass()) != PlayerLoaderStatus.SUCCEEDED && entry.getValue().isRequired()) {
                     kickPlayer();
                     return;
                 }
@@ -205,12 +205,12 @@ public final class PlayerLoadCycle {
      */
     private void startLoader(PlayerLoader playerLoader) {
         try {
-            List<String> dependencies = getLoaderOptions(playerLoader).getDependencies();
+            List<Class<? extends PlayerLoader>> dependencies = getLoaderOptions(playerLoader).getDependencies();
             if (dependencies != null && !dependencies.isEmpty()) {
-                for (String dependency : dependencies) {
+                for (Class<? extends PlayerLoader> dependency : dependencies) {
                     PlayerLoaderStatus depStatus = loaderStatuses.get(dependency);
                     if (depStatus == null) {
-                        LogHelper.debug(FlexCore.class, "Loader dependency '" + dependency + "' for loader '" + playerLoader.getClass().getCanonicalName() + "'not found.");
+                        LogHelper.debug(FlexCore.class, "Loader dependency '" + dependency.getCanonicalName() + "' for loader '" + playerLoader.getClass().getCanonicalName() + "'not found.");
 
                         if (getLoaderOptions(playerLoader).isRequired()) {
                             kickPlayer();
@@ -227,7 +227,7 @@ public final class PlayerLoadCycle {
 
                         case FAILED:
                             if (getLoaderOptions(playerLoader).isRequired()) {
-                                loaderStatuses.put(playerLoader.getClass().getCanonicalName(), PlayerLoaderStatus.FAILED);
+                                loaderStatuses.put(playerLoader.getClass(), PlayerLoaderStatus.FAILED);
                                 kickPlayer();
                                 return;
                             }
@@ -243,8 +243,8 @@ public final class PlayerLoadCycle {
             }
 
             LogHelper.debug(FlexCore.class, "Starting player loader '" + playerLoader.getClass().getCanonicalName() + "'");
-            if (loaderStatuses.get(playerLoader.getClass().getCanonicalName()) == PlayerLoaderStatus.NOT_STARTED) {
-                loaderStatuses.put(playerLoader.getClass().getCanonicalName(), PlayerLoaderStatus.STARTED);
+            if (loaderStatuses.get(playerLoader.getClass()) == PlayerLoaderStatus.NOT_STARTED) {
+                loaderStatuses.put(playerLoader.getClass(), PlayerLoaderStatus.STARTED);
             }
             playerLoader.loadPlayer(playerUuid, playerName, this);
         } catch (Exception ex) {
@@ -264,7 +264,7 @@ public final class PlayerLoadCycle {
         for (PlayerLoader playerLoader : registeredLoaders.keySet()) {
             LogHelper.debug(FlexCore.class, "Checking player loader status: '" + playerLoader.getClass().getCanonicalName() + "'");
 
-            if (loaderStatuses.get(playerLoader.getClass().getCanonicalName()) == PlayerLoaderStatus.NOT_STARTED) {
+            if (loaderStatuses.get(playerLoader.getClass()) == PlayerLoaderStatus.NOT_STARTED) {
                 LogHelper.debug(FlexCore.class, "Player loader '" + playerLoader.getClass().getCanonicalName() + "' hasn't started yet.");
 
                 if (!getLoaderOptions(playerLoader).isAsynchronous()) {
