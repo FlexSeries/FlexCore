@@ -167,7 +167,7 @@ public final class PlayerManager extends FlexModule<FlexCore> implements Listene
         }
 
         PlayerJoinLoadedEvent newJoinEvent = new PlayerJoinLoadedEvent(p, cycle.getCustomData());
-        if (enableJoinMessageChange) {
+        if (enableJoinMessageChange && joinMessage != null) {
             newJoinEvent.setJoinMessage(MessageReference.createPlain(joinMessage));
         }
 
@@ -258,7 +258,7 @@ public final class PlayerManager extends FlexModule<FlexCore> implements Listene
         }
 
         PlayerLeaveEvent newLeaveEvent = new PlayerLeaveEvent(p);
-        if (enableQuitMessageChange) {
+        if (enableQuitMessageChange && message != null) {
             newLeaveEvent.setLeaveMessage(MessageReference.createPlain(message));
         }
 
