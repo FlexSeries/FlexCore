@@ -44,7 +44,9 @@ import me.st28.flexseries.flexcore.player.uuid_tracker.PlayerUuidTracker;
 import me.st28.flexseries.flexcore.plugin.FlexPlugin;
 import me.st28.flexseries.flexcore.plugin.exceptions.ModuleDisabledException;
 import me.st28.flexseries.flexcore.storage.mysql.MySQLManager;
+import me.st28.flexseries.flexcore.variable.Variable;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 
 public final class FlexCore extends FlexPlugin implements Listener {
@@ -75,12 +77,14 @@ public final class FlexCore extends FlexPlugin implements Listener {
 
     @Override
     public void handlePluginEnable() {
+        // Register commands
         FlexCommandWrapper.registerCommand(this, new CmdDebug(this));
         FlexCommandWrapper.registerCommand(this, new CmdHooks(this));
         FlexCommandWrapper.registerCommand(this, new CmdModules(this));
         FlexCommandWrapper.registerCommand(this, new CmdReload(this));
         FlexCommandWrapper.registerCommand(this, new CmdSave(this));
 
+        // Register debug tests
         try {
             DebugManager debugManager = FlexPlugin.getRegisteredModule(DebugManager.class);
 
@@ -92,6 +96,38 @@ public final class FlexCore extends FlexPlugin implements Listener {
         } catch (ModuleDisabledException ex) {
             LogHelper.warning(this, "Unable to register default debug tests because the debug manager is not enabled.");
         }
+
+        // Register default variables
+        Variable.registerVariable(new Variable("server") {
+            @Override
+            public String getReplacement(Player player) {
+                return serverName;
+            }
+        });
+
+        Variable.registerVariable(new Variable("name") {
+            @Override
+            public String getReplacement(Player player) {
+                if (player == null) return null;
+                return player.getName();
+            }
+        });
+
+        Variable.registerVariable(new Variable("dispname") {
+            @Override
+            public String getReplacement(Player player) {
+                if (player == null) return null;
+                return player.getDisplayName();
+            }
+        });
+
+        Variable.registerVariable(new Variable("world") {
+            @Override
+            public String getReplacement(Player player) {
+                if (player == null) return null;
+                return player.getWorld().getName();
+            }
+        });
     }
 
     @Override
