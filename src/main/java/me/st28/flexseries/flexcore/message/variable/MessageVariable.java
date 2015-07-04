@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package me.st28.flexseries.flexcore.variable;
+package me.st28.flexseries.flexcore.message.variable;
 
 import org.apache.commons.lang.Validate;
 import org.bukkit.entity.Player;

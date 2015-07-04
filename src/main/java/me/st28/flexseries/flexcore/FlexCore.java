@@ -44,7 +44,7 @@ import me.st28.flexseries.flexcore.player.uuid_tracker.PlayerUuidTracker;
 import me.st28.flexseries.flexcore.plugin.FlexPlugin;
 import me.st28.flexseries.flexcore.plugin.exceptions.ModuleDisabledException;
 import me.st28.flexseries.flexcore.storage.mysql.MySQLManager;
-import me.st28.flexseries.flexcore.variable.MessageVariable;
+import me.st28.flexseries.flexcore.message.variable.MessageVariable;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
