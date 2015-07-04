@@ -44,7 +44,7 @@ import me.st28.flexseries.flexcore.player.uuid_tracker.PlayerUuidTracker;
 import me.st28.flexseries.flexcore.plugin.FlexPlugin;
 import me.st28.flexseries.flexcore.plugin.exceptions.ModuleDisabledException;
 import me.st28.flexseries.flexcore.storage.mysql.MySQLManager;
-import me.st28.flexseries.flexcore.variable.Variable;
+import me.st28.flexseries.flexcore.variable.MessageVariable;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
@@ -98,14 +98,14 @@ public final class FlexCore extends FlexPlugin implements Listener {
         }
 
         // Register default variables
-        Variable.registerVariable(new Variable("server") {
+        MessageVariable.registerVariable(new MessageVariable("server") {
             @Override
             public String getReplacement(Player player) {
                 return serverName;
             }
         });
 
-        Variable.registerVariable(new Variable("name") {
+        MessageVariable.registerVariable(new MessageVariable("name") {
             @Override
             public String getReplacement(Player player) {
                 if (player == null) return null;
@@ -113,7 +113,7 @@ public final class FlexCore extends FlexPlugin implements Listener {
             }
         });
 
-        Variable.registerVariable(new Variable("dispname") {
+        MessageVariable.registerVariable(new MessageVariable("dispname") {
             @Override
             public String getReplacement(Player player) {
                 if (player == null) return null;
@@ -121,7 +121,7 @@ public final class FlexCore extends FlexPlugin implements Listener {
             }
         });
 
-        Variable.registerVariable(new Variable("world") {
+        MessageVariable.registerVariable(new MessageVariable("world") {
             @Override
             public String getReplacement(Player player) {
                 if (player == null) return null;
