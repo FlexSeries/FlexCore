@@ -11,7 +11,6 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="Maven: com.comphenix.executors:BukkitExecutors:1.1-SNAPSHOT" level="project" />
     <orderEntry type="library" name="Maven: org.spigotmc:spigot-api:1.8.7-R0.1-SNAPSHOT" level="project" />
     <orderEntry type="library" name="Maven: commons-lang:commons-lang:2.6" level="project" />
     <orderEntry type="library" name="Maven: com.googlecode.json-simple:json-simple:1.1.1" level="project" />
@@ -32,11 +31,12 @@
     <orderEntry type="library" name="Maven: net.jodah:expiringmap:0.3.1" level="project" />
     <orderEntry type="library" name="Maven: com.google.code.gson:gson:2.3" level="project" />
     <orderEntry type="library" name="Maven: com.gamingmesh:jobs:2.12.0" level="project" />
-    <orderEntry type="library" name="Maven: com.stealthyone.mcb:mcml:1.5.3-SNAPSHOT" level="project" />
+    <orderEntry type="library" name="Maven: com.stealthyone.mcb:mcml:2.0.0-SNAPSHOT" level="project" />
     <orderEntry type="library" name="Maven: com.comphenix.packetwrapper:PacketWrapper:1.8-R0.1" level="project" />
     <orderEntry type="library" name="Maven: com.comphenix.protocol:ProtocolLib:3.6.3-SNAPSHOT" level="project" />
     <orderEntry type="library" name="Maven: cglib:cglib-nodep:2.2.2" level="project" />
-    <orderEntry type="library" name="Maven: com.comphenix.executors:BukkitExecutors:1.1-SNAPSHOT" level="project" />
+    <orderEntry type="library" name="Maven: com.comphenix.executors:BukkitExecutors:1.0.0" level="project" />
+    <orderEntry type="library" name="Maven: io.netty:netty-all:4.0.26.Final" level="project" />
     <orderEntry type="library" name="Maven: com.palmergames:towny:0.89.2.0" level="project" />
     <orderEntry type="library" name="Maven: org.kitteh:VanishNoPacket:3.19.1" level="project" />
     <orderEntry type="library" name="Maven: net.milkbowl.vault:Vault:1.4.1" level="project" />

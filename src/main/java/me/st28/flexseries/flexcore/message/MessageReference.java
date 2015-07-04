@@ -117,7 +117,10 @@ public final class MessageReference {
     }
 
     public String getPlainMessage() {
-        String returnMessage = new MCMLBuilder(rawMessage, replacements).buildFancyMessage().toOldMessageFormat();
+        Map<String, Object> newReplacements = new HashMap<>();
+        newReplacements.putAll(replacements);
+
+        String returnMessage = new MCMLBuilder(rawMessage, newReplacements).getFancyMessage().toOldMessageFormat();
         if (!rawMessage.startsWith(ChatColor.WHITE.toString()) && returnMessage.startsWith(ChatColor.WHITE.toString())) {
             return returnMessage.substring(2);
         } else {
@@ -130,7 +133,7 @@ public final class MessageReference {
     }
 
     public FancyMessage getMessage(Map<String, String> additionalReplacements) {
-        Map<String, String> newReplacements = new HashMap<>();
+        Map<String, Object> newReplacements = new HashMap<>();
 
         if (replacements != null) {
             newReplacements.putAll(replacements);
@@ -140,7 +143,7 @@ public final class MessageReference {
             newReplacements.putAll(additionalReplacements);
         }
 
-        return new MCMLBuilder(rawMessage, newReplacements, itemReplacements).buildFancyMessage();
+        return new MCMLBuilder(rawMessage, newReplacements).getFancyMessage();
     }
 
     public void sendTo(CommandSender... recipients) {

@@ -99,7 +99,7 @@ public final class ListBuilder {
         int maxPages = MiscUtils.getPageCount(messages.size(), pageItems);
 
         List<FancyMessage> returnList = new ArrayList<>();
-        returnList.add(new MCMLBuilder(header.getFormattedHeader(page, maxPages, headerKey, headerValue)).buildFancyMessage());
+        returnList.add(new MCMLBuilder(header.getFormattedHeader(page, maxPages, headerKey, headerValue)).getFancyMessage());
         for (int i = 0; i < pageItems; i++) {
             int curIndex = i + ((page - 1) * pageItems);
 
@@ -107,13 +107,13 @@ public final class ListBuilder {
                 returnList.add(messages.get(curIndex).getMessage(new ReplacementMap("{LABEL}", label).put("{INDEX}", Integer.toString(curIndex + 1)).getMap()));
             } catch (Exception ex) {
                 if (i == 0) {
-                    returnList.add(new MCMLBuilder(listManager.msgNoElements).buildFancyMessage());
+                    returnList.add(new MCMLBuilder(listManager.msgNoElements).getFancyMessage());
                 }
                 break;
             }
 
             if (i == pageItems - 1 && page < maxPages && nextPageCommand != null) {
-                returnList.add(new MCMLBuilder(listManager.msgNextPage.replace("{COMMAND}", nextPageCommand.replace("{LABEL}", label)).replace("{NEXTPAGE}", Integer.toString(page + 1))).buildFancyMessage());
+                returnList.add(new MCMLBuilder(listManager.msgNextPage.replace("{COMMAND}", nextPageCommand.replace("{LABEL}", label)).replace("{NEXTPAGE}", Integer.toString(page + 1))).getFancyMessage());
             }
         }
 
