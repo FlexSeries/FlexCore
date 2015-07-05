@@ -42,7 +42,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerKickEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 import java.io.File;
@@ -245,10 +244,10 @@ public final class PlayerManager extends FlexModule<FlexCore> implements Listene
         }
     }
 
-    @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
+    /*@EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
     public void onPlayerKick(PlayerKickEvent e) {
         handlePlayerLeave(e.getPlayer(), e.getLeaveMessage());
-    }
+    }*/
 
     private void handlePlayerLeave(Player p, String message) {
         boolean isPlayerLoaded = playerData.containsKey(p.getUniqueId());
