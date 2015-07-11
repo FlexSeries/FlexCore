@@ -153,7 +153,7 @@ public final class PlayerManager extends FlexModule<FlexCore> implements Listene
         }
         playerData.lastLogin = System.currentTimeMillis();
 
-        String curIp = p.getAddress().toString();
+        String curIp = p.getAddress().getAddress().getHostAddress();
         playerData.lastIp = curIp;
         if (!playerData.ips.contains(curIp)) {
             playerData.ips.add(curIp);
