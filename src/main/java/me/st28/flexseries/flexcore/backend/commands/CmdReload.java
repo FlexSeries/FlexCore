@@ -60,7 +60,7 @@ public final class CmdReload extends FlexCommand<FlexCore> implements FlexTabCom
 
         Plugin targetPlugin = Bukkit.getPluginManager().getPlugin(properName);
         if (!(targetPlugin instanceof FlexPlugin)) {
-            MessageReference.create(FlexCore.class, "lib_astplugin.errors.plugin_not_astplugin", new ReplacementMap("{NAME}", args[0]).getMap()).sendTo(sender);
+            MessageReference.create(FlexCore.class, "lib_plugin.errors.plugin_not_flexplugin", new ReplacementMap("{NAME}", args[0]).getMap()).sendTo(sender);
             return;
         }
 
