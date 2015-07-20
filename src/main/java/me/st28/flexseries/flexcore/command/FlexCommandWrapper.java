@@ -146,7 +146,10 @@ public final class FlexCommandWrapper implements CommandExecutor {
             if (args.length < curIndex) {
                 fullNewArgs = args;
             } else {
-                fullNewArgs = CommandUtils.fixArguments(ArrayUtils.stringArraySublist(args, curIndex, args.length));
+                fullNewArgs = ArrayUtils.stringArraySublist(args, curIndex, args.length);
+                if (commandSettings.shouldFixArguments()) {
+                    fullNewArgs = CommandUtils.fixArguments(fullNewArgs);
+                }
             }
 
             Map<String, String> parameters = new HashMap<>();
