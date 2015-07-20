@@ -72,16 +72,24 @@ public final class PlayerData {
 
         ConfigurationSection customSec = config.getConfigurationSection("custom");
         if (customSec != null) {
-            loadCustomData(customSec, "");
+            loadCustomData(customSec, null);
         }
     }
 
     private void loadCustomData(ConfigurationSection currentSec, String currentKey) {
         for (String key : currentSec.getKeys(false)) {
             if (currentSec.get(key) instanceof ConfigurationSection) {
-                loadCustomData(currentSec.getConfigurationSection(key), currentKey + "." + key);
+                if (currentKey == null) {
+                    loadCustomData(currentSec.getConfigurationSection(key), key);
+                } else {
+                    loadCustomData(currentSec.getConfigurationSection(key), currentKey + "." + key);
+                }
             } else {
-                customData.put(currentKey + "." + key, currentSec.get(key));
+                if (currentKey == null) {
+                    customData.put(key, currentSec.get(key));
+                } else {
+                    customData.put(currentKey + "." + key, currentSec.get(key));
+                }
             }
         }
     }
