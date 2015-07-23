@@ -39,6 +39,8 @@ public interface PermissionNode {
     /**
      * @return true if the permissible has permission for this node.
      */
-    boolean isAllowed(Permissible permissible);
+    default boolean isAllowed(Permissible permissible) {
+        return permissible.hasPermission(getNode());
+    }
 
 }
